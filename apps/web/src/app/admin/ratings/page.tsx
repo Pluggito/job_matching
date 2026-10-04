@@ -1,0 +1,1 @@
+export default function AdminRatings() { return <div><h2 className='text-2xl font-semibold mb-6'>Manage Ratings</h2></div>; }

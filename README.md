@@ -1,159 +1,64 @@
-# Turborepo starter
+# Staff Guru - Nigeria Marketplace
 
-This Turborepo starter is maintained by the Turborepo core team.
+This is a monorepo for the Staff Guru application, a reverse marketplace connecting skilled artisans with employers across Nigeria.
 
-## Using this example
-
-Run the following command:
-
-```sh
-npx create-turbo@latest
-```
-
-## What's inside?
+## Architecture
 
 This Turborepo includes the following packages/apps:
 
-### Apps and Packages
+- **`apps/web`**: Main Next.js application for Workers and Employers.
+- **`apps/admin`**: Next.js application for Admin operations.
+- **`packages/db`**: Database schema, Drizzle ORM setup, and seed scripts.
+- **`packages/shared`**: Shared business logic, types, schemas, and constants.
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `@next/eslint-plugin-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+## Prerequisites
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+- Node.js (>=18)
+- `pnpm`
+- PostgreSQL database
 
-### Utilities
+## Setup Instructions
 
-This Turborepo has some additional tools already setup for you:
+1. **Install Dependencies**
+   ```bash
+   pnpm install
+   ```
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+2. **Environment Variables**
+   Create a `.env` file in the root of the project with the following variables:
+   ```env
+   # PostgreSQL connection string
+   DATABASE_URL="postgresql://user:password@localhost:5432/staffguru"
 
-### Build
+   # JWT Secret for authentication
+   JWT_SECRET="your-super-secret-key-for-development"
+   ```
 
-To build all apps and packages, run the following command:
+3. **Database Setup**
+   Run the following commands from the root to push the schema to your database and seed it:
+   ```bash
+   # Push schema to database
+   pnpm --filter @repo/db run push
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+   # Seed the database (1 admin, 4 workers, 2 employers)
+   pnpm --filter @repo/db run seed
+   ```
 
-```sh
-cd my-turborepo
-turbo build
-```
+4. **Run Development Servers**
+   ```bash
+   pnpm run dev
+   ```
+   - Web App will be running at `http://localhost:3000`
+   - Admin App will be running at `http://localhost:3001` (configured in package.json)
 
-Without global `turbo`, use your package manager:
+## Core Business Rules
+Implemented in `packages/shared`:
+- **Agency Fee**: NGN 50,000 per worker.
+- **Replacement Window**: 14 days from placement confirmation.
+- **Removal Notice**: 3 days notice required by employer.
+- **Access Rule**: Worker contact details are only returned if a Selection with a verified Payment exists.
+- **Refunds**: No refunds allowed.
 
-```sh
-cd my-turborepo
-npx turbo build
-pnpm exec turbo build
-pnpm exec turbo build
-```
-
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo build --filter=docs
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo dev
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo dev
-pnpm exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo dev --filter=web
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-pnpm exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-pnpm exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+## Authentication & Roles
+- **Roles**: `WORKER`, `EMPLOYER`, `ADMIN` (One role per account).
+- **Enforcement**: Role access is strictly guarded in `middleware.ts` for all routes and verified inside route handlers/server actions using the decrypted JWT session.

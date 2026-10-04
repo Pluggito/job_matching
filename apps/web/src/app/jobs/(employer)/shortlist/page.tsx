@@ -1,0 +1,1 @@
+export default function EmployerShortlist() { return <div><h2 className='text-2xl font-semibold mb-6'>Your Shortlist</h2></div>; }

@@ -1,0 +1,1 @@
+export default function Notifications() { return <div><h2 className='text-2xl font-semibold mb-6'>Notifications</h2></div>; }

@@ -1,0 +1,1 @@
+export default function WorkerStatus() { return <div><h2 className='text-2xl font-semibold mb-6'>Application Status</h2></div>; }

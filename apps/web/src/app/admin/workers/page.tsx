@@ -1,0 +1,1 @@
+export default function AdminWorkers() { return <div><h2 className='text-2xl font-semibold mb-6'>Manage Workers</h2></div>; }

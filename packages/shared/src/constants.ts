@@ -1,0 +1,3 @@
+export const AGENCY_FEE_PER_WORKER = 50000;
+export const REPLACEMENT_WINDOW_DAYS = 14;
+export const REMOVAL_NOTICE_DAYS = 3;

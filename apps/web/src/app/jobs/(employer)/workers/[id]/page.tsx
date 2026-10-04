@@ -1,0 +1,1 @@
+export default function WorkerView({ params }: { params: { id: string } }) { return <div><h2 className='text-2xl font-semibold mb-6'>Worker Profile {params.id}</h2></div>; }
