@@ -89,15 +89,15 @@ export default function SignupPage() {
 
       {/* RIGHT SIDE - FORM */}
       <div className="w-full lg:w-[55%] flex items-center justify-center p-6 sm:p-12 lg:p-16 relative">
-        {/* Mobile Logo */}
-        <div className="absolute top-6 left-6 lg:hidden">
-          <Link href="/" className="flex items-center gap-2 text-[var(--ink)] font-bold text-xl [font-family:var(--font-space-grotesk)] tracking-tight">
-            <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-[var(--lime)] text-[var(--ink)] font-bold text-sm tracking-tighter">sg</span>
-            staff<span className="text-[var(--green)]">guru</span><i className="text-[var(--orange)] not-italic">.</i>
-          </Link>
-        </div>
-
         <div className="w-full max-w-md">
+          {/* Mobile Logo */}
+          <div className="mb-8 lg:hidden flex justify-center sm:justify-start">
+            <Link href="/" className="flex items-center gap-2 text-[var(--ink)] font-bold text-2xl [font-family:var(--font-space-grotesk)] tracking-tight">
+              <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-[var(--lime)] text-[var(--ink)] font-bold text-sm tracking-tighter">sg</span>
+              staff<span className="text-[var(--green)]">guru</span><i className="text-[var(--orange)] not-italic">.</i>
+            </Link>
+          </div>
+
           <div className="mb-8 text-center lg:text-left">
             <h2 className="[font-family:var(--font-space-grotesk)] text-3xl font-bold text-[var(--ink)] tracking-tight">Create your account</h2>
             <p className="mt-2 text-muted-foreground text-sm">Join thousands of professionals already on Staff Guru.</p>
@@ -141,7 +141,7 @@ export default function SignupPage() {
                 <input 
                   type="text" 
                   required
-                  className="w-full h-11 px-4 rounded-xl border border-[var(--line)] bg-[var(--canvas)] text-[var(--ink)] text-sm focus:outline-none focus:border-[var(--green)] focus:ring-1 focus:ring-[var(--green)] transition-all"
+                  className="w-full h-11 px-4 rounded-xl border border-[var(--line)] bg-[var(--canvas)] text-[var(--ink)] text-base sm:text-sm focus:outline-none focus:border-[var(--green)] focus:ring-1 focus:ring-[var(--green)] transition-all"
                   placeholder="e.g. Adebayo"
                 />
               </div>
@@ -150,7 +150,7 @@ export default function SignupPage() {
                 <input 
                   type="text" 
                   required
-                  className="w-full h-11 px-4 rounded-xl border border-[var(--line)] bg-[var(--canvas)] text-[var(--ink)] text-sm focus:outline-none focus:border-[var(--green)] focus:ring-1 focus:ring-[var(--green)] transition-all"
+                  className="w-full h-11 px-4 rounded-xl border border-[var(--line)] bg-[var(--canvas)] text-[var(--ink)] text-base sm:text-sm focus:outline-none focus:border-[var(--green)] focus:ring-1 focus:ring-[var(--green)] transition-all"
                   placeholder="e.g. Adewale"
                 />
               </div>
@@ -162,7 +162,7 @@ export default function SignupPage() {
                 type="email" 
                 name="email"
                 required
-                className="w-full h-11 px-4 rounded-xl border border-[var(--line)] bg-[var(--canvas)] text-[var(--ink)] text-sm focus:outline-none focus:border-[var(--green)] focus:ring-1 focus:ring-[var(--green)] transition-all"
+                className="w-full h-11 px-4 rounded-xl border border-[var(--line)] bg-[var(--canvas)] text-[var(--ink)] text-base sm:text-sm focus:outline-none focus:border-[var(--green)] focus:ring-1 focus:ring-[var(--green)] transition-all"
                 placeholder="name@example.com"
               />
             </div>
@@ -174,7 +174,7 @@ export default function SignupPage() {
                   type={showPassword ? "text" : "password"}
                   name="password"
                   required
-                  className="w-full h-11 pl-4 pr-12 rounded-xl border border-[var(--line)] bg-[var(--canvas)] text-[var(--ink)] text-sm focus:outline-none focus:border-[var(--green)] focus:ring-1 focus:ring-[var(--green)] transition-all"
+                  className="w-full h-11 pl-4 pr-12 rounded-xl border border-[var(--line)] bg-[var(--canvas)] text-[var(--ink)] text-base sm:text-sm focus:outline-none focus:border-[var(--green)] focus:ring-1 focus:ring-[var(--green)] transition-all"
                   placeholder="Create a strong password"
                 />
                 <button 
