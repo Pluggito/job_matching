@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { decrypt } from './lib/auth';
 
-const protectedRoutes = ['/jobs', '/admin'];
+const protectedRoutes = ['/jobs', '/admin', '/onboarding', '/dashboard', '/employer'];
 const publicOnlyRoutes = ['/login', '/signup'];
 
 export async function middleware(request: NextRequest) {
@@ -27,8 +27,11 @@ export async function middleware(request: NextRequest) {
   if (publicOnlyRoutes.some(route => pathname.startsWith(route)) && session) {
     if (session.role === 'ADMIN') {
       return NextResponse.redirect(new URL('/admin/workers', request.url));
+    } else if (session.role === 'EMPLOYER') {
+      return NextResponse.redirect(new URL(`/employer`, request.url));
+    } else {
+      return NextResponse.redirect(new URL(`/dashboard`, request.url));
     }
-    return NextResponse.redirect(new URL('/jobs/search', request.url));
   }
 
   // 3. Guard protected routes
@@ -40,7 +43,7 @@ export async function middleware(request: NextRequest) {
 
   // 4. Role-based routing enforcement
   if (pathname.startsWith('/admin') && session?.role !== 'ADMIN') {
-    return NextResponse.redirect(new URL('/jobs/search', request.url));
+    return NextResponse.redirect(new URL(session?.role === 'EMPLOYER' ? `/employer` : `/dashboard`, request.url));
   }
 
   if (pathname.startsWith('/jobs/admin')) {

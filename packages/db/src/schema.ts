@@ -8,6 +8,9 @@ export const workerStatusEnum = pgEnum("worker_status", ["PENDING", "APPROVED", 
 export const paymentStatusEnum = pgEnum("payment_status", ["PENDING", "VERIFIED", "FAILED"]);
 export const selectionStatusEnum = pgEnum("selection_status", ["PENDING", "CONFIRMED", "CANCELLED"]);
 export const placementStatusEnum = pgEnum("placement_status", ["ACTIVE", "TERMINATED", "REPLACED"]);
+export const engagementTypeEnum = pgEnum("engagement_type", ["ONSITE", "REMOTE"]);
+export const hiringRequestStatusEnum = pgEnum("hiring_request_status", ["OPEN", "FILLED", "CLOSED"]);
+export const availabilityStatusEnum = pgEnum("availability_status", ["AVAILABLE_NOW", "AVAILABLE_FROM", "BUSY"]);
 
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -25,6 +28,12 @@ export const workerProfiles = pgTable("worker_profiles", {
   skills: text("skills").array().notNull(),
   experienceYears: integer("experience_years").notNull(),
   location: text("location").notNull(),
+  locationState: text("location_state"),
+  locationArea: text("location_area"),
+  latitude: doublePrecision("latitude"),
+  longitude: doublePrecision("longitude"),
+  availabilityStatus: availabilityStatusEnum("availability_status").default("AVAILABLE_NOW").notNull(),
+  availableFrom: timestamp("available_from"),
   availability: text("availability").notNull(),
   expectedPay: doublePrecision("expected_pay").notNull(),
   status: workerStatusEnum("status").default("PENDING").notNull(),
@@ -34,6 +43,7 @@ export const workerProfiles = pgTable("worker_profiles", {
 }, (table) => {
   return {
     workerSearchIdx: index("worker_search_idx").on(table.category, table.location, table.status),
+    smartMatchIdx: index("worker_smart_match_idx").on(table.category, table.status, table.locationState, table.availabilityStatus),
   }
 });
 
@@ -144,4 +154,24 @@ export const pushSubscriptions = pgTable("push_subscriptions", {
   userId: uuid("user_id").references(() => users.id).notNull(),
   endpoint: text("endpoint").notNull(),
   keys: json("keys").notNull(),
+});
+
+export const hiringRequests = pgTable("hiring_requests", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  employerId: uuid("employer_id").references(() => employerProfiles.id).notNull(),
+  category: text("category").notNull(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  requiredSkills: text("required_skills").array().notNull(),
+  preferredSkills: text("preferred_skills").array().notNull(),
+  minExperienceYears: integer("min_experience_years").notNull(),
+  locationState: text("location_state").notNull(),
+  locationArea: text("location_area").notNull(),
+  engagementType: engagementTypeEnum("engagement_type").notNull(),
+  startDate: timestamp("start_date").notNull(),
+  budgetMin: doublePrecision("budget_min").notNull(),
+  budgetMax: doublePrecision("budget_max").notNull(),
+  workersNeeded: integer("workers_needed").notNull(),
+  status: hiringRequestStatusEnum("status").default("OPEN").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });

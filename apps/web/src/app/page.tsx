@@ -1,31 +1,18 @@
 import Link from "next/link";
 import { ArrowUpRight, Check, Globe, Laptop, MessageSquare, ShieldCheck, Users, Zap } from "lucide-react";
+import { PublicHeader } from "@/components/layout/PublicHeader";
+import { PublicFooter } from "@/components/layout/PublicFooter";
+import { getSession } from "@/lib/auth";
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const session = await getSession();
+  const getStartedLink = session 
+    ? (session.role === "EMPLOYER" ? "/employer" : session.role === "ADMIN" ? "/admin/workers" : "/dashboard")
+    : "/signup";
+    
   return (
     <div className="min-h-screen bg-[var(--canvas)] flex flex-col font-sans">
-      {/* HEADER */}
-      <header className="sticky top-0 z-50 bg-[var(--canvas)]/80 backdrop-blur-md border-b border-[var(--line)]">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-8">
-          <Link href="/" className="flex items-center gap-2 text-[var(--ink)] font-bold text-xl [font-family:var(--font-space-grotesk)] tracking-tight">
-            <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-[var(--lime)] text-[var(--ink)] font-bold text-sm tracking-tighter">sg</span>
-            staff<span className="text-[var(--green)]">guru</span><i className="text-[var(--orange)] not-italic">.</i>
-          </Link>
-
-          <nav className="hidden md:flex items-center gap-8">
-            <Link href="/dashboard" className="text-sm font-bold text-[var(--ink-soft)] hover:text-[var(--ink)] transition-colors">Find work</Link>
-            <Link href="/dashboard" className="text-sm font-bold text-[var(--ink-soft)] hover:text-[var(--ink)] transition-colors">Hire talent</Link>
-            <Link href="/dashboard" className="text-sm font-bold text-[var(--ink-soft)] hover:text-[var(--ink)] transition-colors">Pricing</Link>
-          </nav>
-
-          <div className="flex items-center gap-4">
-            <Link href="/login" className="hidden md:block text-sm font-bold text-[var(--ink)]">Log in</Link>
-            <Link href="/signup" className="flex h-10 items-center justify-center rounded-xl bg-[var(--ink)] px-5 text-sm font-bold text-[var(--lime)] transition-transform hover:-translate-y-0.5 shadow-lg shadow-[var(--ink)]/10">
-              Sign up
-            </Link>
-          </div>
-        </div>
-      </header>
+      <PublicHeader />
 
       <main className="flex-1">
         {/* HERO SECTION */}
@@ -39,12 +26,14 @@ export default function LandingPage() {
               Access thousands of verified professionals across Nigeria. Find, assess and hire the right people—whether for plumbing, fashion, electrical, or corporate roles—without unnecessary middlemen.
             </p>
             <div className="mt-10 flex flex-wrap gap-4">
-              <Link href="/signup" className="flex h-12 items-center justify-center rounded-full bg-[var(--lime)] px-8 text-sm font-extrabold text-[var(--ink)] transition-all hover:bg-[var(--lime-dark)] hover:-translate-y-0.5">
-                Hire talent
+              <Link href={getStartedLink} className="flex h-12 items-center justify-center rounded-full bg-[var(--lime)] px-8 text-sm font-extrabold text-[var(--ink)] transition-all hover:bg-[var(--lime-dark)] hover:-translate-y-0.5">
+                {session ? "Go to Dashboard" : "Hire talent"}
               </Link>
-              <Link href="/signup" className="flex h-12 items-center justify-center rounded-full border border-[var(--ink-soft)] bg-[var(--ink-soft)]/30 px-8 text-sm font-bold text-white transition-all hover:bg-[var(--ink-soft)]/50">
-                Find jobs
-              </Link>
+              {!session && (
+                <Link href="/signup" className="flex h-12 items-center justify-center rounded-full border border-[var(--ink-soft)] bg-[var(--ink-soft)]/30 px-8 text-sm font-bold text-white transition-all hover:bg-[var(--ink-soft)]/50">
+                  Find jobs
+                </Link>
+              )}
             </div>
             
             <dl className="mt-24 grid grid-cols-1 gap-10 border-t border-[var(--ink-soft)] pt-12 sm:grid-cols-3 lg:mt-32">
@@ -72,7 +61,7 @@ export default function LandingPage() {
               <h2 className="mt-4 [font-family:var(--font-space-grotesk)] text-4xl font-semibold tracking-tight text-[var(--ink)] sm:text-5xl">
                 From search to hire, all in one place.
               </h2>
-              <p className="mt-6 text-lg leading-8 text-[var(--muted)]">
+              <p className="mt-6 text-lg leading-8 text-[var(--ink-soft)]">
                 Search professionals, review verified experience, speak directly and manage your hiring process seamlessly.
               </p>
             </div>
@@ -138,7 +127,7 @@ export default function LandingPage() {
                 <h2 className="mt-4 [font-family:var(--font-space-grotesk)] text-4xl font-semibold tracking-tight text-[var(--ink)] sm:text-5xl">
                   Screened talent, with deeper verification.
                 </h2>
-                <p className="mt-6 text-lg leading-8 text-[var(--muted)]">
+                <p className="mt-6 text-lg leading-8 text-[var(--ink-soft)]">
                   Every professional currently visible on Staff Guru has been screened. We introduce an additional level of assessment for employers who want greater confidence when hiring.
                 </p>
                 <div className="mt-10 flex flex-col gap-4">
@@ -186,8 +175,8 @@ export default function LandingPage() {
             </div>
 
             <div className="mt-12">
-               <Link href="/dashboard" className="inline-flex h-12 items-center justify-center rounded-full border border-[var(--line)]/20 px-8 text-sm font-bold text-white transition-colors hover:bg-white hover:text-[var(--ink)]">
-                Explore all roles
+               <Link href={session ? getStartedLink : "/login"} className="inline-flex h-12 items-center justify-center rounded-full border border-[var(--line)]/20 px-8 text-sm font-bold text-white transition-colors hover:bg-white hover:text-[var(--ink)]">
+                {session ? "Explore all roles" : "Log in to explore"}
               </Link>
             </div>
           </div>
@@ -195,52 +184,7 @@ export default function LandingPage() {
 
       </main>
 
-      {/* FOOTER */}
-      <footer className="bg-[var(--ink)] border-t border-white/10 pb-12 pt-16 text-white/70">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-4">
-            <div className="lg:col-span-1">
-              <Link href="/" className="flex items-center gap-2 text-white font-bold text-xl [font-family:var(--font-space-grotesk)] tracking-tight">
-                <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-[var(--lime)] text-[var(--ink)] font-bold text-sm tracking-tighter">sg</span>
-                staff<span className="text-[var(--lime)]">guru</span><i className="text-[var(--orange)] not-italic">.</i>
-              </Link>
-              <p className="mt-6 text-sm leading-relaxed max-w-xs">
-                The workplace OS for finding, hiring, and managing Nigeria's best talent.
-              </p>
-            </div>
-            
-            <div>
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider [font-family:var(--font-dm-mono)]">Platform</h3>
-              <ul className="mt-6 space-y-4 text-sm">
-                <li><Link href="/dashboard" className="hover:text-[var(--lime)] transition-colors">How it works</Link></li>
-                <li><Link href="/dashboard" className="hover:text-[var(--lime)] transition-colors">Browse Talent</Link></li>
-                <li><Link href="/dashboard" className="hover:text-[var(--lime)] transition-colors">Pricing</Link></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider [font-family:var(--font-dm-mono)]">Company</h3>
-              <ul className="mt-6 space-y-4 text-sm">
-                <li><Link href="#" className="hover:text-[var(--lime)] transition-colors">About Us</Link></li>
-                <li><Link href="#" className="hover:text-[var(--lime)] transition-colors">Blog</Link></li>
-                <li><Link href="#" className="hover:text-[var(--lime)] transition-colors">Contact</Link></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider [font-family:var(--font-dm-mono)]">Legal</h3>
-              <ul className="mt-6 space-y-4 text-sm">
-                <li><Link href="#" className="hover:text-[var(--lime)] transition-colors">Terms of Service</Link></li>
-                <li><Link href="#" className="hover:text-[var(--lime)] transition-colors">Privacy Policy</Link></li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="mt-16 flex flex-col items-center justify-between gap-6 border-t border-white/10 pt-8 sm:flex-row">
-            <p className="text-sm">© 2026 Staff Guru. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <PublicFooter />
     </div>
   );
 }

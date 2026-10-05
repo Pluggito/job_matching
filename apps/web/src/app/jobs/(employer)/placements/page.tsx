@@ -1,1 +1,0 @@
-export default function EmployerPlacements() { return <div><h2 className='text-2xl font-semibold mb-6'>Your Placements</h2></div>; }
