@@ -2,21 +2,33 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, BriefcaseBusiness, User, CheckCircle2, Eye, EyeOff } from "lucide-react";
+import { ArrowRight, BriefcaseBusiness, User, CheckCircle2, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useFormState, useFormStatus } from "react-dom";
 import { signup } from "../../../actions/auth";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <button 
-      type="submit" 
-      disabled={pending}
-      className="w-full h-12 mt-2 flex items-center justify-center gap-2 rounded-xl bg-[var(--ink)] text-[var(--lime)] font-bold text-sm transition-transform hover:-translate-y-0.5 shadow-lg shadow-[var(--ink)]/10 disabled:opacity-70 disabled:hover:translate-y-0"
-    >
-      {pending ? "Creating Account..." : "Create Account"}
-      {!pending && <ArrowRight size={16} />}
-    </button>
+    <>
+      <button 
+        type="submit" 
+        disabled={pending}
+        className="w-full h-12 mt-2 flex items-center justify-center gap-2 rounded-xl bg-[var(--ink)] text-[var(--lime)] font-bold text-sm transition-transform hover:-translate-y-0.5 shadow-lg shadow-[var(--ink)]/10 disabled:opacity-70 disabled:hover:translate-y-0"
+      >
+        {pending ? <Loader2 size={16} className="animate-spin" /> : null}
+        {pending ? "Creating Account..." : "Create Account"}
+        {!pending && <ArrowRight size={16} />}
+      </button>
+
+      {pending && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 size={40} className="animate-spin text-[var(--green)]" />
+            <p className="text-[var(--ink)] font-bold font-sans">Creating your account...</p>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 

@@ -1,1 +1,0 @@
-export default function Messages() { return <div><h2 className='text-2xl font-semibold mb-6'>Messages</h2></div>; }

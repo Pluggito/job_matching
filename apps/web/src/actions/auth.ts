@@ -37,8 +37,10 @@ export async function login(prevState: any, formData: FormData) {
 
   if (user.role === "ADMIN") {
     redirect("/admin/workers");
+  } else if (user.role === "EMPLOYER") {
+    redirect(`/employer`);
   } else {
-    redirect("/jobs/search");
+    redirect(`/dashboard`);
   }
 }
 
@@ -78,7 +80,7 @@ export async function signup(prevState: any, formData: FormData) {
     role: newUser.role as Role,
   });
 
-  redirect("/jobs/onboarding");
+  redirect("/onboarding");
 }
 
 export async function logout() {
