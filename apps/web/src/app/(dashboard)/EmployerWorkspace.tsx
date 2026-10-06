@@ -1,4 +1,4 @@
-import { JOB_CATEGORIES } from "@repo/shared";
+﻿import { JOB_CATEGORIES } from "@repo/shared";
 import { getCurrentUser } from "../../actions/auth";
 import { getEmployerRequests } from "../../server/services/hiringRequests";
 import Link from "next/link";
@@ -44,7 +44,7 @@ export default async function EmployerWorkspace() {
       {requests.length === 0 ? (
         <div className="bg-white rounded-xl border border-[var(--line)] p-12 text-center">
           <div className="w-16 h-16 bg-[var(--canvas)] rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-2xl">🏢</span>
+            <span className="text-2xl">≡ƒÅó</span>
           </div>
           <h3 className="text-lg font-bold mb-2">No active jobs</h3>
           <p className="text-muted-foreground max-w-sm mx-auto mb-6">
