@@ -1,4 +1,4 @@
-import { Briefcase, MapPin, Clock, CheckCircle2, XCircle, Clock3, ChevronRight, Building } from "lucide-react";
+﻿import { Briefcase, MapPin, Clock, CheckCircle2, XCircle, Clock3, ChevronRight, Building } from "lucide-react";
 
 const mockApplications = [
   {
@@ -62,11 +62,11 @@ export default function WorkerJobsView() {
 
   return (
     <div className="space-y-6">
-      {/* Smart Matches Banner */}
+      {/* Smart Matches Banner 
       <div className="bg-[var(--ink)] text-white rounded-xl p-6 flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--green)]/20 blur-[50px] rounded-full pointer-events-none"></div>
         <div className="relative z-10 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-[var(--lime)] flex items-center justify-center text-[var(--ink)]">
+          <div className="w-12 h-12 shrink-0 rounded-full bg-[var(--lime)] flex items-center justify-center text-[var(--ink)]">
             <span className="text-xl font-black">{matchesCount}</span>
           </div>
           <div>
@@ -77,7 +77,7 @@ export default function WorkerJobsView() {
         <button className="relative z-10 shrink-0 h-10 px-6 rounded-lg bg-[var(--lime)] text-[var(--ink)] font-bold text-sm hover:-translate-y-0.5 transition-transform shadow-lg shadow-[var(--lime)]/10">
           View Matches
         </button>
-      </div>
+      </div>*/}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
         <div>
           <h1 className="text-2xl font-bold text-[var(--ink)] tracking-tight">My Applications</h1>
@@ -91,7 +91,7 @@ export default function WorkerJobsView() {
       <div className="grid grid-cols-1 gap-4">
         {mockApplications.map((app) => (
           <div key={app.id} className="bg-white border border-[var(--line)] rounded-xl p-6 hover:shadow-md transition-shadow group flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-            
+
             <div className="flex gap-5 items-start sm:items-center">
               <div className="w-14 h-14 bg-[var(--canvas)] rounded-xl border border-[var(--line)] flex items-center justify-center shrink-0">
                 <Building size={24} className="text-[var(--ink-soft)]" />
