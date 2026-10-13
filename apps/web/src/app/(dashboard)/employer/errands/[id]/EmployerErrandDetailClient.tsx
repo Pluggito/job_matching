@@ -1,0 +1,591 @@
+"use client";
+
+import React, { useState } from "react";
+import Link from "next/link";
+import {
+  Package,
+  MapPin,
+  Clock,
+  ShieldCheck,
+  CheckCircle2,
+  AlertCircle,
+  KeyRound,
+  MessageSquare,
+  Camera,
+  Send,
+  Loader2,
+  FileCheck,
+  RotateCcw,
+  AlertTriangle,
+  ChevronLeft,
+} from "lucide-react";
+import { formatNaira } from "@repo/shared";
+import {
+  approveErrandCompletion,
+  cancelOpenErrandEmployer,
+  requestErrandChanges,
+  reportErrandProblem,
+} from "@/actions/errands";
+import { sendErrandMessage } from "@/actions/errandMessages";
+
+interface Props {
+  errand: {
+    id: string;
+    title: string;
+    type: string;
+    status: string;
+    description: string;
+    locationState: string;
+    locationArea: string;
+    address: string;
+    dropoffAddress?: string | null;
+    budgetKobo: number;
+    taskPriceKobo: number | null;
+    creationFeeKobo: number | null;
+    workerPayoutKobo: number | null;
+    deadline: string;
+    requiredProof: string;
+    openedAt: string | null;
+    claimedAt: string | null;
+    proofSubmittedAt: string | null;
+    completedAt: string | null;
+    revisionRequestedAt?: string | null;
+    revisionNotes?: string | null;
+    revisionGraceExpiresAt?: string | null;
+  };
+  runner?: {
+    id: string;
+    category: string;
+    locationState: string;
+  } | null;
+  deliveryPin?: string | null;
+  initialMessages: Array<{
+    id: string;
+    senderId: string;
+    content: string;
+    createdAt: string;
+  }>;
+  currentUserId: string;
+}
+
+export default function EmployerErrandDetailClient({
+  errand,
+  runner,
+  deliveryPin,
+  initialMessages,
+  currentUserId,
+}: Props) {
+  const [messages, setMessages] = useState(initialMessages);
+  const [newMessage, setNewMessage] = useState("");
+  const [isSending, setIsSending] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
+  const [approveError, setApproveError] = useState<string | null>(null);
+
+  // Revision state
+  const [isRevisionModalOpen, setIsRevisionModalOpen] = useState(false);
+  const [revisionNotesInput, setRevisionNotesInput] = useState("");
+  const [isSubmittingRevision, setIsSubmittingRevision] = useState(false);
+  const [revisionError, setRevisionError] = useState<string | null>(null);
+
+  // Dispute state
+  const [isDisputeModalOpen, setIsDisputeModalOpen] = useState(false);
+  const [disputeReason, setDisputeReason] = useState("INCOMPLETE_TASK");
+  const [disputeDescription, setDisputeDescription] = useState("");
+  const [isFilingDispute, setIsFilingDispute] = useState(false);
+  const [disputeError, setDisputeError] = useState<string | null>(null);
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMessage.trim()) return;
+
+    setIsSending(true);
+    const content = newMessage.trim();
+    setNewMessage("");
+
+    // Optimistic message
+    const tempId = `temp_${Date.now()}`;
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: tempId,
+        senderId: currentUserId,
+        content,
+        createdAt: new Date().toISOString(),
+      },
+    ]);
+
+    try {
+      const res = await sendErrandMessage({
+        errandId: errand.id,
+        content,
+      });
+
+      if (!res.success) {
+        alert(('error' in res ? (res.error as string) : null) || "Failed to send message.");
+      }
+    } catch (err) {
+      console.error("Chat error:", err);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleApprove = async () => {
+    if (!confirm("Are you satisfied with the submitted proof? Approving will release payout to the runner.")) {
+      return;
+    }
+    setIsApproving(true);
+    setApproveError(null);
+    try {
+      const res = await approveErrandCompletion(errand.id);
+      if (res.success) {
+        window.location.reload();
+      } else {
+        setApproveError(('error' in res ? (res.error as string) : null) || "Failed to approve completion");
+      }
+    } catch (err: any) {
+      setApproveError(err?.message || "An error occurred");
+    } finally {
+      setIsApproving(false);
+    }
+  };
+
+  const handleRevisionSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!revisionNotesInput.trim()) return;
+
+    setIsSubmittingRevision(true);
+    setRevisionError(null);
+    try {
+      const res = await requestErrandChanges({
+        errandId: errand.id,
+        notes: revisionNotesInput.trim(),
+      });
+      if (res.success) {
+        window.location.reload();
+      } else {
+        setRevisionError(('error' in res ? (res.error as string) : null) || "Failed to request changes.");
+      }
+    } catch (err: any) {
+      setRevisionError(err?.message || "Failed to request changes.");
+    } finally {
+      setIsSubmittingRevision(false);
+    }
+  };
+
+  const handleDisputeSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!disputeDescription.trim()) return;
+
+    setIsFilingDispute(true);
+    setDisputeError(null);
+    try {
+      const res = await reportErrandProblem({
+        errandId: errand.id,
+        reason: disputeReason,
+        description: disputeDescription.trim(),
+      });
+      if (res.success) {
+        window.location.reload();
+      } else {
+        setDisputeError(('error' in res ? (res.error as string) : null) || "Failed to report dispute.");
+      }
+    } catch (err: any) {
+      setDisputeError(err?.message || "Failed to report dispute.");
+    } finally {
+      setIsFilingDispute(false);
+    }
+  };
+
+  const handleCancel = async () => {
+    const reason = prompt("Enter cancellation reason (100% full refund):");
+    if (!reason) return;
+    try {
+      const res = await cancelOpenErrandEmployer(errand.id, reason);
+      if (res.success) {
+        window.location.reload();
+      } else {
+        alert(('error' in res ? (res.error as string) : null) || "Failed to cancel");
+      }
+    } catch (err: any) {
+      alert(err?.message || "Failed to cancel");
+    }
+  };
+
+  return (
+    <div className="space-y-6 max-w-5xl mx-auto pb-12">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <Link
+            href="/employer/errands"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-neutral-500 hover:text-[var(--ink)] mb-2"
+          >
+            <ChevronLeft size={16} /> Back to Errands
+          </Link>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-[var(--ng)]">
+              {errand.type.replace("_", " ")}
+            </span>
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+                errand.status === "open"
+                  ? "bg-blue-100 text-blue-800"
+                  : errand.status === "claimed"
+                  ? "bg-amber-100 text-amber-800"
+                  : errand.status === "in_progress"
+                  ? "bg-indigo-100 text-indigo-800"
+                  : errand.status === "proof_submitted"
+                  ? "bg-purple-100 text-purple-800"
+                  : errand.status === "completed"
+                  ? "bg-green-100 text-green-800"
+                  : errand.status === "disputed"
+                  ? "bg-red-100 text-red-800"
+                  : "bg-neutral-100 text-neutral-700"
+              }`}
+            >
+              {errand.status.replace("_", " ")}
+            </span>
+          </div>
+          <h1 className="text-2xl font-bold text-[var(--ink)] mt-1 font-heading">{errand.title}</h1>
+        </div>
+
+        <div className="text-right sm:self-center">
+          <span className="text-xs text-neutral-500 block">Total Budget Paid</span>
+          <span className="text-2xl font-bold font-mono text-[var(--ink)]">
+            {formatNaira(errand.budgetKobo)}
+          </span>
+        </div>
+      </div>
+
+      {/* Disputed Alert Banner */}
+      {errand.status === "disputed" && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex items-start gap-3 text-amber-900">
+          <AlertTriangle className="text-amber-600 shrink-0 mt-0.5" size={20} />
+          <div className="space-y-1">
+            <h4 className="font-bold text-sm">Dispute Under Admin Review</h4>
+            <p className="text-xs text-amber-800 leading-relaxed">
+              A problem was reported on this errand. Our mediation team has been notified and is inspecting the execution history and submitted materials to arbitrate a resolution.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Revision Requested Notice */}
+      {errand.revisionNotes && errand.status === "in_progress" && (
+        <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 flex items-start gap-3 text-blue-900">
+          <RotateCcw className="text-blue-600 shrink-0 mt-0.5" size={20} />
+          <div className="space-y-1">
+            <h4 className="font-bold text-sm">Revisions in Progress</h4>
+            <p className="text-xs text-blue-800 leading-relaxed">
+              You requested changes: <strong>"{errand.revisionNotes}"</strong>. The runner has been given a grace window to re-submit proof before {errand.revisionGraceExpiresAt ? new Date(errand.revisionGraceExpiresAt).toLocaleString() : "the deadline"}.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Delivery PIN Banner (for pickup & delivery tasks) */}
+      {deliveryPin && (
+        <div className="bg-amber-50 rounded-2xl border border-amber-200 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0">
+              <KeyRound size={20} />
+            </div>
+            <div>
+              <h4 className="font-bold text-sm text-amber-950">Security Delivery PIN</h4>
+              <p className="text-xs text-amber-800">
+                Give this 6-digit PIN to the recipient. The runner must input it to verify delivery handover.
+              </p>
+            </div>
+          </div>
+          <div className="font-mono font-bold text-2xl tracking-widest text-amber-900 bg-white px-5 py-2.5 rounded-xl border border-amber-300 shrink-0 text-center">
+            {deliveryPin}
+          </div>
+        </div>
+      )}
+
+      {/* Main Details Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Left Column: Details & Proof */}
+        <div className="lg:col-span-7 space-y-6">
+          <div className="bg-white rounded-2xl border border-black/10 p-6 shadow-xs space-y-4">
+            <h3 className="font-bold text-base text-[var(--ink)]">Task Instructions</h3>
+            <p className="text-sm text-neutral-700 leading-relaxed whitespace-pre-line">
+              {errand.description}
+            </p>
+
+            <div className="pt-4 border-t border-black/5 space-y-2 text-xs text-neutral-600">
+              <div className="flex items-center gap-2">
+                <MapPin size={14} className="text-neutral-400" />
+                <span><strong>Address:</strong> {errand.address}, {errand.locationArea}, {errand.locationState}</span>
+              </div>
+              {errand.dropoffAddress && (
+                <div className="flex items-center gap-2 text-emerald-800">
+                  <MapPin size={14} />
+                  <span><strong>Dropoff:</strong> {errand.dropoffAddress}</span>
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <Clock size={14} className="text-neutral-400" />
+                <span><strong>Deadline:</strong> {new Date(errand.deadline).toLocaleString()}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Camera size={14} className="text-neutral-400" />
+                <span><strong>Required Proof:</strong> {errand.requiredProof}</span>
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-black/5 flex flex-wrap items-center justify-between gap-3">
+              {errand.status === "open" && (
+                <button
+                  onClick={handleCancel}
+                  className="py-2 px-4 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-xs font-bold cursor-pointer"
+                >
+                  Cancel Errand (100% Refund)
+                </button>
+              )}
+
+              {["claimed", "in_progress"].includes(errand.status) && (
+                <button
+                  onClick={() => setIsDisputeModalOpen(true)}
+                  className="text-xs font-bold text-neutral-500 hover:text-red-600 flex items-center gap-1 cursor-pointer"
+                >
+                  <AlertTriangle size={14} /> Report a Problem
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Proof Review Section */}
+          {errand.status === "proof_submitted" && (
+            <div className="bg-white rounded-2xl border-2 border-emerald-500/30 p-6 shadow-xs space-y-4">
+              <div className="flex items-center gap-2 text-emerald-800 font-bold text-base">
+                <FileCheck size={20} />
+                <h3>Runner Submitted Execution Proof</h3>
+              </div>
+              <p className="text-xs text-neutral-600">
+                The runner has submitted photographic evidence. Please review and confirm completion. Funds will automatically release in 24 hours if no dispute is raised.
+              </p>
+
+              {approveError && (
+                <p className="text-xs text-red-600 font-medium">{approveError}</p>
+              )}
+
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
+                <button
+                  onClick={handleApprove}
+                  disabled={isApproving}
+                  className="flex-1 py-3 px-4 rounded-xl bg-[var(--ng)] text-white text-xs font-bold hover:opacity-95 shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  {isApproving ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
+                  Approve Proof & Release Payout
+                </button>
+
+                <button
+                  onClick={() => setIsRevisionModalOpen(true)}
+                  className="py-3 px-4 rounded-xl border border-black/20 bg-neutral-50 text-[var(--ink)] text-xs font-bold hover:bg-neutral-100 flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <RotateCcw size={15} /> Request Changes
+                </button>
+
+                <button
+                  onClick={() => setIsDisputeModalOpen(true)}
+                  className="py-3 px-4 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <AlertTriangle size={15} /> Report Problem
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Right Column: In-App Chat with Redaction */}
+        <div className="lg:col-span-5 bg-white rounded-2xl border border-black/10 p-5 shadow-xs flex flex-col h-[520px]">
+          <div className="flex items-center justify-between border-b border-black/10 pb-3 mb-3">
+            <div className="flex items-center gap-2">
+              <MessageSquare size={16} className="text-[var(--ng)]" />
+              <h3 className="font-bold text-sm text-[var(--ink)]">Errand Coordination Chat</h3>
+            </div>
+            <span className="text-[10px] bg-neutral-100 text-neutral-600 px-2 py-0.5 rounded-full font-bold">
+              Protected
+            </span>
+          </div>
+
+          <p className="text-[11px] text-neutral-400 mb-3 bg-neutral-50 p-2 rounded-lg">
+            Direct phone numbers and bank details are hidden until task completion for security.
+          </p>
+
+          {/* Message History */}
+          <div className="flex-1 overflow-y-auto space-y-2.5 pr-1">
+            {messages.length === 0 ? (
+              <p className="text-xs text-neutral-400 text-center py-12">
+                No messages yet. Send a message to coordinate with the runner.
+              </p>
+            ) : (
+              messages.map((m) => {
+                const isMe = m.senderId === currentUserId;
+                return (
+                  <div
+                    key={m.id}
+                    className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}
+                  >
+                    <div
+                      className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-xs leading-relaxed ${
+                        isMe
+                          ? "bg-[var(--ng)] text-white rounded-br-xs"
+                          : "bg-neutral-100 text-neutral-900 rounded-bl-xs"
+                      }`}
+                    >
+                      {m.content}
+                    </div>
+                    <span className="text-[10px] text-neutral-400 mt-1 px-1">
+                      {new Date(m.createdAt).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          {/* Chat Input */}
+          <form onSubmit={handleSendMessage} className="pt-3 border-t border-black/10 flex items-center gap-2">
+            <input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder="Type message to runner..."
+              className="flex-1 px-3 py-2 text-xs rounded-xl border border-black/15 focus:outline-none focus:ring-2 focus:ring-[var(--ng)]"
+            />
+            <button
+              type="submit"
+              disabled={isSending || !newMessage.trim()}
+              className="w-8 h-8 rounded-xl bg-[var(--ng)] text-white flex items-center justify-center hover:opacity-90 disabled:opacity-40 cursor-pointer shrink-0"
+            >
+              {isSending ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+            </button>
+          </form>
+        </div>
+      </div>
+
+      {/* Modal: Request Changes (Revision Grace Window) */}
+      {isRevisionModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+          <div className="w-full max-w-md bg-white rounded-2xl p-6 shadow-2xl border border-black/10 space-y-4">
+            <h3 className="text-lg font-bold text-[var(--ink)] flex items-center gap-2">
+              <RotateCcw size={18} className="text-blue-600" />
+              Request Revisions
+            </h3>
+            <p className="text-xs text-neutral-500">
+              Describe what is missing or needs improvement. The runner will receive a 24-hour grace window to submit revised proof.
+            </p>
+
+            <form onSubmit={handleRevisionSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-neutral-700 mb-1">
+                  Revision Instructions
+                </label>
+                <textarea
+                  value={revisionNotesInput}
+                  onChange={(e) => setRevisionNotesInput(e.target.value)}
+                  placeholder="e.g. Please capture a clearer angle of the property meter..."
+                  rows={4}
+                  className="w-full p-2.5 rounded-xl border border-black/15 text-xs focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+
+              {revisionError && <p className="text-xs text-red-600 font-medium">{revisionError}</p>}
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsRevisionModalOpen(false)}
+                  className="flex-1 py-2 text-xs font-bold text-neutral-600 border border-neutral-300 rounded-xl"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingRevision || !revisionNotesInput.trim()}
+                  className="flex-1 py-2 text-xs font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {isSubmittingRevision ? <Loader2 size={14} className="animate-spin" /> : "Send Revision Request"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Report a Problem (Dispute) */}
+      {isDisputeModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+          <div className="w-full max-w-md bg-white rounded-2xl p-6 shadow-2xl border border-black/10 space-y-4">
+            <h3 className="text-lg font-bold text-red-600 flex items-center gap-2">
+              <AlertTriangle size={18} />
+              Report Errand Problem
+            </h3>
+            <p className="text-xs text-neutral-500">
+              Filing a dispute pauses payout release and assigns a Staff Guru administrator to inspect evidence and arbitrate a resolution.
+            </p>
+
+            <form onSubmit={handleDisputeSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-neutral-700 mb-1">
+                  Problem Category
+                </label>
+                <select
+                  value={disputeReason}
+                  onChange={(e) => setDisputeReason(e.target.value)}
+                  className="w-full p-2.5 rounded-xl border border-black/15 text-xs bg-white focus:ring-2 focus:ring-red-500"
+                >
+                  <option value="INCOMPLETE_TASK">Incomplete Task / Unfinished Work</option>
+                  <option value="POOR_QUALITY">Poor Quality / False Proof</option>
+                  <option value="DAMAGED_ITEM">Damaged or Lost Item</option>
+                  <option value="NO_SHOW">Runner No-Show / Unresponsive</option>
+                  <option value="OTHER">Other Issues</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-neutral-700 mb-1">
+                  Detailed Explanation
+                </label>
+                <textarea
+                  value={disputeDescription}
+                  onChange={(e) => setDisputeDescription(e.target.value)}
+                  placeholder="Provide detailed facts and context for admin review..."
+                  rows={4}
+                  className="w-full p-2.5 rounded-xl border border-black/15 text-xs focus:ring-2 focus:ring-red-500"
+                  required
+                />
+              </div>
+
+              {disputeError && <p className="text-xs text-red-600 font-medium">{disputeError}</p>}
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsDisputeModalOpen(false)}
+                  className="flex-1 py-2 text-xs font-bold text-neutral-600 border border-neutral-300 rounded-xl"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isFilingDispute || !disputeDescription.trim()}
+                  className="flex-1 py-2 text-xs font-bold text-white bg-red-600 rounded-xl hover:bg-red-700 disabled:opacity-50"
+                >
+                  {isFilingDispute ? <Loader2 size={14} className="animate-spin" /> : "Submit Dispute to Admin"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

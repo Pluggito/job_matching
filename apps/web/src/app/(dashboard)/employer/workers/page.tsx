@@ -1,45 +1,42 @@
 import { Search, Filter, Download, MoreVertical, MapPin, Star, ShieldCheck, Calendar } from "lucide-react";
+import { db, selections, hiringRequests, workerProfiles, employerProfiles, users, eq, and } from "@repo/db";
+import { getCurrentUser } from "@/actions/auth";
 
-const mockWorkers = [
-  {
-    id: 1,
-    name: "Samuel Johnson",
-    role: "Professional Driver",
-    location: "Ikeja, Lagos",
-    startDate: "Oct 1, 2026",
-    status: "Active",
-    rating: 4.9,
-    pay: "₦120,000",
-    avatar: "S",
-    verified: true
-  },
-  {
-    id: 2,
-    name: "Grace Okafor",
-    role: "Warehouse Manager",
-    location: "Surulere, Lagos",
-    startDate: "Sep 15, 2026",
-    status: "Active",
-    rating: 5.0,
-    pay: "₦150,000",
-    avatar: "G",
-    verified: true
-  },
-  {
-    id: 3,
-    name: "David Adeleke",
-    role: "Security Guard",
-    location: "Lekki, Lagos",
-    startDate: "Oct 3, 2026",
-    status: "On Leave",
-    rating: 4.7,
-    pay: "₦80,000",
-    avatar: "D",
-    verified: false
-  }
-];
+export default async function EmployedWorkersPage() {
+  const session = await getCurrentUser();
+  if (!session || session.role !== "EMPLOYER") return null;
 
-export default function EmployedWorkersPage() {
+  const [employerProfile] = await db
+    .select({ id: employerProfiles.id })
+    .from(employerProfiles)
+    .where(eq(employerProfiles.userId, session.userId))
+    .limit(1);
+
+  if (!employerProfile) return null;
+
+  const hiredWorkers = await db
+    .select({
+      id: selections.id,
+      feeAmount: selections.feeAmount,
+      termsAcceptedAt: selections.termsAcceptedAt,
+      jobTitle: hiringRequests.title,
+      locationState: hiringRequests.locationState,
+      locationArea: hiringRequests.locationArea,
+      workerCategory: workerProfiles.category,
+      workerName: users.email, // using email as placeholder for name
+      ninVerificationStatus: workerProfiles.ninVerificationStatus,
+    })
+    .from(selections)
+    .innerJoin(hiringRequests, eq(selections.hiringRequestId, hiringRequests.id))
+    .innerJoin(workerProfiles, eq(selections.workerProfileId, workerProfiles.id))
+    .innerJoin(users, eq(workerProfiles.userId, users.id))
+    .where(
+      and(
+        eq(selections.employerProfileId, employerProfile.id),
+        eq(selections.status, "CONFIRMED")
+      )
+    );
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
@@ -47,8 +44,8 @@ export default function EmployedWorkersPage() {
           <h1 className="text-2xl font-bold text-[var(--ink)] tracking-tight">Employed Workers</h1>
           <p className="text-[var(--ink-soft)] mt-1">Manage your active workforce and their details.</p>
         </div>
-        <button className="inline-flex h-10 items-center gap-2 rounded-lg bg-[var(--ink)] px-5 text-sm font-semibold text-[var(--lime)] transition-colors hover:bg-[var(--ink)]/90 shadow-sm">
-          <Download size={16} />
+        <button className="inline-flex h-11 items-center gap-2 rounded-xl bg-[var(--ng)] px-6 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-[var(--ng-deep)] shadow-lg shadow-[var(--ng)]/20">
+          <Download size={18} />
           Export List
         </button>
       </div>
@@ -81,47 +78,50 @@ export default function EmployedWorkersPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--line)]">
-              {mockWorkers.map((worker) => (
+              {hiredWorkers.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-[var(--ink-soft)]">
+                    You haven't hired any workers yet. Send an offer from the matchmaking tab!
+                  </td>
+                </tr>
+              )}
+              {hiredWorkers.map((worker) => (
                 <tr key={worker.id} className="hover:bg-gray-50/50 transition-colors group">
                   <td className="p-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-[var(--green)]/10 text-[var(--green)] flex items-center justify-center font-bold text-lg border border-[var(--green)]/20">
-                        {worker.avatar}
+                      <div className="w-10 h-10 rounded-full bg-[var(--green)]/10 text-[var(--green)] flex items-center justify-center font-bold text-lg border border-[var(--green)]/20 uppercase">
+                        {worker.workerName.substring(0, 1)}
                       </div>
                       <div>
                         <div className="font-semibold text-[var(--ink)] flex items-center gap-1.5">
-                          {worker.name}
-                          {worker.verified && <ShieldCheck size={14} className="text-green-600" />}
+                          {worker.workerName.split('@')[0]}
+                          {worker.ninVerificationStatus === 'VERIFIED' && <ShieldCheck size={14} className="text-green-600" />}
                         </div>
                         <div className="text-sm text-[var(--ink-soft)] flex items-center gap-1 mt-0.5">
                           <Star size={12} className="text-[var(--orange)] fill-[var(--orange)]" />
-                          {worker.rating}
+                          5.0
                         </div>
                       </div>
                     </div>
                   </td>
                   <td className="p-4">
-                    <div className="font-medium text-[var(--ink)]">{worker.role}</div>
+                    <div className="font-medium text-[var(--ink)]">{worker.jobTitle}</div>
                     <div className="text-sm text-[var(--ink-soft)] flex items-center gap-1 mt-0.5">
-                      <MapPin size={12} /> {worker.location}
+                      <MapPin size={12} /> {worker.locationArea}, {worker.locationState}
                     </div>
                   </td>
                   <td className="p-4">
                     <div className="mb-1">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${
-                        worker.status === 'Active' 
-                          ? 'bg-green-50 text-green-700 border-green-200' 
-                          : 'bg-orange-50 text-orange-700 border-orange-200'
-                      }`}>
-                        {worker.status}
+                      <span className="px-2.5 py-1 rounded-full text-xs font-semibold border bg-green-50 text-green-700 border-green-200">
+                        Active
                       </span>
                     </div>
-                    <div className="text-sm font-medium text-[var(--ink)]">{worker.pay} / mo</div>
+                    <div className="text-sm font-medium text-[var(--ink)]">₦{worker.feeAmount.toLocaleString()}</div>
                   </td>
                   <td className="p-4">
                     <div className="text-[var(--ink)] text-sm flex items-center gap-2">
                       <Calendar size={14} className="text-[var(--ink-soft)]" />
-                      {worker.startDate}
+                      {worker.termsAcceptedAt ? new Date(worker.termsAcceptedAt).toLocaleDateString() : 'N/A'}
                     </div>
                   </td>
                   <td className="p-4 text-right">

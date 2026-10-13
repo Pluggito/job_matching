@@ -57,13 +57,27 @@ export default function NewHiringRequestPage() {
       
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || "Failed to create request");
+        let errorMessage = errorData.error || "Failed to create request";
+        
+        // Try to parse Zod error JSON if it's stringified
+        try {
+          if (errorMessage.startsWith("[")) {
+            const parsed = JSON.parse(errorMessage);
+            if (Array.isArray(parsed) && parsed[0]?.message) {
+              errorMessage = parsed.map((e: any) => `${e.path?.join(".") || "Field"}: ${e.message}`).join(", ");
+            }
+          }
+        } catch (e) {
+          // ignore
+        }
+        
+        throw new Error(errorMessage);
       }
       
       const data = await res.json();
       router.push(`/employer/requests/${data.id}/matches`);
-    } catch (err) {
-      alert(err);
+    } catch (err: any) {
+      alert(err.message || "An error occurred");
       setLoading(false);
     }
   };
@@ -78,7 +92,7 @@ export default function NewHiringRequestPage() {
       {/* Progress Bar */}
       <div className="w-full bg-[var(--line)] h-2 rounded-full mb-10 overflow-hidden">
         <div 
-          className="bg-[var(--green)] h-full transition-all duration-300"
+          className="bg-[var(--ng)] h-full transition-all duration-300"
           style={{ width: `${(step / 3) * 100}%` }}
         />
       </div>
@@ -104,7 +118,7 @@ export default function NewHiringRequestPage() {
 
             <div className="space-y-2">
               <label className="text-sm font-bold text-[var(--ink-soft)]">Description</label>
-              <textarea required value={formData.description} onChange={e => updateForm("description", e.target.value)} className="w-full p-3 rounded-xl border border-[var(--line)] bg-[var(--canvas)] focus:outline-none focus:border-[var(--green)] min-h-[120px]" placeholder="Describe the role, responsibilities, and what you're looking for..." />
+              <textarea required minLength={20} value={formData.description} onChange={e => updateForm("description", e.target.value)} className="w-full p-3 rounded-xl border border-[var(--line)] bg-[var(--canvas)] focus:outline-none focus:border-[var(--green)] min-h-[120px]" placeholder="Describe the role, responsibilities, and what you're looking for... (min 20 characters)" />
             </div>
           </div>
         )}
@@ -186,7 +200,7 @@ export default function NewHiringRequestPage() {
             </button>
           ) : <div></div>}
 
-          <button type="submit" disabled={loading} className="flex items-center gap-2 px-8 h-12 rounded-xl font-bold bg-[var(--ink)] text-[var(--lime)] hover:-translate-y-0.5 transition-transform shadow-lg shadow-[var(--ink)]/10 disabled:opacity-70">
+          <button type="submit" disabled={loading} className="flex items-center gap-2 px-8 h-12 rounded-xl font-bold bg-[var(--ng)] text-white hover:-translate-y-0.5 hover:bg-[var(--ng-deep)] transition-all shadow-lg shadow-[var(--ng)]/20 disabled:opacity-70 disabled:hover:translate-y-0 disabled:shadow-none">
             {step === 3 ? (loading ? "Submitting..." : "Find Matches") : "Next"} 
             {step === 3 ? <Check size={16} /> : <ArrowRight size={16} />}
           </button>

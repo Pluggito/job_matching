@@ -1,8 +1,9 @@
-﻿import { JOB_CATEGORIES } from "@repo/shared";
+import { JOB_CATEGORIES } from "@repo/shared";
 import { getCurrentUser } from "../../actions/auth";
 import { getEmployerRequests } from "../../server/services/hiringRequests";
 import Link from "next/link";
 import { db, eq, employerProfiles } from "@repo/db";
+import { BriefcaseBusiness } from "lucide-react";
 
 export default async function EmployerWorkspace() {
   const session = await getCurrentUser();
@@ -18,21 +19,32 @@ export default async function EmployerWorkspace() {
     <div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Employer Overview</h1>
-          <p className="text-muted-foreground">Manage your vacancies and incoming applications.</p>
+          <h1 className="text-3xl font-bold mb-2 font-space tracking-tight text-[var(--ink)]">Employer Overview</h1>
+          <p className="text-muted-foreground font-medium">Manage your vacancies and review curated shortlists.</p>
         </div>
-        <Link href="/employer/requests/new" className="self-end sm:self-auto inline-flex h-10 items-center justify-center rounded-lg bg-[var(--ink)] px-6 text-sm font-bold text-[var(--lime)] transition-colors hover:bg-black whitespace-nowrap shrink-0">
-          Post a Job
-        </Link>
+        <div className="flex items-center gap-3 self-end sm:self-auto shrink-0">
+          <Link
+            href="/employer/errands/new"
+            className="inline-flex h-11 items-center justify-center rounded-xl border border-black/15 bg-white px-5 text-sm font-bold text-[var(--ink)] transition-all hover:bg-neutral-50 shadow-xs"
+          >
+            Post an Errand
+          </Link>
+          <Link
+            href="/employer/requests/new"
+            className="inline-flex h-11 items-center justify-center rounded-xl bg-[var(--ng)] px-5 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-[var(--ng-deep)] shadow-lg shadow-[var(--ng)]/20 whitespace-nowrap"
+          >
+            Post a Role
+          </Link>
+        </div>
       </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
         <div className="bg-white rounded-xl border border-[var(--line)] p-6">
-          <p className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-2">Active Jobs</p>
+          <p className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-2">Active Roles</p>
           <p className="text-3xl font-black">{activeJobsCount}</p>
         </div>
         <div className="bg-white rounded-xl border border-[var(--line)] p-6">
-          <p className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-2">New Applications</p>
+          <p className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-2">Curated Matches</p>
           <p className="text-3xl font-black">0</p>
         </div>
         <div className="bg-white rounded-xl border border-[var(--line)] p-6">
@@ -42,16 +54,16 @@ export default async function EmployerWorkspace() {
       </div>
 
       {requests.length === 0 ? (
-        <div className="bg-white rounded-xl border border-[var(--line)] p-12 text-center">
-          <div className="w-16 h-16 bg-[var(--canvas)] rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-2xl">≡ƒÅó</span>
+        <div className="bg-white/50 rounded-2xl border border-[var(--line)] p-12 text-center shadow-sm">
+          <div className="w-16 h-16 bg-[var(--ng)]/10 rounded-full flex items-center justify-center mx-auto mb-5 border border-[var(--ng)]/20">
+            <BriefcaseBusiness size={28} className="text-[var(--ng)]" />
           </div>
-          <h3 className="text-lg font-bold mb-2">No active jobs</h3>
-          <p className="text-muted-foreground max-w-sm mx-auto mb-6">
-            Post a new job vacancy to start receiving applications and view smart matches from verified workers.
+          <h3 className="text-lg font-bold mb-2 text-[var(--ink)]">No active roles</h3>
+          <p className="text-muted-foreground max-w-sm mx-auto mb-8 font-medium">
+            Post a new role to instantly generate a curated shortlist of verified workers perfectly matched to your needs.
           </p>
-          <Link href="/employer/requests/new" className="inline-flex h-10 items-center justify-center rounded-lg border border-[var(--line)] bg-white px-6 text-sm font-bold text-[var(--ink)] transition-colors hover:bg-[var(--canvas)]">
-            Post a Job
+          <Link href="/employer/requests/new" className="inline-flex h-11 items-center justify-center rounded-xl bg-[var(--ng)] px-8 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-[var(--ng-deep)] shadow-lg shadow-[var(--ng)]/20">
+            Post a Role or Errand
           </Link>
         </div>
       ) : (
@@ -64,7 +76,7 @@ export default async function EmployerWorkspace() {
                 <div className="flex flex-wrap items-center gap-3 text-sm text-[var(--ink-soft)] mt-2">
                   <span className="bg-[var(--canvas)] px-2 py-1 rounded text-xs font-semibold">{req.category}</span>
                   <span>{req.locationArea}, {req.locationState}</span>
-                  <span>Max Budget: {req.budgetMax.toLocaleString()}₦</span>
+                  <span>Max Budget: {req.budgetMax.toLocaleString()}?</span>
                   <span className={`px-2 py-1 rounded text-xs font-semibold ${req.status === 'OPEN' ? 'bg-[var(--lime)] text-[var(--green)]' : 'bg-gray-200 text-gray-700'}`}>
                     {req.status}
                   </span>

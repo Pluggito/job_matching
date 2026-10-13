@@ -1,6 +1,6 @@
 import { db } from "@repo/db";
 import { workerProfiles, placements } from "@repo/db/src/schema";
-import { eq, and, ne, sql, isNull, or, lte } from "@repo/db";
+import { eq, and, ne, sql, isNull, or, lte, ilike } from "@repo/db";
 import { getHiringRequest } from "./hiringRequests";
 import { scoreWorker, sortMatches, MatchResult } from "@repo/shared";
 
@@ -25,7 +25,7 @@ export async function getMatchesForRequest(
   // - locationState = request.locationState if engagementType === 'ONSITE'
   
   const baseConditions = [
-    eq(workerProfiles.status, "APPROVED"),
+    ne(workerProfiles.status, "REJECTED"),
     eq(workerProfiles.category, request.category),
     or(
       ne(workerProfiles.availabilityStatus, "BUSY"),
@@ -37,7 +37,13 @@ export async function getMatchesForRequest(
   ];
 
   if (request.engagementType === "ONSITE") {
-    baseConditions.push(eq(workerProfiles.locationState, request.locationState));
+    const trimmedState = request.locationState.trim();
+    baseConditions.push(
+      or(
+        ilike(workerProfiles.locationState, `%${trimmedState}%`),
+        ilike(workerProfiles.location, `%${trimmedState}%`)
+      )
+    );
   }
   
   if (options.verifiedOnly) {

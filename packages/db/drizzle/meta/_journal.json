@@ -15,6 +15,34 @@
       "when": 1791199243190,
       "tag": "0001_cloudy_the_fury",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791731501584,
+      "tag": "0002_parallel_iron_monger",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791739100000,
+      "tag": "0003_phase1_financial_schema",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791745000000,
+      "tag": "0004_phase2_direct_proofs",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791751000000,
+      "tag": "0005_phase2_5_contact_and_hardening",
+      "breakpoints": true
     }
   ]
 }

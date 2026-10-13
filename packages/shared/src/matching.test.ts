@@ -6,7 +6,8 @@ import {
   HiringRequestMatchData,
   WorkerProfileMatchData,
   sortMatches,
-  getDistance
+  getDistance,
+  isWorkerEligibleForErrand,
 } from "./matching";
 
 describe("Smart Matching Algorithm", () => {
@@ -115,5 +116,62 @@ describe("Smart Matching Algorithm", () => {
     expect("name" in result.preview).toBe(false);
     expect("email" in result.preview).toBe(false);
     expect("phone" in result.preview).toBe(false);
+  });
+
+  describe("Errand Claim & Matching Guards (isWorkerEligibleForErrand)", () => {
+    const validCandidate = {
+      id: "w-100",
+      openToErrands: true,
+      ninVerificationStatus: "VERIFIED",
+      hasActiveBankAccount: true,
+      activeErrandsCount: 0,
+      errandMinPayKobo: 500_000, // ₦5,000
+      errandPreferredStates: ["Lagos"],
+      errandPreferredAreas: ["Yaba", "Lekki"],
+      errandTypes: ["pickup_delivery", "site_inspection"],
+    };
+
+    const validErrand = {
+      type: "pickup_delivery",
+      locationState: "Lagos",
+      locationArea: "Lekki",
+      budgetKobo: 1_000_000, // ₦10,000
+    };
+
+    it("should allow a fully qualified worker with an active bank account", () => {
+      const res = isWorkerEligibleForErrand(validCandidate, validErrand, 2);
+      expect(res.eligible).toBe(true);
+    });
+
+    it("should reject a worker who has NOT opted in to errands", () => {
+      const res = isWorkerEligibleForErrand({ ...validCandidate, openToErrands: false }, validErrand, 2);
+      expect(res.eligible).toBe(false);
+      expect(res.reason).toContain("opted in");
+    });
+
+    it("should reject a worker without verified NIN", () => {
+      const res = isWorkerEligibleForErrand({ ...validCandidate, ninVerificationStatus: "PENDING" }, validErrand, 2);
+      expect(res.eligible).toBe(false);
+      expect(res.reason).toContain("NIN is not verified");
+    });
+
+    it("should reject a worker without an active bank account on file", () => {
+      const res = isWorkerEligibleForErrand({ ...validCandidate, hasActiveBankAccount: false }, validErrand, 2);
+      expect(res.eligible).toBe(false);
+      expect(res.reason).toContain("active bank account");
+    });
+
+    it("should reject a worker who has reached the active concurrency cap", () => {
+      const res = isWorkerEligibleForErrand({ ...validCandidate, activeErrandsCount: 2 }, validErrand, 2);
+      expect(res.eligible).toBe(false);
+      expect(res.reason).toContain("maximum concurrent active errands cap");
+    });
+
+    it("should reject when errand budget is below worker minimum pay", () => {
+      const lowBudgetErrand = { ...validErrand, budgetKobo: 300_000 }; // ₦3,000 < ₦5,000
+      const res = isWorkerEligibleForErrand(validCandidate, lowBudgetErrand, 2);
+      expect(res.eligible).toBe(false);
+      expect(res.reason).toContain("below worker minimum pay threshold");
+    });
   });
 });
