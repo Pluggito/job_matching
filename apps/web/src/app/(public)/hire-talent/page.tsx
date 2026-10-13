@@ -7,20 +7,20 @@ export default function HireTalentPage() {
   return (
     <div className="min-h-screen bg-[var(--canvas)] flex flex-col font-sans">
       <PublicHeader />
-      
+
       <main className="flex-1">
         {/* HERO */}
-        <section className="relative overflow-hidden bg-[var(--ink)] text-[var(--paper)] py-24 sm:py-32">
-          <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[var(--green)] via-[var(--ink)] to-[var(--ink)] pointer-events-none"></div>
+        <section className="relative overflow-hidden bg-[#fafcfa] text-[var(--ink)] py-24 sm:py-32 border-b border-black/5">
+          <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, black 1px, transparent 0)', backgroundSize: '32px 32px' }}></div>
           <div className="relative mx-auto max-w-7xl px-6 lg:px-8 text-center">
-            <h1 className="mx-auto max-w-4xl [font-family:var(--font-space-grotesk)] text-5xl font-semibold leading-[1.1] sm:text-6xl lg:text-[76px] tracking-tight">
-              Build your dream team <br/><span className="text-[var(--lime)]">with confidence.</span>
+            <h1 className="mx-auto max-w-4xl font-space text-5xl font-bold leading-[1.1] sm:text-6xl lg:text-[76px] tracking-tight">
+              Build your dream team <br /><span className="text-[var(--ng)]">with confidence.</span>
             </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-[var(--muted)]">
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-black/60 font-medium">
               Access a curated pool of top-tier Nigerian professionals. Hire verified talent across various industries without the usual hassle.
             </p>
             <div className="mt-10 flex justify-center gap-4">
-              <Link href="/signup" className="flex h-12 items-center justify-center rounded-full bg-[var(--lime)] px-8 text-sm font-extrabold text-[var(--ink)] transition-all hover:bg-[var(--lime-dark)] hover:-translate-y-0.5">
+              <Link href="/signup" className="flex h-14 items-center justify-center rounded-full bg-[var(--ng)] px-8 text-base font-bold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[var(--ng)]/20">
                 Hire Talent Now
               </Link>
             </div>
@@ -40,7 +40,7 @@ export default function HireTalentPage() {
                   Hiring the right people is one of the most critical challenges for any business or individual. A bad hire costs you time, money, and momentum. <strong>Staff Guru was designed to eliminate the friction and uncertainty of hiring in Nigeria.</strong>
                 </p>
                 <p>
-                  We understand that you need reliable, skilled professionals who can deliver results. That's why Staff Guru goes beyond a simple job board. We are a comprehensive talent marketplace that emphasizes quality and verification. 
+                  We understand that you need reliable, skilled professionals who can deliver results. That's why Staff Guru goes beyond a simple job board. We are a comprehensive talent marketplace that emphasizes quality and verification.
                 </p>
                 <p>
                   When you use Staff Guru, you aren't just sifting through unverified resumes. Our platform provides you with detailed profiles, verified work histories, portfolios, and peer reviews. We take the guesswork out of hiring by implementing rigorous quality checks, so you can have complete confidence in the people you bring onto your team.

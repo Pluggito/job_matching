@@ -1,6 +1,6 @@
 "use server";
 
-import { db, users, eq } from "@repo/db";
+import { db, users, eq, workerProfiles, employerProfiles } from "@repo/db";
 import { createSession, destroySession, getSession } from "../lib/auth";
 import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
@@ -72,6 +72,33 @@ export async function signup(prevState: any, formData: FormData) {
 
   if (!newUser) {
     return { error: "Failed to create user" };
+  }
+
+  // Create partial profile with the fields collected during signup
+  if (role === "EMPLOYER") {
+    const employerType = formData.get("employerType") as string;
+    await db.insert(employerProfiles).values({
+      userId: newUser.id,
+      businessType: employerType || "INDIVIDUAL",
+      businessName: "Pending", // to be filled in onboarding
+      location: "Pending", // to be filled in onboarding
+      hiringNeeds: "Pending", // to be filled in onboarding
+      profileData: {}
+    });
+  } else if (role === "WORKER") {
+    const openToErrands = formData.get("openToErrands") === "true";
+    await db.insert(workerProfiles).values({
+      userId: newUser.id,
+      category: "Pending", // to be filled in onboarding
+      skills: [], // to be filled in onboarding
+      experienceYears: 0, // to be filled in onboarding
+      location: "Pending", // to be filled in onboarding
+      availability: "Immediate", // to be filled in onboarding
+      expectedPay: 0, // to be filled in onboarding
+      ninVerificationStatus: "PENDING",
+      openToErrands: openToErrands,
+      profileData: {}
+    });
   }
 
   await createSession({
