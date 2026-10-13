@@ -99,11 +99,21 @@ export async function updateWorkerDetails(formData: FormData) {
   profileData.phone = formData.get("phone") as string;
   profileData.aboutMe = formData.get("aboutMe") as string;
 
+  let locationState = profile.locationState;
+  let locationArea = profile.locationArea;
+  if (location && location.includes(",")) {
+    const parts = location.split(",");
+    locationArea = parts[0]?.trim() || locationArea;
+    locationState = parts[1]?.trim() || locationState;
+  }
+
   await db
     .update(workerProfiles)
     .set({
       category: category || profile.category,
       location: location || profile.location,
+      locationState,
+      locationArea,
       experienceYears: experienceYears >= 0 ? experienceYears : profile.experienceYears,
       expectedPay: expectedPay >= 0 ? expectedPay : profile.expectedPay,
       availabilityStatus: availabilityStatus || profile.availabilityStatus,

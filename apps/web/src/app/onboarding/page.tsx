@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { getCurrentUser } from "../../actions/auth";
@@ -24,6 +24,9 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import BankDetailsStep from "@/components/onboarding/BankDetailsStep";
+import { saveWorkerBankDetails } from "@/actions/bank";
+import { validateNuban } from "@repo/shared";
 
 function StepIndicator({ currentStep, totalSteps }: { currentStep: number, totalSteps: number }) {
   return (
@@ -90,7 +93,7 @@ function EmployerOnboarding() {
   return (
     <div className="max-w-2xl mx-auto w-full">
       <div className="text-center mb-8">
-        <h1 className="[font-family:var(--font-plus-jakarta-sans)] text-3xl font-bold text-black tracking-tight">Complete your profile</h1>
+        <h1 className="[font-family:var(--font-inter)] text-3xl font-bold text-black tracking-tight">Complete your profile</h1>
         <p className="mt-2 text-muted-foreground">Let's get your business set up on Staff Guru.</p>
       </div>
 
@@ -162,7 +165,7 @@ function EmployerOnboarding() {
                   </select>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-black/60 uppercase tracking-wider [font-family:var(--font-dm-mono)]">Amount (₦)</label>
+                  <label className="text-xs font-bold text-black/60 uppercase tracking-wider [font-family:var(--font-dm-mono)]">Amount (?)</label>
                   <input type="text" name="amount" required value={formData.amount} onChange={handleChange} className="w-full h-11 px-4 rounded-xl border border-[var(--line)] bg-white text-black text-sm focus:outline-none focus:border-[var(--ng)] focus:ring-1 focus:ring-[var(--ng)] transition-all" placeholder="e.g. 150,000 / month" />
                 </div>
               </div>
@@ -205,6 +208,8 @@ function WorkerOnboarding() {
   const [formData, setFormData] = useState({
     fullName: "", age: "", gender: "Male", phone: "", address: "", 
     jobType: "", experience: "", compensation: "Salary", amount: "", accommodation: "No",
+    openToErrands: false,
+    bankName: "", bankCode: "", accountNumber: "", accountName: "",
     empName: "", empPhone: "", empRole: "", empDuration: "", empStart: "", empEnd: "", empReason: "",
     tailorMachine: "No", tailorPattern: "Freehand", tailorCorset: "No",
     g1Name: "", g1Phone: "", g1Occ: "", g1Address: "",
@@ -222,10 +227,38 @@ function WorkerOnboarding() {
     }
   };
 
-  const totalSteps = isTailor ? 4 : 3;
+  // Dynamic step sequence:
+  // 1: Personal Details (+ Errand Opt-in)
+  // 2: Employment History
+  // [Optional]: Tailoring Assessment (if isTailor)
+  // [Optional]: Bank Details on File (if openToErrands)
+  // Final: Guarantors Verification
+  let currentStepIdx = 2;
+  const tailorStep = isTailor ? ++currentStepIdx : null;
+  const bankStep = formData.openToErrands ? ++currentStepIdx : null;
+  const guarantorStep = ++currentStepIdx;
+  const totalSteps = currentStepIdx;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // If currently on bank step, validate before advancing
+    if (bankStep && step === bankStep) {
+      if (!formData.bankCode || formData.accountNumber.length !== 10) {
+        alert("Please select your bank and enter a valid 10-digit account number.");
+        return;
+      }
+      const val = validateNuban(formData.bankCode, formData.accountNumber);
+      if (!val.isValid) {
+        alert(val.error || "Invalid 10-digit account number check digit for the selected bank.");
+        return;
+      }
+      if (!formData.accountName.trim()) {
+        alert("Please enter the account name registered with your bank.");
+        return;
+      }
+    }
+
     if (step < totalSteps) {
       setStep(step + 1);
       return;
@@ -235,6 +268,15 @@ function WorkerOnboarding() {
     try {
       const res = await saveOnboardingData("WORKER", formData);
       if (res.success) {
+        // If opted into errands and bank details provided, save encrypted bank details on file
+        if (formData.openToErrands && formData.bankCode && formData.accountNumber) {
+          await saveWorkerBankDetails({
+            bankName: formData.bankName,
+            bankCode: formData.bankCode,
+            accountNumber: formData.accountNumber,
+            accountName: formData.accountName || formData.fullName,
+          });
+        }
         router.push("/dashboard");
       } else {
         alert("Failed to save profile. Please try again.");
@@ -249,7 +291,7 @@ function WorkerOnboarding() {
   return (
     <div className="max-w-3xl mx-auto w-full">
       <div className="text-center mb-8">
-        <h1 className="[font-family:var(--font-plus-jakarta-sans)] text-3xl font-bold text-black tracking-tight">Create your Worker Profile</h1>
+        <h1 className="[font-family:var(--font-inter)] text-3xl font-bold text-black tracking-tight">Create your Worker Profile</h1>
         <p className="mt-2 text-muted-foreground">Let's get you verified and ready for work.</p>
       </div>
 
@@ -315,7 +357,7 @@ function WorkerOnboarding() {
                 </select>
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-black/60 uppercase tracking-wider [font-family:var(--font-dm-mono)]">Amount (₦)</label>
+                <label className="text-xs font-bold text-black/60 uppercase tracking-wider [font-family:var(--font-dm-mono)]">Amount (?)</label>
                 <input type="text" name="amount" required value={formData.amount} onChange={handleChange} className="w-full h-11 px-4 rounded-xl border border-[var(--line)] bg-white text-black text-sm focus:outline-none focus:border-[var(--ng)] focus:ring-1 focus:ring-[var(--ng)] transition-all" placeholder="e.g. 150,000" />
               </div>
               <div className="space-y-1.5 md:col-span-3">
@@ -324,6 +366,27 @@ function WorkerOnboarding() {
                   <option>No</option>
                   <option>Yes</option>
                 </select>
+              </div>
+
+              {/* Alabaru On-Demand Errands Opt-in */}
+              <div className="md:col-span-3 p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-2 mt-2">
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="openToErrands"
+                    checked={formData.openToErrands}
+                    onChange={(e) => setFormData(prev => ({ ...prev, openToErrands: e.target.checked }))}
+                    className="w-5 h-5 mt-0.5 accent-[var(--ng)] rounded border-gray-300 text-[var(--ng)] cursor-pointer shrink-0"
+                  />
+                  <div>
+                    <span className="text-sm font-bold text-[var(--ink)] block">
+                      I am open to running on-demand Alabaru errands
+                    </span>
+                    <span className="text-xs text-[var(--ink-soft)] block mt-0.5 leading-relaxed">
+                      Take on verified inspections, photography, and delivery errands during downtime between formal contracts. Earn 70% per completed task. (Requires adding a bank account on file for direct payouts).
+                    </span>
+                  </div>
+                </label>
               </div>
             </div>
           </div>
@@ -367,7 +430,7 @@ function WorkerOnboarding() {
           </div>
         )}
 
-        {isTailor && step === 3 && (
+        {isTailor && tailorStep && step === tailorStep && (
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
             <h2 className="text-lg font-bold flex items-center gap-2 border-b border-[var(--line)] pb-4">
               <Scissors className="text-[var(--ng)]" /> Tailoring Assessment
@@ -432,7 +495,20 @@ function WorkerOnboarding() {
           </div>
         )}
 
-        {step === totalSteps && (
+        {/* Bank Details on File Step (Shown ONLY to workers who opt into errands) */}
+        {formData.openToErrands && bankStep && step === bankStep && (
+          <BankDetailsStep
+            formData={{
+              bankName: formData.bankName,
+              bankCode: formData.bankCode,
+              accountNumber: formData.accountNumber,
+              accountName: formData.accountName || formData.fullName,
+            }}
+            onChange={(bankData) => setFormData(prev => ({ ...prev, ...bankData }))}
+          />
+        )}
+
+        {step === guarantorStep && (
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
             <h2 className="text-lg font-bold flex items-center gap-2 border-b border-[var(--line)] pb-4">
               <Users className="text-[var(--ng)]" /> Guarantors Verification
@@ -516,13 +592,9 @@ export default function OnboardingPage() {
       <div className="max-w-5xl mx-auto w-full">
         {/* Simple Header */}
         <div className="flex items-center justify-between mb-12">
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-[var(--ng-bright)] flex items-center justify-center font-bold text-lg text-black shadow-sm transition-transform group-hover:scale-105">
-              sg
-            </div>
-            <span className="font-bold text-xl tracking-tight text-black [font-family:var(--font-plus-jakarta-sans)]">
-              staff<span className="text-[var(--ng)]">guru.</span>
-            </span>
+          <Link href="/" className="flex items-center gap-2 text-[var(--ink)] font-bold text-2xl tracking-tight font-space">
+            <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-[var(--ng)] text-white font-bold text-base tracking-tighter shadow-lg shadow-[var(--ng)]/20 transition-transform group-hover:scale-105">sg</span>
+            staff<span className="text-[var(--ng)]">guru</span><i className="text-[var(--orange)] not-italic">.</i>
           </Link>
           
           <div className="px-4 py-1.5 rounded-full bg-[var(--canvas)] border border-[var(--line)] text-xs font-bold text-muted-foreground flex items-center gap-2">

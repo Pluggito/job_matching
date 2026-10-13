@@ -27,19 +27,10 @@ import {
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { PublicFooter } from "@/components/layout/PublicFooter";
 import { getSession } from "@/lib/auth";
-
-const categories = [
-  { name: "Fashion & Tailoring", icon: Scissors, count: "1,240", img: "fashion" },
-  { name: "Electrical", icon: Zap, count: "980", img: "electrical" },
-  { name: "Plumbing", icon: Wrench, count: "760", img: "plumbing" },
-  { name: "Automotive", icon: Car, count: "540", img: "automotive" },
-  { name: "Beauty & Hair", icon: Sparkles, count: "1,105", img: "beauty" },
-  { name: "Web Development", icon: Code2, count: "830", img: "webdev" },
-  { name: "Customer Support", icon: Headphones, count: "615", img: "support" },
-  { name: "Design", icon: Palette, count: "702", img: "design" },
-  { name: "Carpentry", icon: Hammer, count: "410", img: "carpentry" },
-  { name: "Sales & Ops", icon: LineChart, count: "590", img: "sales" },
-];
+import { getErrandPricingStatus } from "@/actions/errands";
+import AlabaruShowcase from "@/components/landing/AlabaruShowcase";
+import { HeroStateRotator } from "@/components/landing/HeroStateRotator";
+import { HeroMapGraphic } from "@/components/landing/HeroMapGraphic";
 
 const marquee = [
   "Tailors",
@@ -66,76 +57,50 @@ export default async function LandingPage() {
         : "/dashboard"
     : null;
 
+  const pricingStatus = await getErrandPricingStatus();
+
   return (
     <div className="flex min-h-screen flex-col bg-white font-sans text-black">
       <PublicHeader />
 
       <main className="flex-1">
         {/* ================= HERO ================= */}
-        <section className="relative -mt-[68px] overflow-hidden bg-[var(--night)] pt-[68px] text-white">
+        <section className="relative -mt-[68px] overflow-hidden bg-white pt-[68px] text-[var(--ink)]">
           <div className="lp-grid" />
-          <div className="lp-glow -left-40 top-10 h-[520px] w-[520px] bg-[var(--ng)]/40" />
-          <div className="lp-glow -right-20 bottom-0 h-[420px] w-[420px] bg-[var(--ng-bright)]/20" />
           <div className="lp-grain" />
 
           <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-16 px-5 pb-20 pt-14 lg:grid-cols-[1.1fr_1fr] lg:px-8 lg:pb-28 lg:pt-20">
             {/* Copy */}
-            <div>
-
-
-              <h1 className="lp-fade-up lp-d1 mt-7 text-[44px] font-bold leading-[1.02] tracking-[-0.045em] [font-family:var(--font-plus-jakarta-sans)] sm:text-6xl lg:text-[80px]">
-                Nigeria&apos;s skilled work,{" "}
-                <span className="lp-text-gradient">one tap away.</span>
+            <div className="relative z-10">
+              <h1 className="lp-fade-up lp-d1 mt-7 text-[44px] font-bold leading-[1.02] tracking-[-0.03em] [font-family:var(--font-bricolage)] sm:text-6xl lg:text-[76px]">
+                <span className="block">Need a Staff in</span>
+                <span className="block h-[1.12em] overflow-hidden">
+                  <HeroStateRotator />
+                </span>
+                <span className="relative inline-block text-[var(--ng)]">
+                  by Friday?
+                  <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 200 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 9.5C45.5 -1.5 155.5 -1.5 198 9.5" stroke="currentColor" strokeWidth="3" strokeLinecap="round" /></svg>
+                </span>
               </h1>
 
-              <p className="lp-fade-up lp-d2 mt-6 max-w-xl text-base leading-relaxed text-white/60 sm:text-lg">
-                Staff Guru connects employers with verified tailors, electricians, developers and more — and helps
-                professionals land steady, well-paid work close to home.
+              <p className="lp-fade-up lp-d2 mt-6 max-w-xl text-base leading-relaxed text-[var(--ink)] opacity-50 sm:text-lg [font-family:var(--font-dm-sans)]">
+                Staff Guru connects employers with verified artisans, electricians, and developers. Get matched, get it done, and get on with your day.
               </p>
 
-              {/* Dual-path chooser */}
-              <div className="lp-fade-up lp-d3 mt-10 grid max-w-xl grid-cols-1 gap-3 sm:grid-cols-2">
+              {/* Asymmetrical CTA */}
+              <div className="lp-fade-up lp-d3 mt-10 flex flex-col items-center gap-6 sm:flex-row">
                 <Link
                   href={dashboardLink ?? "/signup?role=EMPLOYER"}
-                  className="lp-shine group relative flex flex-col justify-between rounded-2xl bg-[var(--ng)] p-5 transition-all duration-300 hover:-translate-y-1 hover:bg-[#009a5c] hover:shadow-[0_20px_50px_-12px_var(--ng-bright)]"
+                  className="group flex h-14 w-full items-center justify-center gap-2 rounded-full bg-[var(--ng)] px-8 text-base font-bold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg sm:w-auto"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15">
-                      <Briefcase size={19} />
-                    </span>
-                    <ArrowUpRight
-                      size={20}
-                      className="text-white/70 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-white"
-                    />
-                  </div>
-                  <div className="mt-6">
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/70 [font-family:var(--font-dm-mono)]">
-                      I&apos;m hiring
-                    </p>
-                    <p className="mt-1 text-lg font-bold [font-family:var(--font-plus-jakarta-sans)]">
-                      {session ? "Go to dashboard" : "Hire talent"}
-                    </p>
-                  </div>
+                  {session ? "Go to dashboard" : "Hire talent"}
+                  <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
                 </Link>
                 <Link
                   href={dashboardLink ?? "/signup?role=WORKER"}
-                  className="group relative flex flex-col justify-between rounded-2xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:border-white/25 hover:bg-white/[0.08]"
+                  className="group flex items-center gap-2 text-base font-bold text-[var(--ink)] opacity-50 transition-colors hover:text-[var(--ng)]"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-black">
-                      <Search size={19} />
-                    </span>
-                    <ArrowUpRight
-                      size={20}
-                      className="text-white/50 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-white"
-                    />
-                  </div>
-                  <div className="mt-6">
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/50 [font-family:var(--font-dm-mono)]">
-                      I&apos;m a professional
-                    </p>
-                    <p className="mt-1 text-lg font-bold [font-family:var(--font-plus-jakarta-sans)]">Find work</p>
-                  </div>
+                  Find work <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
                 </Link>
               </div>
 
@@ -145,12 +110,12 @@ export default async function LandingPage() {
                   {["/landing/tailor.jpg", "/landing/electrician.jpg", "/landing/employer.jpg"].map((src) => (
                     <span
                       key={src}
-                      className="relative h-10 w-10 overflow-hidden rounded-full border-2 border-[var(--night)]"
+                      className="relative h-10 w-10 overflow-hidden rounded-full border-2 border-white"
                     >
                       <Image src={src} alt="" fill sizes="40px" className="object-cover object-top" />
                     </span>
                   ))}
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-[var(--night)] bg-[var(--ng)] text-[11px] font-bold">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-[var(--ng)] text-[11px] font-bold text-white">
                     10k+
                   </span>
                 </div>
@@ -159,91 +124,35 @@ export default async function LandingPage() {
                     {Array.from({ length: 5 }).map((_, i) => (
                       <Star key={i} size={14} fill="currentColor" strokeWidth={0} />
                     ))}
-                    <span className="ml-1.5 font-bold text-white">4.9</span>
+                    <span className="ml-1.5 font-bold text-[var(--ink)]">4.9</span>
                   </div>
-                  <p className="text-white/50">Trusted by 1,800+ Nigerian businesses</p>
+                  <p className="text-[var(--ink)] opacity-50">Trusted by 1,800+ Nigerian businesses</p>
                 </div>
               </div>
             </div>
 
-            {/* Visual collage */}
-            <div className="lp-fade-up lp-d3 relative mx-auto h-[520px] w-full max-w-[520px] sm:h-[580px]">
-              {/* main portrait */}
-              <div className="lp-card-glow absolute right-0 top-0 h-[86%] w-[78%] overflow-hidden rounded-[28px] bg-[var(--night-2)] shadow-2xl">
-                <Image
-                  src="/landing/tailor.jpg"
-                  alt="Verified Nigerian fashion designer on Staff Guru"
-                  fill
-                  priority
-                  sizes="(max-width: 1024px) 80vw, 420px"
-                  className="object-cover object-top"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
-                <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between">
-                  <div>
-                    <p className="flex items-center gap-1.5 text-base font-bold">
-                      Adaeze O. <BadgeCheck size={17} className="text-[var(--ng-bright)]" />
-                    </p>
-                    <p className="flex items-center gap-1 text-xs text-white/70">
-                      <MapPin size={12} /> Fashion Designer · Yaba, Lagos
-                    </p>
-                  </div>
-                  <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-black">Available</span>
-                </div>
-              </div>
-
-              {/* secondary portrait */}
-              <div className="lp-float-delay absolute bottom-0 right-[10%] h-[44%] w-[42%] overflow-hidden rounded-3xl border-4 border-[var(--night)] shadow-2xl">
-                <Image
-                  src="/landing/electrician.jpg"
-                  alt="Verified electrician on Staff Guru"
-                  fill
-                  sizes="220px"
-                  className="object-cover object-top"
-                />
-              </div>
-
-              {/* floating: hire request card */}
-              <div className="lp-float absolute right-[-4px] top-[2%] w-[230px] rounded-2xl border border-white/10 bg-white/[0.07] p-4 shadow-2xl backdrop-blur-xl sm:right-[-20px] sm:top-[12%]">
-                <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/60 [font-family:var(--font-dm-mono)]">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[var(--ng-bright)]" /> New hire request
-                </div>
-                <p className="mt-2 font-bold [font-family:var(--font-plus-jakarta-sans)]">Bridal tailor, 2 weeks</p>
-                <div className="mt-3 flex items-center justify-between">
-                  <span className="text-lg font-bold text-[var(--ng-bright)] [font-family:var(--font-plus-jakarta-sans)]">
-                    ₦180,000
-                  </span>
-                  <span className="rounded-full bg-[var(--ng)] px-2.5 py-1 text-[10px] font-bold">Match 96%</span>
-                </div>
-              </div>
-
-              {/* floating: verified chip */}
-              <div className="lp-float absolute bottom-[35%] left-[-4px] flex items-center gap-3 rounded-2xl bg-white p-3 pr-5 text-black shadow-2xl sm:left-[-20px] sm:bottom-[25%]">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--ng)] text-white">
-                  <ShieldCheck size={20} />
-                </span>
-                <div>
-                  <p className="text-sm font-bold">ID &amp; skills verified</p>
-                  <p className="text-xs text-black/50">Background checked</p>
-                </div>
-              </div>
+            {/* Dynamic UI Illustration: Nigeria Spatial Map */}
+            {/* On mobile: Ambient watermark positioned directly behind the hero text with subtle opacity */}
+            {/* On desktop (lg): Dedicated right column at 100% interactive opacity */}
+            <div className="absolute inset-0 flex items-center justify-center opacity-25 pointer-events-none scale-105 sm:scale-100 lg:static lg:inset-auto lg:opacity-100 lg:pointer-events-auto lg:justify-end lg:mt-0 z-0 w-full h-full">
+              <HeroMapGraphic />
             </div>
           </div>
 
           {/* Stats bar */}
-          <div className="relative border-t border-white/[0.07]">
-            <dl className="mx-auto grid max-w-7xl grid-cols-2 divide-white/[0.07] px-5 lg:grid-cols-4 lg:divide-x lg:px-8">
+          <div className="relative border-t border-black/[0.05]">
+            <dl className="mx-auto grid max-w-7xl grid-cols-2 divide-black/[0.05] px-5 lg:grid-cols-4 lg:divide-x lg:px-8">
               {[
                 { k: "Verified professionals", v: "10,000+" },
                 { k: "Skill categories", v: "30+" },
-                { k: "Cities covered", v: "Lagos Only" },
+                { k: "Cities covered", v: "36 + FCT" },
                 { k: "Faster hiring", v: "70%" },
               ].map((s, i) => (
                 <div key={s.k} className={`py-8 ${i % 2 === 1 ? "pl-6" : ""} lg:px-8 lg:first:pl-0`}>
-                  <dd className="text-3xl font-bold tracking-tight [font-family:var(--font-plus-jakarta-sans)] sm:text-4xl">
+                  <dd className="text-3xl font-bold tracking-tight text-[var(--ink)] [font-family:var(--font-bricolage)] sm:text-4xl">
                     {s.v}
                   </dd>
-                  <dt className="mt-1 text-xs font-medium uppercase tracking-[0.14em] text-white/45 [font-family:var(--font-dm-mono)]">
+                  <dt className="mt-1 text-xs font-medium uppercase tracking-[0.14em] text-[var(--ink)] opacity-50 [font-family:var(--font-dm-sans)]">
                     {s.k}
                   </dt>
                 </div>
@@ -258,7 +167,7 @@ export default async function LandingPage() {
             {[...marquee, ...marquee].map((m, i) => (
               <span
                 key={i}
-                className="flex items-center gap-8 whitespace-nowrap px-4 text-2xl font-bold tracking-tight [font-family:var(--font-plus-jakarta-sans)] sm:text-3xl"
+                className="flex items-center gap-8 whitespace-nowrap px-4 text-2xl font-bold tracking-tight [font-family:var(--font-inter)] sm:text-3xl"
               >
                 {m}
                 <span className="text-white/40">✦</span>
@@ -268,14 +177,17 @@ export default async function LandingPage() {
         </section>
 
         {/* ================= TWO SIDES ================= */}
-        <section className="bg-white py-24 sm:py-32">
+        <section className="relative overflow-hidden bg-white py-24 sm:py-32">
+          {/* Subtle background decoration */}
+          <div className="absolute left-1/2 top-0 h-px w-full max-w-7xl -translate-x-1/2 bg-gradient-to-r from-transparent via-black/10 to-transparent" />
+
           <div className="mx-auto max-w-7xl px-5 lg:px-8">
             <div className="flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-end">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--ng)] [font-family:var(--font-dm-mono)]">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-black">
                   One platform · Two sides
                 </p>
-                <h2 className="mt-4 max-w-2xl text-4xl font-bold leading-[1.05] tracking-[-0.035em] [font-family:var(--font-plus-jakarta-sans)] sm:text-[56px]">
+                <h2 className="mt-6 max-w-2xl text-4xl font-bold leading-[1.05] tracking-[-0.035em] [font-family:var(--font-inter)] sm:text-[56px]">
                   Built for the people who hire — and the people who deliver.
                 </h2>
               </div>
@@ -284,191 +196,259 @@ export default async function LandingPage() {
               </p>
             </div>
 
-            <div className="mt-16 grid grid-cols-1 gap-5 lg:grid-cols-2">
+            {/* Dynamic Flex Columns */}
+            <div className="mt-16 flex flex-col gap-6 lg:h-[680px] lg:flex-row">
               {/* Employers */}
-              <article className="group relative overflow-hidden rounded-[32px] border border-black/[0.08] bg-[#f4f7f5] p-8 transition-shadow duration-500 hover:shadow-[0_30px_80px_-30px_rgba(0,135,81,0.45)] sm:p-10">
-                <div className="flex items-center justify-between">
-                  <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-[var(--ng)] shadow-sm">
-                    For employers
-                  </span>
-                  <Briefcase className="text-black/20" size={28} />
+              <article className="group/side relative flex flex-1 flex-col overflow-hidden rounded-[40px] bg-[#f8faf9] outline outline-1 outline-black/[0.04] transition-[flex] duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:flex-[1.25] lg:flex-row">
+
+                {/* Content */}
+                <div className="relative z-10 flex flex-1 flex-col p-8 sm:p-12 lg:w-1/2 lg:min-w-[340px]">
+                  <div className="flex items-center justify-between">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-black/5 bg-white px-3 py-1.5 text-xs font-bold text-[var(--ng)] shadow-sm">
+                      <Briefcase size={14} /> For employers
+                    </span>
+                  </div>
+
+                  <h3 className="mt-8 text-3xl font-bold tracking-tight text-black [font-family:var(--font-inter)] sm:text-4xl xl:text-5xl xl:leading-[1.1]">
+                    Hire with <br className="hidden xl:block" /> confidence.
+                  </h3>
+
+                  <ul className="mt-8 flex-1 space-y-6">
+                    {[
+                      { icon: Search, t: "Post a job or browse", d: "Filter by skill, state and budget." },
+                      { icon: ShieldCheck, t: "Only verified talent", d: "ID, references and skills checked." },
+                      { icon: MessageSquare, t: "Interview in-app", d: "Chat, shortlist and hire in one place." },
+                    ].map(({ icon: Icon, t, d }) => (
+                      <li key={t} className="group/item flex items-start gap-4">
+                        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-black/[0.04] transition-all duration-300 group-hover/item:-translate-y-1 group-hover/item:shadow-md group-hover/item:ring-[var(--ng)]/20 text-black">
+                          <Icon size={20} className="transition-colors group-hover/item:text-[var(--ng)]" />
+                        </span>
+                        <div className="pt-1">
+                          <p className="font-bold text-black">{t}</p>
+                          <p className="mt-1 max-w-[200px] text-sm leading-relaxed text-black/55 xl:max-w-none">{d}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="mt-8">
+                    <Link
+                      href={dashboardLink ?? "/signup?role=EMPLOYER"}
+                      className="inline-flex h-14 items-center gap-2 rounded-full bg-black px-8 text-sm font-bold text-white transition-all hover:scale-[1.02] hover:bg-[var(--ng)] shadow-xl shadow-black/10"
+                    >
+                      Start hiring
+                      <ArrowRight size={16} />
+                    </Link>
+                  </div>
                 </div>
-                <h3 className="mt-8 text-3xl font-bold tracking-tight [font-family:var(--font-plus-jakarta-sans)] sm:text-4xl">
-                  Hire with confidence.
-                </h3>
-                <div className="relative mt-8 aspect-[16/10] overflow-hidden rounded-2xl">
+
+                {/* Visual */}
+                <div className="relative min-h-[360px] overflow-hidden lg:h-full lg:w-1/2">
+                  <div className="absolute inset-0 bg-[var(--ng)]/5 transition-opacity duration-500 group-hover/side:opacity-0" />
                   <Image
                     src="/landing/employer.jpg"
                     alt="Employer reviewing candidates on Staff Guru"
                     fill
-                    sizes="(max-width: 1024px) 90vw, 560px"
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    className="object-cover object-[center_30%] transition-all duration-[1.5s] ease-[cubic-bezier(0.32,0.72,0,1)] group-hover/side:scale-105"
                   />
-                  <div className="absolute bottom-4 left-4 flex items-center gap-2 rounded-full bg-white/95 px-3 py-1.5 text-xs font-bold shadow-lg backdrop-blur">
-                    <span className="h-2 w-2 rounded-full bg-[var(--ng)]" /> 12 matched candidates
+
+                  {/* Gradient fades for text legibility on smaller screens */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-white via-white/40 to-transparent lg:hidden" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#f8faf9] via-white/40 to-transparent hidden lg:block opacity-60" />
+
+                  {/* Floating elements */}
+                  <div className="absolute bottom-8 left-8 flex w-max items-center gap-2 whitespace-nowrap rounded-full bg-white/95 px-4 py-3 text-xs font-bold text-black shadow-[0_20px_40px_-10px_rgba(0,0,0,0.2)] backdrop-blur transition-all duration-700 ease-out group-hover/side:-translate-y-2 lg:bottom-12 lg:left-0 lg:-translate-x-4 lg:group-hover/side:-translate-x-0">
+                    12 matched candidates
                   </div>
                 </div>
-                <ul className="mt-8 space-y-4">
-                  {[
-                    { icon: Search, t: "Post a job or browse", d: "Filter by skill, state and budget." },
-                    { icon: ShieldCheck, t: "Only verified talent", d: "ID, references and skills checked." },
-                    { icon: MessageSquare, t: "Interview in-app", d: "Chat, shortlist and hire in one place." },
-                  ].map(({ icon: Icon, t, d }) => (
-                    <li key={t} className="flex gap-4">
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--ng)] text-white">
-                        <Icon size={18} />
-                      </span>
-                      <div>
-                        <p className="font-bold">{t}</p>
-                        <p className="text-sm text-black/55">{d}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href={dashboardLink ?? "/signup?role=EMPLOYER"}
-                  className="lp-shine group/btn mt-10 inline-flex h-12 items-center gap-2 rounded-full bg-black px-6 text-sm font-bold text-white transition-all hover:bg-[var(--ng)]"
-                >
-                  Start hiring
-                  <ArrowRight size={16} className="transition-transform group-hover/btn:translate-x-1" />
-                </Link>
               </article>
 
               {/* Professionals */}
-              <article className="group relative overflow-hidden rounded-[32px] bg-black p-8 text-white transition-shadow duration-500 hover:shadow-[0_30px_80px_-30px_rgba(0,135,81,0.7)] sm:p-10">
-                <div className="lp-glow -right-20 -top-20 h-64 w-64 bg-[var(--ng)]/40" />
-                <div className="relative flex items-center justify-between">
-                  <span className="rounded-full bg-[var(--ng)] px-3 py-1 text-xs font-bold">For professionals</span>
-                  <Wallet className="text-white/20" size={28} />
+              <article className="group/side relative flex flex-1 flex-col overflow-hidden rounded-[40px] bg-[#faf9f5] border border-black/5 transition-[flex] duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:flex-[1.25] lg:flex-row-reverse">
+
+                {/* Content */}
+                <div className="relative z-10 flex flex-1 flex-col p-8 sm:p-12 lg:w-1/2 lg:min-w-[340px]">
+                  <div className="flex items-center justify-between">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-[var(--ng)]/20 bg-[var(--ng)]/10 px-3 py-1.5 text-xs font-bold text-[var(--ng)]">
+                      <Wallet size={14} /> For professionals
+                    </span>
+                  </div>
+
+                  <h3 className="mt-8 text-3xl font-bold tracking-tight text-[var(--ink)] [font-family:var(--font-bricolage)] sm:text-4xl xl:text-5xl xl:leading-[1.1]">
+                    Get paid for <br className="hidden xl:block" /> your craft.
+                  </h3>
+
+                  <ul className="mt-8 flex-1 space-y-6">
+                    {[
+                      { icon: BadgeCheck, t: "Get verified once", d: "Stand out with a trusted badge." },
+                      { icon: Briefcase, t: "Jobs that match you", d: "Smart matching by skill and location." },
+                      { icon: Star, t: "Build your reputation", d: "Reviews that follow you everywhere." },
+                    ].map(({ icon: Icon, t, d }) => (
+                      <li key={t} className="group/item flex items-start gap-4">
+                        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-[var(--ink)] shadow-sm ring-1 ring-black/5 transition-all duration-300 group-hover/item:-translate-y-1 group-hover/item:bg-[var(--ng)] group-hover/item:text-white group-hover/item:ring-[var(--ng)]">
+                          <Icon size={20} className="transition-colors group-hover/item:text-white" />
+                        </span>
+                        <div className="pt-1">
+                          <p className="font-bold text-[var(--ink)]">{t}</p>
+                          <p className="mt-1 max-w-[200px] text-sm leading-relaxed text-[var(--ink)] opacity-50 xl:max-w-none">{d}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="mt-8">
+                    <Link
+                      href={dashboardLink ?? "/signup?role=WORKER"}
+                      className="inline-flex h-14 items-center gap-2 rounded-full bg-white px-8 text-sm font-bold text-[var(--ink)] border border-black/5 transition-all hover:scale-[1.02] hover:bg-[var(--ng)] hover:text-white hover:border-transparent shadow-sm"
+                    >
+                      Find work
+                      <ArrowRight size={16} />
+                    </Link>
+                  </div>
                 </div>
-                <h3 className="relative mt-8 text-3xl font-bold tracking-tight [font-family:var(--font-plus-jakarta-sans)] sm:text-4xl">
-                  Get paid for your craft.
-                </h3>
-                <div className="relative mt-8 aspect-[16/10] overflow-hidden rounded-2xl">
+
+                {/* Visual */}
+                <div className="relative min-h-[360px] overflow-hidden lg:h-full lg:w-1/2">
+                  <div className="absolute inset-0 bg-black/20 transition-opacity duration-500 group-hover/side:opacity-0 z-10" />
                   <Image
                     src="/landing/electrician.jpg"
-                    alt="Professional electrician finding work on Staff Guru"
+                    alt="Professional finding work on Staff Guru"
                     fill
-                    sizes="(max-width: 1024px) 90vw, 560px"
-                    className="object-cover object-[center_20%] transition-transform duration-700 group-hover:scale-105"
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    className="object-cover object-[center_10%] transition-all duration-[1.5s] ease-[cubic-bezier(0.32,0.72,0,1)] group-hover/side:scale-105"
                   />
-                  <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between rounded-2xl border border-white/10 bg-black/60 p-3 backdrop-blur-md">
+
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#faf9f5] via-transparent to-transparent opacity-90 lg:hidden z-10" />
+                  <div className="absolute inset-0 bg-gradient-to-l from-[#faf9f5] via-white/20 to-transparent hidden lg:block opacity-90 z-10" />
+
+                  {/* Floating elements */}
+                  <div className="absolute bottom-8 right-8 flex w-max items-center justify-between gap-6 rounded-2xl border border-black/5 bg-white/95 p-4 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] backdrop-blur-md transition-all duration-700 ease-out group-hover/side:-translate-y-2 lg:bottom-12 lg:right-0 lg:translate-x-4 lg:group-hover/side:translate-x-0 z-20">
                     <div>
-                      <p className="text-[10px] uppercase tracking-[0.14em] text-white/60 [font-family:var(--font-dm-mono)]">
+                      <p className="text-[10px] uppercase tracking-[0.14em] text-[var(--ink)] opacity-50">
                         This month
                       </p>
-                      <p className="text-lg font-bold [font-family:var(--font-plus-jakarta-sans)]">₦420,500 earned</p>
+                      <p className="mt-1 text-sm font-bold text-[var(--ink)] sm:text-base">₦420,500 earned</p>
                     </div>
-                    <span className="rounded-full bg-[var(--ng-bright)] px-2.5 py-1 text-xs font-bold text-black">
-                      +18%
+                    <span className="flex items-center gap-1.5 rounded-full bg-[var(--ng)] px-3 py-1.5 text-xs font-bold text-white">
+                      <LineChart size={14} /> +18%
                     </span>
                   </div>
                 </div>
-                <ul className="relative mt-8 space-y-4">
-                  {[
-                    { icon: BadgeCheck, t: "Get verified once", d: "Stand out with a trusted badge." },
-                    { icon: Briefcase, t: "Jobs that match you", d: "Smart matching by skill and location." },
-                    { icon: Star, t: "Build your reputation", d: "Reviews that follow you everywhere." },
-                  ].map(({ icon: Icon, t, d }) => (
-                    <li key={t} className="flex gap-4">
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-black">
-                        <Icon size={18} />
-                      </span>
-                      <div>
-                        <p className="font-bold">{t}</p>
-                        <p className="text-sm text-white/55">{d}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href={dashboardLink ?? "/signup?role=WORKER"}
-                  className="lp-shine group/btn relative mt-10 inline-flex h-12 items-center gap-2 rounded-full bg-[var(--ng)] px-6 text-sm font-bold text-white transition-all hover:bg-[var(--ng-bright)]"
-                >
-                  Find work
-                  <ArrowRight size={16} className="transition-transform group-hover/btn:translate-x-1" />
-                </Link>
               </article>
             </div>
           </div>
         </section>
 
-        {/* ================= HOW IT WORKS (bento) ================= */}
-        <section className="bg-[#f4f7f5] py-24 sm:py-32">
-          <div className="mx-auto max-w-7xl px-5 lg:px-8">
-            <div className="mx-auto max-w-2xl text-center">
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--ng)] [font-family:var(--font-dm-mono)]">
-                How it works
-              </p>
-              <h2 className="mt-4 text-4xl font-bold tracking-[-0.035em] [font-family:var(--font-plus-jakarta-sans)] sm:text-[56px] sm:leading-[1.05]">
-                From search to signed, in days — not weeks.
-              </h2>
-            </div>
+        {/* ================= HOW IT WORKS ================= */}
+        <section className="bg-[#f4f7f5] py-24 sm:py-32 relative">
+          <div className="mx-auto max-w-7xl px-5 lg:px-8 relative z-10">
+            <div className="flex flex-col lg:flex-row gap-16 lg:gap-24">
 
-            <div className="mt-16 grid grid-cols-1 gap-5 lg:grid-cols-2">
-              {/* 01 — tall left card */}
-              <div className="group relative flex min-h-[420px] flex-col justify-between overflow-hidden rounded-[28px] bg-black p-8 text-white shadow-xl sm:p-10">
-                <div className="lp-grid opacity-60" />
-                <div className="lp-glow -bottom-24 -left-10 h-72 w-72 bg-[var(--ng)]/50" />
-                <div className="relative">
-                  <span className="text-6xl font-medium leading-none text-white/20 [font-family:var(--font-plus-jakarta-sans)]">01</span>
-                  <h3 className="mt-6 text-3xl font-semibold leading-tight [font-family:var(--font-plus-jakarta-sans)] sm:text-4xl">
-                    Post a job or <br />
-                    browse talent
-                  </h3>
-                </div>
-                <div className="relative mt-12 flex items-end justify-between gap-4">
-                  <p className="max-w-[260px] text-sm leading-relaxed text-white/70">
-                    Describe the role you need filled, or search our talent pool directly by skill, role, and location.
-                  </p>
-                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/10 text-white transition-all duration-300 group-hover:bg-[var(--ng)] group-hover:rotate-45">
-                    <ArrowUpRight size={22} />
+              {/* Sticky Intro */}
+              <div className="lg:w-5/12">
+                <div className="sticky top-32">
+                  <span className="text-base font-semibold text-[var(--ink)]">
+                    How it works
                   </span>
+                  <h2 className="mt-6 text-4xl font-bold tracking-[-0.03em] text-[var(--ink)] [font-family:var(--font-inter)] sm:text-6xl sm:leading-[1.05] text-balance">
+                    Hire in days, not weeks.
+                  </h2>
+                  <p className="mt-8 text-lg text-[var(--ink-soft)] leading-relaxed max-w-md">
+                    Search verified workers, message them in the app, agree terms, and pay as each milestone is completed.
+                  </p>
                 </div>
               </div>
 
-              {/* Right column */}
-              <div className="flex flex-col gap-5">
-                {/* 02 — full width */}
-                <div className="flex flex-col justify-between rounded-[28px] border border-black/[0.06] bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-                  <div className="flex items-start justify-between">
-                    <span className="text-5xl font-medium leading-none text-black/15 [font-family:var(--font-plus-jakarta-sans)]">02</span>
-                    <BadgeCheck className="text-[var(--ng)]" size={26} />
-                  </div>
-                  <div>
-                    <h3 className="mt-6 text-2xl font-semibold [font-family:var(--font-plus-jakarta-sans)]">Review real profiles</h3>
-                    <p className="mt-3 max-w-sm text-sm leading-relaxed text-black/55">
-                      See verified skills, portfolios, work history, and rates up front—no back and forth required.
-                    </p>
-                  </div>
-                </div>
+              {/* Scrolling Steps */}
+              <div className="lg:w-7/12 relative">
+                {/* Vertical Line */}
+                <div className="absolute left-[39px] top-8 bottom-8 w-px bg-gradient-to-b from-transparent via-black/10 to-transparent hidden sm:block" />
 
-                {/* 03 + 04 — two cards */}
-                <div className="grid flex-1 grid-cols-1 gap-5 sm:grid-cols-2">
-                  <div className="flex flex-col justify-between rounded-[28px] bg-[var(--ng)] p-8 text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_-15px_var(--ng)]">
-                    <div className="flex items-start justify-between">
-                      <span className="text-5xl font-medium leading-none text-white/30 [font-family:var(--font-plus-jakarta-sans)]">03</span>
-                      <MessageSquare size={22} className="text-white/70" />
+                <div className="flex flex-col gap-0 sm:gap-20">
+                  {[
+                    {
+                      num: "01",
+                      icon: Search,
+                      title: "Post a job or browse talent",
+                      desc: "Describe the role you need filled, or search our talent pool directly by skill, role, and location.",
+                      cardStyle: "bg-white text-black shadow-xl shadow-black/[0.03]",
+                      iconStyle: "bg-white text-black border border-black/5 shadow-sm",
+                      numColor: "text-black/10 group-hover:text-black/20"
+                    },
+                    {
+                      num: "02",
+                      icon: BadgeCheck,
+                      title: "Review real profiles",
+                      desc: "See verified skills, portfolios, work history, and rates up front—no back and forth required.",
+                      cardStyle: "bg-white text-[var(--ink)] shadow-xl shadow-black/[0.03]",
+                      iconStyle: "bg-white text-[var(--ink)] border border-black/5 shadow-sm",
+                      numColor: "text-black/10 group-hover:text-black/20"
+                    },
+                    {
+                      num: "03",
+                      icon: MessageSquare,
+                      title: "Message & interview",
+                      desc: "Reach out directly through the platform and set up interviews effortlessly.",
+                      cardStyle: "bg-[#f8faf9] text-[var(--ink)] border border-black/5 shadow-sm",
+                      iconStyle: "bg-white text-[var(--ink)] border border-black/5 shadow-sm",
+                      numColor: "text-black/10 group-hover:text-black/20"
+                    },
+                    {
+                      num: "04",
+                      icon: Handshake,
+                      title: "Hire & manage",
+                      desc: "Make an offer, onboard your new hire, and manage your team all in one place.",
+                      cardStyle: "bg-[#f4f7f5] sm:bg-transparent text-black border-2 border-dashed border-black/15 hover:border-[var(--ng)]/50 hover:bg-white",
+                      iconStyle: "bg-[#f4f7f5] sm:bg-transparent text-black border-2 border-dashed border-black/15 group-hover:border-[var(--ng)]/50 group-hover:bg-white",
+                      numColor: "text-black/10 group-hover:text-black/20"
+                    }
+                  ].map((step, i, arr) => (
+                    <div
+                      key={step.num}
+                      className={`group sticky top-[15vh] sm:relative sm:top-0 flex flex-col sm:flex-row gap-6 sm:gap-12 items-start transition-transform duration-500 ${i === arr.length - 1 ? '' : 'mb-[15vh] sm:mb-0'}`}
+                      style={{ zIndex: i + 10 }}
+                    >
+
+                      {/* Node/Number (Desktop only) */}
+                      <div className="relative z-10 hidden sm:flex flex-col items-center gap-6 shrink-0">
+                        <div className={`flex h-20 w-20 items-center justify-center rounded-3xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 ${step.iconStyle}`}>
+                          <step.icon size={32} strokeWidth={1.5} />
+                        </div>
+                        <span className={`text-4xl font-bold [font-family:var(--font-inter)] transition-colors -rotate-90 mt-8 ${step.numColor}`}>
+                          {step.num}
+                        </span>
+                      </div>
+
+                      {/* Card Content */}
+                      <div className={`flex-1 w-full rounded-[32px] sm:rounded-[40px] p-8 sm:p-12 transition-all duration-500 group-hover:-translate-y-2 ${step.cardStyle} shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] sm:shadow-none`}>
+
+                        {/* Node/Number (Mobile only) */}
+                        <div className="flex sm:hidden items-center justify-between mb-8">
+                          <div className={`flex h-16 w-16 items-center justify-center rounded-[20px] ${step.iconStyle} shadow-sm`}>
+                            <step.icon size={28} strokeWidth={1.5} />
+                          </div>
+                          <span className={`text-4xl font-bold [font-family:var(--font-inter)] ${step.cardStyle.includes('text-white') ? 'text-white/20' : 'text-black/10'}`}>
+                            {step.num}
+                          </span>
+                        </div>
+
+                        <h3 className="text-2xl sm:text-3xl font-bold [font-family:var(--font-inter)]">
+                          {step.title}
+                        </h3>
+                        <p className={`mt-4 text-base sm:text-lg leading-relaxed ${step.cardStyle.includes('text-white') ? 'text-white/70' : 'text-black/60'}`}>
+                          {step.desc}
+                        </p>
+
+                        {/* Micro-interaction UI element */}
+                        <div className="mt-8 h-0 opacity-0 overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:h-12 group-hover:opacity-100 flex items-center gap-3">
+                          <span className={`flex h-12 w-12 items-center justify-center rounded-full ${step.cardStyle.includes('text-white') ? 'bg-white/10' : 'bg-black/5'}`}>
+                            <ArrowRight size={18} className={step.cardStyle.includes('text-white') ? 'text-white' : 'text-black'} />
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="mt-6 text-2xl font-semibold [font-family:var(--font-plus-jakarta-sans)]">Message &amp; interview</h3>
-                      <p className="mt-3 text-sm leading-relaxed text-white/85">
-                        Reach out directly through the platform and set up interviews.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex flex-col justify-between rounded-[28px] bg-[var(--night)] p-8 text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
-                    <div className="flex items-start justify-between">
-                      <span className="text-5xl font-medium leading-none text-[var(--ng-bright)]/40 [font-family:var(--font-plus-jakarta-sans)]">04</span>
-                      <Handshake size={22} className="text-[var(--ng-bright)]" />
-                    </div>
-                    <div>
-                      <h3 className="mt-6 text-2xl font-semibold [font-family:var(--font-plus-jakarta-sans)]">Hire &amp; manage</h3>
-                      <p className="mt-3 text-sm leading-relaxed text-white/65">
-                        Make an offer, onboard your new hire, and manage your team.
-                      </p>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -476,156 +456,109 @@ export default async function LandingPage() {
         </section>
 
         {/* ================= VERIFICATION ================= */}
-        <section className="relative overflow-hidden bg-[var(--night)] py-24 text-white sm:py-32">
-          <div className="lp-glow left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 bg-[var(--ng)]/25" />
-          <div className="lp-grain" />
-          <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-16 px-5 lg:grid-cols-2 lg:px-8">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--ng-bright)] [font-family:var(--font-dm-mono)]">
-                Trust &amp; safety
-              </p>
-              <h2 className="mt-4 text-4xl font-bold leading-[1.05] tracking-[-0.035em] [font-family:var(--font-plus-jakarta-sans)] sm:text-[56px]">
-                Every badge is <span className="lp-text-gradient">earned.</span>
+        <section className="relative bg-white py-24 sm:py-32">
+          <div className="relative mx-auto max-w-7xl px-5 lg:px-8 z-10">
+            <div className="max-w-lg">
+              <h2 className="text-4xl font-bold leading-tight tracking-tight text-[var(--ink)] sm:text-5xl">
+                Every badge is earned.
               </h2>
-              <p className="mt-6 max-w-lg text-lg leading-relaxed text-white/60">
-                Every professional on Staff Guru is screened before they appear in search. Employers get an extra
-                layer of assessment for complete peace of mind.
+              <p className="mt-4 text-lg leading-relaxed text-gray-700">
+                We don't just take their word for it. Every professional on StaffGuru goes through a rigorous screening process before they ever appear in your search results.
               </p>
-              <ul className="mt-10 space-y-4">
-                {[
-                  "NIN identity verification & background checks",
-                  "Verified work history and portfolios",
-                  "Peer reviews and employer ratings",
-                  "Secure, in-platform messaging",
-                ].map((item) => (
-                  <li key={item} className="flex items-center gap-3">
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--ng)]">
-                      <Check size={15} strokeWidth={3} />
-                    </span>
-                    <span className="font-semibold text-white/85">{item}</span>
-                  </li>
-                ))}
-              </ul>
             </div>
 
-            {/* Profile card mock */}
-            <div className="relative mx-auto w-full max-w-md">
-              <div className="lp-card-glow lp-float relative rounded-[28px] bg-white/[0.05] p-6 shadow-2xl backdrop-blur-xl">
-                <div className="flex items-center gap-4">
-                  <span className="relative h-16 w-16 overflow-hidden rounded-2xl">
-                    <Image src="/landing/electrician.jpg" alt="" fill sizes="64px" className="object-cover object-top" />
-                  </span>
-                  <div className="flex-1">
-                    <p className="flex items-center gap-1.5 text-lg font-bold">
-                      Tunde Adebayo <BadgeCheck size={18} className="text-[var(--ng-bright)]" />
-                    </p>
-                    <p className="text-sm text-white/55">Licensed Electrician · Lagos</p>
+            <div className="mt-12 grid grid-cols-1 gap-16 lg:grid-cols-2 lg:items-start">
+              {/* Left: Content Steps */}
+              <div className="flex flex-col max-w-lg">
+                <div className="flex gap-4 pb-6 border-b border-black/10">
+                  <span className="w-10 shrink-0 text-sm font-bold text-gray-500">01</span>
+                  <div>
+                    <h3 className="font-bold text-[var(--ink)]">Identity Verification</h3>
+                    <p className="mt-1 text-sm text-gray-600 leading-relaxed">Government NIN is checked against the NIMC database to ensure every user is exactly who they claim to be.</p>
                   </div>
                 </div>
-                <div className="mt-6 grid grid-cols-3 gap-3">
-                  {[
-                    { k: "Rating", v: "4.9" },
-                    { k: "Jobs", v: "128" },
-                    { k: "Years", v: "9" },
-                  ].map((s) => (
-                    <div key={s.k} className="rounded-2xl border border-white/[0.08] bg-white/[0.04] p-3 text-center">
-                      <p className="text-xl font-bold [font-family:var(--font-plus-jakarta-sans)]">{s.v}</p>
-                      <p className="text-[10px] uppercase tracking-[0.14em] text-white/45 [font-family:var(--font-dm-mono)]">{s.k}</p>
-                    </div>
-                  ))}
+                <div className="flex gap-4 py-6 border-b border-black/10">
+                  <span className="w-10 shrink-0 text-sm font-bold text-gray-500">02</span>
+                  <div>
+                    <h3 className="font-bold text-[var(--ink)]">Skill Assessment</h3>
+                    <p className="mt-1 text-sm text-gray-600 leading-relaxed">Trade certificates, licenses, and past portfolios are manually reviewed to verify professional capabilities.</p>
+                  </div>
                 </div>
-                <div className="mt-6 space-y-3">
-                  {[
-                    { k: "Identity (NIN)", s: "Verified" },
-                    { k: "Trade certificate", s: "Verified" },
-                    { k: "References", s: "3 confirmed" },
-                  ].map((r) => (
-                    <div key={r.k} className="flex items-center justify-between rounded-xl bg-white/[0.04] px-4 py-3 text-sm">
-                      <span className="text-white/70">{r.k}</span>
-                      <span className="flex items-center gap-1.5 font-bold text-[var(--ng-bright)]">
-                        <Check size={14} strokeWidth={3} /> {r.s}
-                      </span>
-                    </div>
-                  ))}
+                <div className="flex gap-4 py-6 border-b border-black/10">
+                  <span className="w-10 shrink-0 text-sm font-bold text-gray-500">03</span>
+                  <div>
+                    <h3 className="font-bold text-[var(--ink)]">Peer Reviews</h3>
+                    <p className="mt-1 text-sm text-gray-600 leading-relaxed">Post-job ratings are securely collected only from verified employers who have completed work with the talent.</p>
+                  </div>
                 </div>
-                <div className="mt-6 flex gap-3">
-                  <span className="flex h-11 flex-1 items-center justify-center rounded-full bg-[var(--ng)] text-sm font-bold">
-                    Send hire request
-                  </span>
-                  <span className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15">
-                    <MessageSquare size={17} />
-                  </span>
+                <div className="flex gap-4 pt-6">
+                  <span className="w-10 shrink-0 text-sm font-bold text-gray-500">04</span>
+                  <div>
+                    <h3 className="font-bold text-[var(--ink)]">Secure Platform</h3>
+                    <p className="mt-1 text-sm text-gray-600 leading-relaxed">In-app messaging and milestone-based payments protect both parties throughout the entire engagement.</p>
+                  </div>
                 </div>
               </div>
-              <div className="lp-float-delay absolute -bottom-6 -left-6 flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-bold text-black shadow-2xl">
-                <ShieldCheck size={18} className="text-[var(--ng)]" /> Staff Guru Verified
+
+              {/* Right: Realistic Worker Profile Card */}
+              <div className="relative mx-auto w-full max-w-md lg:mx-0 lg:pl-10 self-start lg:sticky lg:top-[96px]">
+                <div className="w-full rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="relative h-14 w-14 overflow-hidden rounded-full bg-gray-100">
+                        <Image
+                          src="/landing/categories/fashion.jpg"
+                          alt="Adaeze Okafor"
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-[var(--ink)]">Adaeze Okafor</h4>
+                        <p className="text-sm text-gray-600">Fashion Designer</p>
+                        <p className="text-xs text-gray-500 mt-0.5">Yaba, Lagos</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Star size={14} className="fill-[var(--ng)] text-[var(--ng)]" />
+                      <span className="text-sm font-bold text-[var(--ink)]">4.9</span>
+                      <span className="text-xs text-gray-500">(120)</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 flex flex-wrap gap-2">
+                    <span className="inline-flex items-center gap-1.5 rounded-md bg-[var(--ng)]/10 px-2.5 py-1 text-xs font-semibold text-[var(--ng)]">
+                      <ShieldCheck size={14} />
+                      NIN Verified
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 rounded-md bg-[var(--ng)]/10 px-2.5 py-1 text-xs font-semibold text-[var(--ng)]">
+                      <BadgeCheck size={14} />
+                      Skills Verified
+                    </span>
+                  </div>
+
+                  <div className="mt-6 flex items-center justify-between border-t border-black/5 pt-4 text-xs font-medium text-gray-500">
+                    <span>14 jobs completed</span>
+                    <span>Member since 2024</span>
+                  </div>
+                </div>
               </div>
             </div>
+
           </div>
         </section>
 
-        {/* ================= CATEGORIES ================= */}
-        <section className="bg-white py-24 sm:py-32">
-          <div className="mx-auto max-w-7xl px-5 lg:px-8">
-            <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--ng)] [font-family:var(--font-dm-mono)]">
-                  Categories
-                </p>
-                <h2 className="mt-4 text-4xl font-bold tracking-[-0.035em] [font-family:var(--font-plus-jakarta-sans)] sm:text-[56px] sm:leading-[1.05]">
-                  Every skill. Every state.
-                </h2>
-              </div>
-              <Link
-                href="/hire-talent"
-                className="group inline-flex items-center gap-2 text-sm font-bold text-black transition-colors hover:text-[var(--ng)]"
-              >
-                Browse all categories
-                <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-              </Link>
-            </div>
-
-            <div className="mt-14 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-              {categories.map(({ name, icon: Icon, count, img }) => (
-                <Link
-                  key={name}
-                  href="/hire-talent"
-                  className="group relative flex aspect-[4/5] flex-col justify-between overflow-hidden rounded-3xl bg-black p-4 text-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_25px_50px_-15px_rgba(0,135,81,0.55)] sm:p-5"
-                >
-                  <Image
-                    src={`/landing/categories/${img}.jpg`}
-                    alt={`${name} professionals in Nigeria`}
-                    fill
-                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 240px"
-                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/5" />
-                  <div className="absolute inset-0 bg-[var(--ng)]/0 mix-blend-multiply transition-colors duration-500 group-hover:bg-[var(--ng)]/35" />
-                  <div className="relative flex items-start justify-between">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/20 bg-white/15 backdrop-blur-md transition-colors duration-300 group-hover:border-transparent group-hover:bg-[var(--ng)]">
-                      <Icon size={18} />
-                    </span>
-                    <span className="flex h-8 w-8 translate-y-1 items-center justify-center rounded-full bg-white text-black opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-                      <ArrowUpRight size={16} />
-                    </span>
-                  </div>
-                  <div className="relative">
-                    <h3 className="text-base font-bold leading-tight [font-family:var(--font-plus-jakarta-sans)] sm:text-lg">{name}</h3>
-                    <p className="mt-1 flex items-center gap-1.5 text-xs text-white/70">
-                      <span className="h-1.5 w-1.5 rounded-full bg-[var(--ng-bright)]" />
-                      {count} verified pros
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
+        {/* ================= ALABARU ON-DEMAND ERRANDS SHOWCASE ================= */}
+        <AlabaruShowcase
+          creationFeeKobo={pricingStatus.creationFeeKobo}
+          commissionBps={pricingStatus.commissionBps}
+          minPriceKobo={pricingStatus.minPriceKobo}
+        />
 
         {/* ================= TESTIMONIALS ================= */}
         <section className="border-t border-black/[0.06] bg-[#f4f7f5] py-24 sm:py-32">
           <div className="mx-auto max-w-7xl px-5 lg:px-8">
-            <h2 className="max-w-2xl text-4xl font-bold tracking-[-0.035em] [font-family:var(--font-plus-jakarta-sans)] sm:text-[56px] sm:leading-[1.05]">
+            <h2 className="max-w-2xl text-4xl font-bold tracking-[-0.035em] [font-family:var(--font-inter)] sm:text-[56px] sm:leading-[1.05]">
               Loved on both sides of the deal.
             </h2>
             <div className="mt-14 grid grid-cols-1 gap-5 md:grid-cols-3">
@@ -654,9 +587,8 @@ export default async function LandingPage() {
               ].map((t) => (
                 <figure
                   key={t.n}
-                  className={`flex flex-col justify-between rounded-[28px] p-8 transition-transform duration-300 hover:-translate-y-1 ${
-                    t.dark ? "bg-[var(--ng)] text-white" : "border border-black/[0.06] bg-white"
-                  }`}
+                  className={`flex flex-col justify-between rounded-[28px] p-8 transition-transform duration-300 hover:-translate-y-1 ${t.dark ? "bg-[var(--ng)] text-white" : "border border-black/[0.06] bg-white"
+                    }`}
                 >
                   <div>
                     <div className={`flex gap-0.5 ${t.dark ? "text-white" : "text-[var(--ng)]"}`}>
@@ -686,10 +618,8 @@ export default async function LandingPage() {
           <div className="mx-auto max-w-7xl px-5 lg:px-8">
             <div className="relative overflow-hidden rounded-[36px] bg-[var(--ng)] px-6 py-20 text-center text-white sm:px-16 sm:py-24">
               <div className="lp-grid opacity-70" />
-              <div className="lp-glow -left-24 -top-24 h-80 w-80 bg-[var(--ng-bright)]/60" />
-              <div className="lp-glow -bottom-32 -right-10 h-96 w-96 bg-black/50" />
               <div className="relative">
-                <h2 className="mx-auto max-w-3xl text-4xl font-bold leading-[1.02] tracking-[-0.04em] [font-family:var(--font-plus-jakarta-sans)] sm:text-6xl lg:text-7xl">
+                <h2 className="mx-auto max-w-3xl text-4xl font-bold leading-[1.02] tracking-[-0.04em] [font-family:var(--font-bricolage)] sm:text-6xl lg:text-7xl">
                   Ready when you are.
                 </h2>
                 <p className="mx-auto mt-6 max-w-xl text-lg text-white/80">
@@ -698,7 +628,7 @@ export default async function LandingPage() {
                 <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
                   <Link
                     href={dashboardLink ?? "/signup?role=EMPLOYER"}
-                    className="lp-shine group inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-black px-8 text-base font-bold text-white transition-all hover:-translate-y-0.5 hover:shadow-2xl sm:w-auto"
+                    className="group inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-[var(--ink)] px-8 text-base font-bold text-white transition-all hover:-translate-y-0.5 hover:shadow-2xl sm:w-auto"
                   >
                     {session ? "Open dashboard" : "Hire talent"}
                     <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
@@ -706,7 +636,7 @@ export default async function LandingPage() {
                   {!session && (
                     <Link
                       href="/signup?role=WORKER"
-                      className="group inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-white px-8 text-base font-bold text-black transition-all hover:-translate-y-0.5 hover:shadow-2xl sm:w-auto"
+                      className="group inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-white px-8 text-base font-bold text-[var(--ink)] transition-all hover:-translate-y-0.5 hover:shadow-2xl sm:w-auto"
                     >
                       Find work
                       <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />

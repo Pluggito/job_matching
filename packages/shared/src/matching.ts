@@ -240,3 +240,61 @@ export function sortMatches(a: MatchResult, b: MatchResult, aWorker: WorkerProfi
   // Tie-breaker 3: ID string comparison for stable sorting
   return a.workerId.localeCompare(b.workerId);
 }
+
+export interface ErrandWorkerCandidate {
+  id: string;
+  openToErrands: boolean;
+  ninVerificationStatus: string;
+  hasActiveBankAccount: boolean;
+  activeErrandsCount: number;
+  errandMinPayKobo?: number | null;
+  errandPreferredStates?: string[] | null;
+  errandPreferredAreas?: string[] | null;
+  errandTypes?: string[] | null;
+}
+
+export interface ErrandOfferRequirement {
+  type: string;
+  locationState: string;
+  locationArea: string;
+  budgetKobo: number;
+}
+
+/**
+ * Validates whether a worker is eligible to receive an offer or claim an errand.
+ * Enforces all claim guards:
+ * - Opt-in to errands == true
+ * - NIN verified
+ * - Active bank account on file (replaces "bank verified")
+ * - Within active concurrency cap
+ * - Budget >= worker minimum pay preference
+ * - Errand type and location matching
+ */
+export function isWorkerEligibleForErrand(
+  worker: ErrandWorkerCandidate,
+  errand: ErrandOfferRequirement,
+  activeCap = 2
+): { eligible: boolean; reason?: string } {
+  if (!worker.openToErrands) {
+    return { eligible: false, reason: "Worker has not opted in to errands." };
+  }
+  if (worker.ninVerificationStatus !== "VERIFIED") {
+    return { eligible: false, reason: "Worker NIN is not verified." };
+  }
+  if (!worker.hasActiveBankAccount) {
+    return { eligible: false, reason: "Worker does not have an active bank account on file." };
+  }
+  if (worker.activeErrandsCount >= activeCap) {
+    return { eligible: false, reason: "Worker has reached maximum concurrent active errands cap." };
+  }
+  if (worker.errandMinPayKobo && errand.budgetKobo < worker.errandMinPayKobo) {
+    return { eligible: false, reason: "Errand budget is below worker minimum pay threshold." };
+  }
+  if (worker.errandTypes && worker.errandTypes.length > 0 && !worker.errandTypes.includes(errand.type)) {
+    return { eligible: false, reason: "Errand type is not in worker preferences." };
+  }
+  if (worker.errandPreferredStates && worker.errandPreferredStates.length > 0 && !worker.errandPreferredStates.includes(errand.locationState)) {
+    return { eligible: false, reason: "Errand state is not in worker preferences." };
+  }
+  return { eligible: true };
+}

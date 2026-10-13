@@ -49,7 +49,9 @@ export async function saveOnboardingData(role: string, data: any) {
             location: data.address || "Unknown",
             availability: "Immediate",
             expectedPay: data.amount ? parseFloat(data.amount.replace(/,/g, '')) : 0,
+            openToErrands: typeof data.openToErrands === "boolean" ? data.openToErrands : false,
             ninVerificationStatus: "PENDING",
+            status: "APPROVED",
             profileData: data
           })
           .where(eq(workerProfiles.userId, userId));
@@ -62,7 +64,9 @@ export async function saveOnboardingData(role: string, data: any) {
           location: data.address || "Unknown",
           availability: "Immediate",
           expectedPay: data.amount ? parseFloat(data.amount.replace(/,/g, '')) : 0,
+          openToErrands: typeof data.openToErrands === "boolean" ? data.openToErrands : false,
           ninVerificationStatus: "PENDING",
+          status: "APPROVED",
           profileData: data
         });
       }

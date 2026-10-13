@@ -22,6 +22,8 @@ import {
 } from "@/components/ui/sidebar"
 import { ChevronsUpDownIcon, UserIcon, SettingsIcon, BellIcon, LogOutIcon } from "lucide-react"
 import { logout } from "@/actions/auth"
+import { startTransition } from "react"
+import { useRouter } from "next/navigation"
 
 export function NavUser({
   user,
@@ -33,6 +35,8 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+  const router = useRouter()
+  const basePath = user.name === "EMPLOYER" ? "/employer" : user.name === "ADMIN" ? "/admin" : "/worker"
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -58,35 +62,37 @@ export function NavUser({
             align="end"
             sideOffset={4}
           >
-            <DropdownMenuLabel className="p-0 font-normal">
-              <div className="flex items-center gap-2 px-2 py-2 text-left text-sm">
-                <Avatar>
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback>CN</AvatarFallback>
-                </Avatar>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
-                  <span className="truncate text-xs">{user.email}</span>
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="p-0 font-normal">
+                <div className="flex items-center gap-2 px-2 py-2 text-left text-sm">
+                  <Avatar>
+                    <AvatarImage src={user.avatar} alt={user.name} />
+                    <AvatarFallback>CN</AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-medium">{user.name}</span>
+                    <span className="truncate text-xs">{user.email}</span>
+                  </div>
                 </div>
-              </div>
-            </DropdownMenuLabel>
+              </DropdownMenuLabel>
+            </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem className="py-2.5 cursor-pointer">
+              <DropdownMenuItem onClick={() => router.push(`${basePath}/profile`)} className="py-2.5 cursor-pointer">
                 <UserIcon className="mr-2 h-4 w-4" />
                 Profile
               </DropdownMenuItem>
-              <DropdownMenuItem className="py-2.5 cursor-pointer">
+              <DropdownMenuItem onClick={() => router.push(`${basePath}/settings`)} className="py-2.5 cursor-pointer">
                 <SettingsIcon className="mr-2 h-4 w-4" />
                 Settings
               </DropdownMenuItem>
-              <DropdownMenuItem className="py-2.5 cursor-pointer">
+              <DropdownMenuItem onClick={() => router.push(`${basePath}/notifications`)} className="py-2.5 cursor-pointer">
                 <BellIcon className="mr-2 h-4 w-4" />
                 Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={async () => { await logout(); }} className="py-2.5 cursor-pointer hover:text-[var(--ng)] focus:text-[var(--ng)]">
+            <DropdownMenuItem onClick={() => { startTransition(() => { logout() }) }} className="py-2.5 cursor-pointer hover:text-[var(--ng)] focus:text-[var(--ng)]">
               <LogOutIcon className="mr-2 h-4 w-4" />
               Log out
             </DropdownMenuItem>

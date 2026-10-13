@@ -98,9 +98,9 @@ export default function EmployerEditForm({ profile }: { profile: any }) {
         <button 
           type="submit" 
           disabled={isPending}
-          className="bg-[var(--ink)] text-[var(--lime)] font-bold px-8 py-3 rounded-xl transition-transform hover:-translate-y-0.5 disabled:opacity-70 disabled:hover:translate-y-0 flex items-center justify-center min-w-[140px]"
+          className="bg-[var(--ng)] text-white font-bold px-8 py-3 rounded-xl transition-all hover:-translate-y-0.5 hover:bg-[var(--ng-deep)] shadow-lg shadow-[var(--ng)]/20 disabled:opacity-70 disabled:hover:translate-y-0 disabled:shadow-none flex items-center justify-center min-w-[140px]"
         >
-          {isPending ? <Loader2 size={20} className="animate-spin text-[var(--lime)]" /> : "Save Changes"}
+          {isPending ? <Loader2 size={20} className="animate-spin text-white" /> : "Save Changes"}
         </button>
       </div>
     </form>

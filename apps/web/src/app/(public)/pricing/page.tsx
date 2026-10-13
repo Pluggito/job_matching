@@ -7,16 +7,16 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen bg-[var(--canvas)] flex flex-col font-sans">
       <PublicHeader />
-      
+
       <main className="flex-1">
         {/* HERO */}
-        <section className="relative overflow-hidden bg-[var(--ink)] text-[var(--paper)] py-24 sm:py-32">
-          <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[var(--orange)] via-[var(--ink)] to-[var(--ink)] pointer-events-none"></div>
+        <section className="relative overflow-hidden bg-[#fafcfa] text-[var(--ink)] py-24 sm:py-32 border-b border-black/5">
+          <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, black 1px, transparent 0)', backgroundSize: '32px 32px' }}></div>
           <div className="relative mx-auto max-w-7xl px-6 lg:px-8 text-center">
-            <h1 className="mx-auto max-w-4xl [font-family:var(--font-space-grotesk)] text-5xl font-semibold leading-[1.1] sm:text-6xl lg:text-[76px] tracking-tight">
-              Simple, transparent <br/><span className="text-[var(--lime)]">pricing.</span>
+            <h1 className="mx-auto max-w-4xl font-space text-5xl font-bold leading-[1.1] sm:text-6xl lg:text-[76px] tracking-tight">
+              Simple, transparent <br /><span className="text-[var(--ng)]">pricing.</span>
             </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-[var(--muted)]">
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-black/60 font-medium">
               No hidden fees. No surprise charges. Just straightforward pricing designed to help you succeed on Staff Guru.
             </p>
           </div>
