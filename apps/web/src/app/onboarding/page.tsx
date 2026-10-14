@@ -23,6 +23,7 @@ import {
   ShieldCheck
 } from "lucide-react";
 import Link from "next/link";
+import { Logo } from "@/components/Logo";
 import { useRouter } from "next/navigation";
 import BankDetailsStep from "@/components/onboarding/BankDetailsStep";
 import { saveWorkerBankDetails } from "@/actions/bank";
@@ -93,7 +94,7 @@ function EmployerOnboarding() {
   return (
     <div className="max-w-2xl mx-auto w-full">
       <div className="text-center mb-8">
-        <h1 className="[font-family:var(--font-inter)] text-3xl font-bold text-black tracking-tight">Complete your profile</h1>
+        <h1 className="[font-family:var(--font-plus-jakarta)] text-3xl font-bold text-black tracking-tight">Complete your profile</h1>
         <p className="mt-2 text-muted-foreground">Let's get your business set up on Staff Guru.</p>
       </div>
 
@@ -291,7 +292,7 @@ function WorkerOnboarding() {
   return (
     <div className="max-w-3xl mx-auto w-full">
       <div className="text-center mb-8">
-        <h1 className="[font-family:var(--font-inter)] text-3xl font-bold text-black tracking-tight">Create your Worker Profile</h1>
+        <h1 className="[font-family:var(--font-plus-jakarta)] text-3xl font-bold text-black tracking-tight">Create your Worker Profile</h1>
         <p className="mt-2 text-muted-foreground">Let's get you verified and ready for work.</p>
       </div>
 
@@ -592,9 +593,8 @@ export default function OnboardingPage() {
       <div className="max-w-5xl mx-auto w-full">
         {/* Simple Header */}
         <div className="flex items-center justify-between mb-12">
-          <Link href="/" className="flex items-center gap-2 text-[var(--ink)] font-bold text-2xl tracking-tight font-space">
-            <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-[var(--ng)] text-white font-bold text-base tracking-tighter shadow-lg shadow-[var(--ng)]/20 transition-transform group-hover:scale-105">sg</span>
-            staff<span className="text-[var(--ng)]">guru</span><i className="text-[var(--orange)] not-italic">.</i>
+          <Link href="/" className="hover:opacity-85 transition-opacity">
+            <Logo size="lg" />
           </Link>
           
           <div className="px-4 py-1.5 rounded-full bg-[var(--canvas)] border border-[var(--line)] text-xs font-bold text-muted-foreground flex items-center gap-2">

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, BriefcaseBusiness, User, CheckCircle2, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useFormState, useFormStatus } from "react-dom";
 import { signup } from "../../../actions/auth";
+import { Logo } from "@/components/Logo";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -42,9 +43,8 @@ export default function SignupPage() {
       {/* LEFT SIDE - BRAND/HERO */}
       <div className="hidden lg:flex flex-col justify-between w-[45%] bg-[var(--ng)] text-white p-12 relative overflow-hidden">
         <div className="relative z-10">
-          <Link href="/" className="flex items-center gap-2 text-white font-bold text-2xl tracking-tight font-space">
-            <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-[var(--ink)] text-white font-bold text-base tracking-tighter shadow-lg shadow-black/20">sg</span>
-            staff<span className="text-[var(--ink)]">guru</span><i className="text-[var(--orange)] not-italic">.</i>
+          <Link href="/" className="hover:opacity-85 transition-opacity">
+            <Logo size="lg" variant="dark" />
           </Link>
         </div>
 
@@ -72,9 +72,8 @@ export default function SignupPage() {
       <div className="w-full lg:w-[55%] flex items-center justify-center p-6 sm:p-12 lg:p-16 relative">
         <div className="w-full max-w-md">
           <div className="mb-8 lg:hidden flex justify-center sm:justify-start">
-            <Link href="/" className="flex items-center gap-2 text-black font-bold text-2xl tracking-tight font-space">
-              <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-[var(--ng)] text-[var(--ink)] font-bold text-sm tracking-tighter shadow-sm shadow-[var(--ng)]/20">sg</span>
-              staff<span className="text-[var(--ng)]">guru</span><i className="text-[var(--orange)] not-italic">.</i>
+            <Link href="/" className="hover:opacity-85 transition-opacity">
+              <Logo size="md" />
             </Link>
           </div>
 
