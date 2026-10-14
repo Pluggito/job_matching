@@ -166,3 +166,13 @@
 .lp-glow {
   display: none;
 }
+
+.lp-indeterminate {
+  animation: lp-indeterminate 1.4s cubic-bezier(.4,0,.2,1) infinite;
+}
+
+@keyframes lp-indeterminate {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(60%); }
+  100% { transform: translateX(220%); }
+}

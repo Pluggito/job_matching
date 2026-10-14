@@ -49,3 +49,5 @@
 @keyframes lp-ping{75%,100%{transform:scale(2);opacity:0}}
 @keyframes lp-state-in{0%{opacity:0;transform:translateY(65%);filter:blur(3px)}100%{opacity:1;transform:translateY(0);filter:blur(0)}}
 @keyframes lp-state-out{0%{opacity:1;transform:translateY(0);filter:blur(0)}100%{opacity:0;transform:translateY(-65%);filter:blur(3px)}}
+.lp-indeterminate{animation:lp-indeterminate 1.4s cubic-bezier(.4,0,.2,1) infinite}
+@keyframes lp-indeterminate{0%{transform:translateX(-100%)}50%{transform:translateX(60%)}100%{transform:translateX(220%)}}
