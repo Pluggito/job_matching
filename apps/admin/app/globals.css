@@ -4,8 +4,8 @@
 @custom-variant dark (&:is(.dark, .dark *));
 
 @theme inline {
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-heading: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-plus-jakarta), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-heading: var(--font-plus-jakarta), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-dm-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --font-space: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
 
@@ -72,9 +72,10 @@
   --line: #e0e7e1;
 
   /* Typography tokens */
-  --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-plus-jakarta: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-inter: var(--font-plus-jakarta);
   --font-dm-mono: 'DM Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  --font-space-grotesk: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-space-grotesk: var(--font-plus-jakarta);
 
   /* Shadcn UI system variables (OKLCH light mode) */
   --background: oklch(1 0 0);
@@ -164,4 +165,14 @@
 
 .lp-glow {
   display: none;
+}
+
+.lp-indeterminate {
+  animation: lp-indeterminate 1.4s cubic-bezier(.4,0,.2,1) infinite;
+}
+
+@keyframes lp-indeterminate {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(60%); }
+  100% { transform: translateX(220%); }
 }
