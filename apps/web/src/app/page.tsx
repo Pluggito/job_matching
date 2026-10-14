@@ -14,13 +14,17 @@ import {
   LineChart,
   MapPin,
   MessageSquare,
+  Paintbrush,
   Palette,
   Scissors,
   Search,
   ShieldCheck,
   Sparkles,
   Star,
+  Sun,
+  Utensils,
   Wallet,
+  Wind,
   Wrench,
   Zap,
 } from "lucide-react";
@@ -32,19 +36,19 @@ import AlabaruShowcase from "@/components/landing/AlabaruShowcase";
 import { HeroStateRotator } from "@/components/landing/HeroStateRotator";
 import { HeroMapGraphic } from "@/components/landing/HeroMapGraphic";
 
-const marquee = [
-  "Tailors",
-  "Electricians",
-  "Plumbers",
-  "Mechanics",
-  "Hair stylists",
-  "Developers",
-  "Designers",
-  "Carpenters",
-  "Drivers",
-  "Chefs",
-  "Accountants",
-  "Support agents",
+const tradeLogos = [
+  { name: "Tailors", icon: Scissors, color: "#008751", bg: "#e6f4ed" },
+  { name: "Electricians", icon: Zap, color: "#d97706", bg: "#fef3c7" },
+  { name: "Plumbers", icon: Wrench, color: "#2563eb", bg: "#eff6ff" },
+  { name: "Developers", icon: Code2, color: "#4f46e5", bg: "#eef2ff" },
+  { name: "Carpenters", icon: Hammer, color: "#b45309", bg: "#fef3e7" },
+  { name: "Mechanics", icon: Car, color: "#475569", bg: "#f1f5f9" },
+  { name: "Designers", icon: Palette, color: "#9333ea", bg: "#faf5ff" },
+  { name: "Hair Stylists", icon: Sparkles, color: "#db2777", bg: "#fdf2f8" },
+  { name: "Solar Techs", icon: Sun, color: "#ea580c", bg: "#fff7ed" },
+  { name: "HVAC Techs", icon: Wind, color: "#0284c7", bg: "#f0f9ff" },
+  { name: "Painters", icon: Paintbrush, color: "#059669", bg: "#ecfdf5" },
+  { name: "Chefs & Caterers", icon: Utensils, color: "#dc2626", bg: "#fef2f2" },
 ];
 
 export default async function LandingPage() {
@@ -83,7 +87,7 @@ export default async function LandingPage() {
                 </span>
               </h1>
 
-              <p className="lp-fade-up lp-d2 mt-6 max-w-xl text-base leading-relaxed text-[var(--ink)] opacity-50 sm:text-lg [font-family:var(--font-dm-sans)]">
+              <p className="lp-fade-up lp-d2 mt-6 max-w-xl text-base leading-normal sm:leading-[1.45] text-[var(--ink)] opacity-50 sm:text-lg [font-family:var(--font-dm-sans)]">
                 Staff Guru connects employers with verified artisans, electricians, and developers. Get matched, get it done, and get on with your day.
               </p>
 
@@ -161,17 +165,28 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        {/* ================= MARQUEE ================= */}
-        <section aria-label="Popular trades" className="relative overflow-hidden bg-[var(--ng)] py-5 text-white">
-          <div className="lp-marquee">
-            {[...marquee, ...marquee].map((m, i) => (
-              <span
+        {/* ================= CLEAN TRADES MARQUEE ================= */}
+        <section aria-label="Popular verified trades" className="relative overflow-hidden bg-white border-b border-black/[0.06] py-6 sm:py-7">
+          {/* Subtle edge fades (matching reference photo) */}
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-24 sm:w-44 bg-gradient-to-r from-white via-white/80 to-transparent z-10" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-24 sm:w-44 bg-gradient-to-l from-white via-white/80 to-transparent z-10" />
+
+          <div className="lp-marquee flex items-center gap-12 sm:gap-16 pr-12 sm:pr-16">
+            {[...tradeLogos, ...tradeLogos].map((trade, i) => (
+              <div
                 key={i}
-                className="flex items-center gap-8 whitespace-nowrap px-4 text-2xl font-bold tracking-tight [font-family:var(--font-inter)] sm:text-3xl"
+                className="flex items-center gap-3 shrink-0 group cursor-default select-none transition-transform duration-200 hover:-translate-y-0.5"
               >
-                {m}
-                <span className="text-white/40">✦</span>
-              </span>
+                <span
+                  className="flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 group-hover:scale-110 shrink-0 shadow-xs"
+                  style={{ backgroundColor: trade.bg, color: trade.color }}
+                >
+                  <trade.icon size={17} strokeWidth={2.2} />
+                </span>
+                <span className="text-base sm:text-lg font-bold tracking-tight text-[var(--ink)]/85 group-hover:text-[var(--ink)] transition-colors [font-family:var(--font-plus-jakarta)] whitespace-nowrap">
+                  {trade.name}
+                </span>
+              </div>
             ))}
           </div>
         </section>
@@ -187,11 +202,11 @@ export default async function LandingPage() {
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-black">
                   One platform · Two sides
                 </p>
-                <h2 className="mt-6 max-w-2xl text-4xl font-bold leading-[1.05] tracking-[-0.035em] [font-family:var(--font-inter)] sm:text-[56px]">
+                <h2 className="mt-6 max-w-2xl text-4xl font-bold leading-[1.05] tracking-[-0.035em] [font-family:var(--font-plus-jakarta)] sm:text-[56px]">
                   Built for the people who hire — and the people who deliver.
                 </h2>
               </div>
-              <p className="max-w-sm text-base leading-relaxed text-black/55">
+              <p className="max-w-sm text-base leading-normal sm:leading-[1.4] text-black/55">
                 Whether you run a business or run your own trade, Staff Guru gives you the tools to move faster, safer.
               </p>
             </div>
@@ -209,7 +224,7 @@ export default async function LandingPage() {
                     </span>
                   </div>
 
-                  <h3 className="mt-8 text-3xl font-bold tracking-tight text-black [font-family:var(--font-inter)] sm:text-4xl xl:text-5xl xl:leading-[1.1]">
+                  <h3 className="mt-8 text-3xl font-bold tracking-tight text-black [font-family:var(--font-plus-jakarta)] sm:text-4xl xl:text-5xl xl:leading-[1.1]">
                     Hire with <br className="hidden xl:block" /> confidence.
                   </h3>
 
@@ -225,7 +240,7 @@ export default async function LandingPage() {
                         </span>
                         <div className="pt-1">
                           <p className="font-bold text-black">{t}</p>
-                          <p className="mt-1 max-w-[200px] text-sm leading-relaxed text-black/55 xl:max-w-none">{d}</p>
+                          <p className="mt-1 max-w-[200px] text-sm leading-normal sm:leading-[1.38] text-black/55 xl:max-w-none">{d}</p>
                         </div>
                       </li>
                     ))}
@@ -291,7 +306,7 @@ export default async function LandingPage() {
                         </span>
                         <div className="pt-1">
                           <p className="font-bold text-[var(--ink)]">{t}</p>
-                          <p className="mt-1 max-w-[200px] text-sm leading-relaxed text-[var(--ink)] opacity-50 xl:max-w-none">{d}</p>
+                          <p className="mt-1 max-w-[200px] text-sm leading-normal sm:leading-[1.38] text-[var(--ink)] opacity-50 xl:max-w-none">{d}</p>
                         </div>
                       </li>
                     ))}
@@ -351,10 +366,10 @@ export default async function LandingPage() {
                   <span className="text-base font-semibold text-[var(--ink)]">
                     How it works
                   </span>
-                  <h2 className="mt-6 text-4xl font-bold tracking-[-0.03em] text-[var(--ink)] [font-family:var(--font-inter)] sm:text-6xl sm:leading-[1.05] text-balance">
+                  <h2 className="mt-6 text-4xl font-bold tracking-[-0.03em] text-[var(--ink)] [font-family:var(--font-plus-jakarta)] sm:text-6xl sm:leading-[1.05] text-balance">
                     Hire in days, not weeks.
                   </h2>
-                  <p className="mt-8 text-lg text-[var(--ink-soft)] leading-relaxed max-w-md">
+                  <p className="mt-6 text-base sm:text-lg text-[var(--ink-soft)] leading-normal sm:leading-[1.45] max-w-md">
                     Search verified workers, message them in the app, agree terms, and pay as each milestone is completed.
                   </p>
                 </div>
@@ -415,7 +430,7 @@ export default async function LandingPage() {
                         <div className={`flex h-20 w-20 items-center justify-center rounded-3xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 ${step.iconStyle}`}>
                           <step.icon size={32} strokeWidth={1.5} />
                         </div>
-                        <span className={`text-4xl font-bold [font-family:var(--font-inter)] transition-colors -rotate-90 mt-8 ${step.numColor}`}>
+                        <span className={`text-4xl font-bold [font-family:var(--font-plus-jakarta)] transition-colors -rotate-90 mt-8 ${step.numColor}`}>
                           {step.num}
                         </span>
                       </div>
@@ -428,15 +443,15 @@ export default async function LandingPage() {
                           <div className={`flex h-16 w-16 items-center justify-center rounded-[20px] ${step.iconStyle} shadow-sm`}>
                             <step.icon size={28} strokeWidth={1.5} />
                           </div>
-                          <span className={`text-4xl font-bold [font-family:var(--font-inter)] ${step.cardStyle.includes('text-white') ? 'text-white/20' : 'text-black/10'}`}>
+                          <span className={`text-4xl font-bold [font-family:var(--font-plus-jakarta)] ${step.cardStyle.includes('text-white') ? 'text-white/20' : 'text-black/10'}`}>
                             {step.num}
                           </span>
                         </div>
 
-                        <h3 className="text-2xl sm:text-3xl font-bold [font-family:var(--font-inter)]">
+                        <h3 className="text-2xl sm:text-3xl font-bold [font-family:var(--font-plus-jakarta)]">
                           {step.title}
                         </h3>
-                        <p className={`mt-4 text-base sm:text-lg leading-relaxed ${step.cardStyle.includes('text-white') ? 'text-white/70' : 'text-black/60'}`}>
+                        <p className={`mt-3 text-base sm:text-lg leading-normal sm:leading-[1.45] ${step.cardStyle.includes('text-white') ? 'text-white/70' : 'text-black/60'}`}>
                           {step.desc}
                         </p>
 
@@ -462,7 +477,7 @@ export default async function LandingPage() {
               <h2 className="text-4xl font-bold leading-tight tracking-tight text-[var(--ink)] sm:text-5xl">
                 Every badge is earned.
               </h2>
-              <p className="mt-4 text-lg leading-relaxed text-gray-700">
+              <p className="mt-4 text-base sm:text-lg leading-normal sm:leading-[1.45] text-gray-700">
                 We don't just take their word for it. Every professional on StaffGuru goes through a rigorous screening process before they ever appear in your search results.
               </p>
             </div>
@@ -474,28 +489,28 @@ export default async function LandingPage() {
                   <span className="w-10 shrink-0 text-sm font-bold text-gray-500">01</span>
                   <div>
                     <h3 className="font-bold text-[var(--ink)]">Identity Verification</h3>
-                    <p className="mt-1 text-sm text-gray-600 leading-relaxed">Government NIN is checked against the NIMC database to ensure every user is exactly who they claim to be.</p>
+                    <p className="mt-1 text-sm text-gray-600 leading-normal sm:leading-[1.38]">Government NIN is checked against the NIMC database to ensure every user is exactly who they claim to be.</p>
                   </div>
                 </div>
                 <div className="flex gap-4 py-6 border-b border-black/10">
                   <span className="w-10 shrink-0 text-sm font-bold text-gray-500">02</span>
                   <div>
                     <h3 className="font-bold text-[var(--ink)]">Skill Assessment</h3>
-                    <p className="mt-1 text-sm text-gray-600 leading-relaxed">Trade certificates, licenses, and past portfolios are manually reviewed to verify professional capabilities.</p>
+                    <p className="mt-1 text-sm text-gray-600 leading-normal sm:leading-[1.38]">Trade certificates, licenses, and past portfolios are manually reviewed to verify professional capabilities.</p>
                   </div>
                 </div>
                 <div className="flex gap-4 py-6 border-b border-black/10">
                   <span className="w-10 shrink-0 text-sm font-bold text-gray-500">03</span>
                   <div>
                     <h3 className="font-bold text-[var(--ink)]">Peer Reviews</h3>
-                    <p className="mt-1 text-sm text-gray-600 leading-relaxed">Post-job ratings are securely collected only from verified employers who have completed work with the talent.</p>
+                    <p className="mt-1 text-sm text-gray-600 leading-normal sm:leading-[1.38]">Post-job ratings are securely collected only from verified employers who have completed work with the talent.</p>
                   </div>
                 </div>
                 <div className="flex gap-4 pt-6">
                   <span className="w-10 shrink-0 text-sm font-bold text-gray-500">04</span>
                   <div>
                     <h3 className="font-bold text-[var(--ink)]">Secure Platform</h3>
-                    <p className="mt-1 text-sm text-gray-600 leading-relaxed">In-app messaging and milestone-based payments protect both parties throughout the entire engagement.</p>
+                    <p className="mt-1 text-sm text-gray-600 leading-normal sm:leading-[1.38]">In-app messaging and milestone-based payments protect both parties throughout the entire engagement.</p>
                   </div>
                 </div>
               </div>
@@ -558,7 +573,7 @@ export default async function LandingPage() {
         {/* ================= TESTIMONIALS ================= */}
         <section className="border-t border-black/[0.06] bg-[#f4f7f5] py-24 sm:py-32">
           <div className="mx-auto max-w-7xl px-5 lg:px-8">
-            <h2 className="max-w-2xl text-4xl font-bold tracking-[-0.035em] [font-family:var(--font-inter)] sm:text-[56px] sm:leading-[1.05]">
+            <h2 className="max-w-2xl text-4xl font-bold tracking-[-0.035em] [font-family:var(--font-plus-jakarta)] sm:text-[56px] sm:leading-[1.05]">
               Loved on both sides of the deal.
             </h2>
             <div className="mt-14 grid grid-cols-1 gap-5 md:grid-cols-3">
@@ -596,7 +611,7 @@ export default async function LandingPage() {
                         <Star key={i} size={16} fill="currentColor" strokeWidth={0} />
                       ))}
                     </div>
-                    <blockquote className="mt-6 text-lg font-medium leading-relaxed">&ldquo;{t.q}&rdquo;</blockquote>
+                    <blockquote className="mt-6 text-lg font-medium leading-normal sm:leading-[1.4]">&ldquo;{t.q}&rdquo;</blockquote>
                   </div>
                   <figcaption className="mt-10 flex items-center gap-3">
                     <span className="relative h-11 w-11 overflow-hidden rounded-full">

@@ -6,6 +6,7 @@ import { LogOut, X } from "lucide-react";
 import { getNavItems } from "./data";
 import { Role } from "@repo/shared";
 import { logout } from "../../actions/auth";
+import { Logo } from "@/components/Logo";
 
 export default function Sidebar({ role, onLinkClick }: { role: Role, onLinkClick?: () => void }) {
   const pathname = usePathname();
@@ -15,9 +16,8 @@ export default function Sidebar({ role, onLinkClick }: { role: Role, onLinkClick
     <div className="w-64 bg-white border-r border-[var(--line)] flex flex-col h-screen sticky top-0 shrink-0">
       {/* Brand */}
       <div className="p-6 border-b border-[var(--line)] flex items-center justify-between">
-        <Link href="/" onClick={onLinkClick} className="flex items-center gap-2 text-[var(--ink)] font-bold text-xl [font-family:var(--font-space-grotesk)] tracking-tight">
-          <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-[var(--lime)] text-[var(--ink)] font-bold text-sm tracking-tighter">sg</span>
-          staff<span className="text-[var(--green)]">guru</span><i className="text-[var(--orange)] not-italic">.</i>
+        <Link href="/" onClick={onLinkClick} className="hover:opacity-85 transition-opacity">
+          <Logo size="md" />
         </Link>
         <button onClick={onLinkClick} className="md:hidden p-1 text-[var(--ink-soft)] hover:text-[var(--ink)] hover:bg-[var(--canvas)] rounded-md">
           <X size={20} />

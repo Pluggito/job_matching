@@ -4,401 +4,455 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  Camera,
-  KeyRound,
-  ShieldCheck,
-  Wallet,
-  Clock,
-  MapPin,
-  CheckCircle2,
   ArrowRight,
-  BadgeCheck,
-  Lock,
-  Compass,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Sparkles,
+  MapPin,
+  ShieldCheck,
+  Clock,
 } from "lucide-react";
 
 interface Scenario {
   id: string;
-  tag: string;
+  tabLabel: string;
+  category: string;
   title: string;
-  tagline: string;
+  punchline: string;
   description: string;
   location: string;
-  city: string;
+  budget: number;
   turnaround: string;
-  defaultBudget: number;
   image: string;
-  proofType: string;
-  coordinates: string;
-  pin?: string;
-  runnerName: string;
-  runnerJobs: number;
-  proofBadge: string;
+  badge: string;
+  checklist: string[];
 }
 
 const SCENARIOS: Scenario[] = [
   {
-    id: "market",
-    tag: "Wholesale & Market Run",
-    title: "Balogun & Alaba Market Procurement",
-    tagline: "Quality checked on-site. Zero traffic burnt.",
+    id: "inspection",
+    tabLabel: "Site Inspection",
+    category: "Diaspora & Real Estate",
+    title: "Building Site & Property Verification",
+    punchline: "Inspect. Verify. Supervise from anywhere.",
     description:
-      "Sample 5 yards of royal blue French lace or inspect computer parts. Your runner goes into the market labyrinth, verifies item quality on video/photo, negotiates local prices, and retrieves official receipts.",
-    location: "Balogun Market, Lagos Island · Shop B12",
-    city: "Lagos Island",
-    turnaround: "2.2 hrs avg.",
-    defaultBudget: 8000,
-    image: "/landing/alabaru/market.jpg",
-    proofType: "HD Photo of Goods + Serial / Shop Receipt",
-    coordinates: "6.4531° N, 3.3958° E",
-    pin: "482910",
-    runnerName: "Ibrahim Musa",
-    runnerJobs: 42,
-    proofBadge: "Physical Item Inspected",
+      "Wiring funds for building milestones from the UK, US, or across state lines? A vetted local runner arrives on site with GPS-stamped photo and video proof of foundations, blocks, and progress before you disburse contractor funds.",
+    location: "The Eko Pearl · Victoria Island, Lagos",
+    budget: 12000,
+    turnaround: "3.5 hrs avg.",
+    image: "/landing/alabaru/inspection.jpg",
+    badge: "GPS Timestamped Verification",
+    checklist: [
+      "Foundation & concrete milestone stage verification",
+      "GPS-watermarked 4-angle photo & 4K video walk-through",
+      "Architect blueprint alignment & material count check",
+      "Worker attendance & contractor supervisor check-in",
+      "Live WhatsApp or in-app stream directly to diaspora",
+    ],
   },
   {
-    id: "inspection",
-    tag: "Diaspora & Real Estate",
-    title: "Building Site & Property Verification",
-    tagline: "Don't wire funds blindly. Get eyes on the ground.",
+    id: "market",
+    tabLabel: "Market Procurement",
+    category: "Wholesale & Commerce",
+    title: "Balogun & Alaba Market Procurement",
+    punchline: "Source. Negotiate. Skip the 4-hour traffic.",
     description:
-      "Wiring ₦3 million for a building milestone from London, Texas, or Lekki? Don't rely on phone promises. A verified runner arrives with GPS location stamps, taking wide-angle HD photos of foundations, blocks, and progress.",
-    location: "Epe Expressway, Lagos · Royal Palm Estate",
-    city: "Epe Axis",
-    turnaround: "3.5 hrs avg.",
-    defaultBudget: 12000,
-    image: "/landing/alabaru/inspection.jpg",
-    proofType: "4 Timestamped HD Angle Photos + Video",
-    coordinates: "6.5833° N, 3.9833° E",
-    runnerName: "Sunday Ogundipe",
-    runnerJobs: 67,
-    proofBadge: "GPS Watermark Verified",
+      "Need 10 yards of French lace, electronics spares, or market wholesale inventory? Your runner enters the market labyrinth, inspects goods quality on-site, bargains vendor prices, and sends live video proof before payment.",
+    location: "Balogun Market Shop B12 · Lagos Island",
+    budget: 8000,
+    turnaround: "2.2 hrs avg.",
+    image: "/landing/alabaru/market.jpg",
+    badge: "Item Quality Checked On-Site",
+    checklist: [
+      "Fabric, lace & electronics tactile quality inspection",
+      "Direct vendor wholesale price negotiation",
+      "Live video confirmation before funds leave escrow",
+      "Original stamped physical merchant receipt collection",
+      "Secure handoff to dispatch or interstate waybill",
+    ],
   },
   {
     id: "delivery",
-    tag: "High-Value Handover",
-    title: "Sensitive Parcel & Contract Courier",
-    tagline: "Sealed with a 6-digit cryptographic PIN.",
+    tabLabel: "Secure Courier",
+    category: "Corporate & High-Value",
+    title: "Sensitive Parcel & Contract Handover",
+    punchline: "Sealed custody. Cryptographic 6-digit PIN release.",
     description:
-      "Important court documents, bespoke bridal couture, or sensitive company hardware. Handover is physically locked until the recipient provides the secret 6-digit PIN generated at checkout — verified on the spot.",
-    location: "Victoria Island ➔ Allen Avenue, Ikeja",
-    city: "Lagos Mainland",
+      "Court filings, original title deeds, bespoke couture, or sensitive business hardware. The handover is physically locked until the recipient provides the secret 6-digit delivery PIN generated at checkout.",
+    location: "The Corporate Place · 20 Marina, Lagos",
+    budget: 7500,
     turnaround: "1.8 hrs avg.",
-    defaultBudget: 7500,
     image: "/landing/alabaru/delivery.jpg",
-    proofType: "Cryptographic 6-Digit Handover PIN",
-    coordinates: "6.6018° N, 3.3515° E",
-    pin: "839401",
-    runnerName: "Emeka Nnamdi",
-    runnerJobs: 53,
-    proofBadge: "PIN Handoff Verified",
+    badge: "6-Digit Delivery PIN Verified",
+    checklist: [
+      "Original court filings, deeds, or bespoke fashion handover",
+      "Tamper-evident custody seal with sequential tracking",
+      "Handover locked until recipient provides 6-digit PIN",
+      "Real-time GPS transit tracking between origin & destination",
+      "Instant photographic proof & signature acknowledgement",
+    ],
   },
   {
-    id: "official",
-    tag: "Corporate & Government",
-    title: "Civic Queue Holding & Filing Retrieval",
-    tagline: "Skip 4 hours under the sun at CAC or embassies.",
+    id: "civic",
+    tabLabel: "Civic & Registry",
+    category: "Government & Legal Filing",
+    title: "CAC, Lands Registry & Embassy Filing",
+    punchline: "Skip 4 hours under the sun at government desks.",
     description:
-      "Skip 4 hours under the sun at CAC, lands registry, or visa centres. Your vetted runner stands on the line from 7:00 AM, holding your spot or submitting certified true copy (CTC) paperwork with instant confirmation.",
-    location: "CAC FCT Registry / Alausa Secretariat",
-    city: "Ikeja / Abuja",
+      "Skip whole days queuing under the sun at CAC, lands registry, or embassies. A vetted runner holds your spot on line from 7:00 AM, submits paperwork, and retrieves certified true copy (CTC) stamps.",
+    location: "Federal Ministry of Justice · Central Registry",
+    budget: 15000,
     turnaround: "4.0 hrs avg.",
-    defaultBudget: 15000,
-    image: "/landing/alabaru/official.jpg",
-    proofType: "Stamped Registry Acknowledgement Slip",
-    coordinates: "6.6190° N, 3.3585° E",
-    runnerName: "Folake Alabi",
-    runnerJobs: 31,
-    proofBadge: "Stamped Filing Confirmed",
+    image: "/landing/alabaru/civic.jpg",
+    badge: "Stamped Filing Acknowledgement",
+    checklist: [
+      "Early 7:00 AM queue holding at registry & consular gates",
+      "Submission of Certified True Copy (CTC) legal documentation",
+      "Tracking paperwork across state & federal ministry desks",
+      "Official acknowledgement slip & receipt collection",
+      "Avoid losing an entire workday to traffic and queues",
+    ],
+  },
+  {
+    id: "automotive",
+    tabLabel: "Car Inspection",
+    category: "Automotive & Heavy Goods",
+    title: "Pre-Purchase Tokunbo & Car Inspection",
+    punchline: "OBD-II computer diagnostics before you pay the dealer.",
+    description:
+      "Buying a car in Lagos from another state? Don't fall for cleaned odometers. A trained inspector runs computer diagnostics, inspects engine bay, tests flood damage, and verifies customs duty documents.",
+    location: "Berger Auto Market & Lekki Dealerships",
+    budget: 10000,
+    turnaround: "2.5 hrs avg.",
+    image: "/landing/categories/automotive.jpg",
+    badge: "OBD-II Scan & Engine Bay Check",
+    checklist: [
+      "Cold-start engine audio check & exhaust smoke inspection",
+      "Computerized OBD-II diagnostic fault code scan",
+      "Customs paper & VIN verification against FRSC records",
+      "Suspension, underbody rust & flood watermark inspection",
+      "Comprehensive 20-point digital buyer recommendation",
+    ],
   },
 ];
 
 interface AlabaruShowcaseProps {
-  creationFeeKobo: number;
-  commissionBps: number;
-  minPriceKobo: number;
+  creationFeeKobo?: number;
+  commissionBps?: number;
+  minPriceKobo?: number;
+}
+
+/* 3D Glossy Cross Accent */
+function GlossyCross({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 100 100"
+      className={className}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <defs>
+        <radialGradient id="cross-grad" cx="35%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#38ef7d" />
+          <stop offset="35%" stopColor="#008751" />
+          <stop offset="100%" stopColor="#004627" />
+        </radialGradient>
+        <filter id="cross-shadow" x="-30%" y="-30%" width="160%" height="160%">
+          <feDropShadow dx="0" dy="16" stdDeviation="12" floodColor="#008751" floodOpacity="0.4" />
+        </filter>
+      </defs>
+      <path
+        d="M36 16C36 8.268 42.268 2 50 2C57.732 2 64 8.268 64 16V36H84C91.732 36 98 42.268 98 50C98 57.732 91.732 64 84 64H64V84C64 91.732 57.732 98 50 98C42.268 98 36 91.732 36 84V64H16C8.268 64 2 57.732 2 50C2 42.268 8.268 36 16 36H36V16Z"
+        fill="url(#cross-grad)"
+        filter="url(#cross-shadow)"
+      />
+      <path
+        d="M44 14C44 10 47 6 50 6C53 6 55 9 55 13V40C55 42 57 44 59 44H86C90 44 92 47 92 49C89 44 83 40 76 40H60C56 40 53 37 53 33V14H44Z"
+        fill="white"
+        opacity="0.35"
+      />
+    </svg>
+  );
+}
+
+/* 3D Glossy Star Accent */
+function GlossyStar({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 100 100"
+      className={className}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <defs>
+        <radialGradient id="star-grad" cx="30%" cy="25%" r="75%">
+          <stop offset="0%" stopColor="#4ade80" />
+          <stop offset="40%" stopColor="#008751" />
+          <stop offset="100%" stopColor="#00371e" />
+        </radialGradient>
+        <filter id="star-shadow" x="-30%" y="-30%" width="160%" height="160%">
+          <feDropShadow dx="0" dy="16" stdDeviation="14" floodColor="#008751" floodOpacity="0.45" />
+        </filter>
+      </defs>
+      <path
+        d="M50 4C51.5 28 72 48.5 96 50C72 51.5 51.5 72 50 96C48.5 72 28 51.5 4 50C28 48.5 48.5 28 50 4Z"
+        fill="url(#star-grad)"
+        filter="url(#star-shadow)"
+      />
+      <circle cx="42" cy="38" r="14" fill="white" opacity="0.3" filter="blur(3px)" />
+    </svg>
+  );
 }
 
 export default function AlabaruShowcase({
-  creationFeeKobo = 100000, // ₦1,000 default
-  commissionBps = 3000, // 30% default
-  minPriceKobo = 500000, // ₦5,000 floor
+  creationFeeKobo = 100000,
+  commissionBps = 3000,
+  minPriceKobo = 500000,
 }: AlabaruShowcaseProps) {
-  const [selectedScenario, setSelectedScenario] = useState<Scenario>(SCENARIOS[0] as Scenario);
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
+
+  const activeScenario = SCENARIOS[currentIndex] as Scenario;
+
+  const handlePrev = () => {
+    setCurrentIndex((prev) => (prev === 0 ? SCENARIOS.length - 1 : prev - 1));
+  };
+
+  const handleNext = () => {
+    setCurrentIndex((prev) => (prev === SCENARIOS.length - 1 ? 0 : prev + 1));
+  };
 
   const creationFeeNaira = Math.round(creationFeeKobo / 100);
   const minFloorNaira = Math.round(minPriceKobo / 100);
   const totalEmployerDueNaira = minFloorNaira + creationFeeNaira;
 
   return (
-    <section className="relative overflow-hidden bg-[#f8faf9] py-24 sm:py-32 text-[var(--ink)] border-t border-black/[0.06]">
-      {/* Soft Background Accents */}
-      <div className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 h-[500px] w-full max-w-7xl bg-gradient-to-b from-white via-transparent to-transparent opacity-80" />
-      <div className="pointer-events-none absolute right-10 top-24 h-96 w-96 rounded-full bg-emerald-500/5 blur-[120px]" />
+    <section className="relative overflow-hidden bg-[#f3f5f4] py-20 sm:py-28 text-[var(--ink)] border-t border-black/[0.06]">
+      {/* Background ambient lighting */}
+      <div className="pointer-events-none absolute -left-40 top-20 h-96 w-96 rounded-full bg-emerald-500/5 blur-3xl" />
+      <div className="pointer-events-none absolute -right-40 bottom-20 h-96 w-96 rounded-full bg-[var(--lime)]/10 blur-3xl" />
 
-      <div className="relative mx-auto max-w-7xl px-5 lg:px-8 space-y-16">
+      <div className="relative mx-auto max-w-7xl px-5 lg:px-8">
         
-        {/* ================= 1. EDITORIAL HEADER ================= */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 pb-10 border-b border-black/[0.06]">
-          <div className="max-w-2xl space-y-4">
-            {/* Headline */}
-            <h2 className="text-4xl sm:text-5xl lg:text-[56px] font-bold tracking-tight text-[var(--ink)] leading-[1.05] [font-family:var(--font-bricolage)]">
-              Your eyes, ears, and hands across Nigeria. <br />
-              <span className="text-[var(--ng)]">Without the 4-hour traffic.</span>
+        {/* ================= 3-COLUMN MASTER LAYOUT ================= */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 xl:gap-12 items-center">
+          
+          {/* ================= LEFT COLUMN: Eyebrow + Dynamic Checklist Card ================= */}
+          <div className="lg:col-span-4 space-y-6">
+            
+            {/* Pill Eyebrow */}
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-black/[0.06] shadow-xs text-xs sm:text-sm font-semibold text-[var(--ink)]">
+              <Sparkles size={14} className="text-[var(--ng)] shrink-0" />
+              <span>For Nigerians at Home &amp; Diaspora</span>
+            </div>
+
+            {/* Main Headline */}
+            <h2 className="text-3xl sm:text-4xl xl:text-[42px] font-bold tracking-tight text-[var(--ink)] leading-[1.08] [font-family:var(--font-bricolage)]">
+              On-the-ground tasks, solved.
             </h2>
 
-            {/* Sub-copy */}
-            <p className="text-base sm:text-lg text-[var(--ink)]/60 leading-relaxed font-normal [font-family:var(--font-dm-sans)]">
-              Historically, the market <em>Alabaru</em> carried the physical load. Today, Staff Guru puts vetted, NIN-verified runners on the ground in Balogun, Alaba, Epe, and Abuja CBD — providing timestamped HD photo proof and 6-digit delivery PIN security.
-            </p>
-          </div>
-
-          {/* Quick Pricing & Action Header Box */}
-          <div className="flex flex-col sm:flex-row lg:flex-col items-start sm:items-center lg:items-end gap-4 shrink-0">
-            <div className="p-6 rounded-2xl bg-white border border-black/[0.06] shadow-sm space-y-1 text-left sm:text-right lg:text-right w-full sm:w-auto">
-              <span className="text-[11px] uppercase tracking-wider text-[var(--ng)] font-bold block">
-                Set your price and errand
-              </span>
-              <div className="text-3xl font-bold text-[var(--ink)] tracking-tight [font-family:var(--font-bricolage)]">
-                From ₦{totalEmployerDueNaira.toLocaleString()}
-              </div>
-              <span className="text-[11.5px] text-[var(--ink)]/50 block">
-                100% refunded if unclaimed within 24 hours
-              </span>
-            </div>
-
-            <Link
-              href="/employer/errands/new"
-              className="w-full sm:w-auto h-12 px-7 rounded-full bg-[var(--ng)] hover:bg-[#007545] text-white font-bold text-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-md shadow-[var(--ng)]/15 whitespace-nowrap"
-            >
-              Post an Errand Now <ArrowRight size={16} />
-            </Link>
-          </div>
-        </div>
-
-        {/* ================= 2. THE INTERACTIVE FIELD DOSSIER / BENTO ================= */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
-          {/* Left Column (5 Cols): Scenario Selector Cards */}
-          <div className="lg:col-span-5 space-y-3.5">
-            <div className="text-xs uppercase tracking-wider text-[var(--ink)]/50 font-bold mb-2 flex items-center gap-2">
-              <Compass size={14} className="text-[var(--ng)]" /> Choose a Real-World Scenario:
-            </div>
-
-            {SCENARIOS.map((scenario) => {
-              const isSelected = selectedScenario.id === scenario.id;
-              return (
-                <div
-                  key={scenario.id}
-                  onClick={() => setSelectedScenario(scenario)}
-                  className={`group p-5 rounded-2xl border transition-all duration-200 cursor-pointer relative overflow-hidden bg-white ${
-                    isSelected
-                      ? "border-[var(--ng)] shadow-lg shadow-[var(--ng)]/10 ring-2 ring-[var(--ng)]/20 translate-x-1"
-                      : "border-black/[0.06] hover:border-black/20 hover:shadow-md"
-                  }`}
-                >
-                  {/* Selected Indicator Accent */}
-                  {isSelected && (
-                    <div className="absolute top-0 left-0 bottom-0 w-1.5 bg-[var(--ng)]" />
-                  )}
-
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${
-                            isSelected
-                              ? "bg-[var(--ng)] text-white"
-                              : "bg-emerald-50 text-[var(--ng)] border border-emerald-500/15"
-                          }`}
-                        >
-                          {scenario.tag}
-                        </span>
-                        <span className="text-[11px] text-[var(--ink)]/50 font-medium">
-                          {scenario.turnaround}
-                        </span>
-                      </div>
-                      
-                      <h3
-                        className={`text-base font-bold transition-colors ${
-                          isSelected ? "text-[var(--ink)]" : "text-[var(--ink)]/85 group-hover:text-[var(--ink)]"
-                        }`}
-                      >
-                        {scenario.title}
-                      </h3>
-                      
-                      <p className="text-xs text-[var(--ink)]/60 line-clamp-2 leading-relaxed">
-                        {scenario.tagline}
-                      </p>
-                    </div>
-
-                    <div className="shrink-0 text-right">
-                      <span className="text-[11px] text-[var(--ink)]/40 block font-medium">Budget</span>
-                      <span className="text-sm font-bold text-[var(--ink)] [font-family:var(--font-bricolage)]">
-                        ₦{scenario.defaultBudget.toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
+            {/* Dynamic White Feature Card */}
+            <div className="bg-white rounded-[28px] sm:rounded-[32px] p-6 sm:p-7 shadow-sm border border-black/[0.05] space-y-5 transition-all duration-300">
+              
+              {/* Card Header with Active Category Tag & Budget */}
+              <div className="flex items-center justify-between gap-3 pb-3 border-b border-black/[0.06]">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--ng)] bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-500/15 truncate">
+                    {activeScenario.category}
+                  </span>
                 </div>
-              );
-            })}
+                <div className="text-right shrink-0">
+                  <span className="text-xs font-bold text-[var(--ink)] [font-family:var(--font-bricolage)]">
+                    From ₦{activeScenario.budget.toLocaleString()}
+                  </span>
+                </div>
+              </div>
+
+              {/* Dynamic Checklist for Selected Errand */}
+              <ul className="space-y-2.5 text-sm sm:text-[14px] font-medium text-[var(--ink)]/85 min-h-[155px]">
+                {activeScenario.checklist.map((item, idx) => (
+                  <li key={`${activeScenario.id}-${idx}`} className="flex items-start gap-3 animate-in fade-in duration-300">
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[var(--ng)] text-white shrink-0 mt-0.5 shadow-xs">
+                      <Check size={12} strokeWidth={3} />
+                    </span>
+                    <span className="leading-snug">{item}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {/* Fee Split / Escrow Explanation */}
+              <div className="pt-3 border-t border-black/[0.06] text-xs sm:text-[12.5px] text-[var(--ink)]/65 leading-normal sm:leading-[1.4]">
+                Runners keep <strong className="text-[var(--ink)] font-bold">70% of all task earnings</strong> upon verified milestone completion. Staff Guru retains <strong className="text-[var(--ink)] font-bold">30%</strong> to cover platform hosting, escrow security, GPS timestamped verification, and 100% refund protection.
+              </div>
+            </div>
           </div>
 
-          {/* Right Column (7 Cols): The Live Digital Waybill / Dossier */}
-          <div className="lg:col-span-7 bg-white border border-black/[0.06] rounded-[32px] p-6 sm:p-8 shadow-xl shadow-black/[0.03] space-y-6 relative overflow-hidden">
+          {/* ================= CENTER COLUMN: Tall Portrait Photo + "< >" Navigation Controls ================= */}
+          <div className="lg:col-span-4 relative flex flex-col items-center">
             
-            {/* Top Waybill Status Ribbon */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-black/[0.06]">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-mono tracking-wider font-bold text-[var(--ink)]/60 uppercase">
-                  WAYBILL: <strong className="text-[var(--ink)]">#SG-ALB-{selectedScenario.id.toUpperCase()}</strong>
-                </span>
-                <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-[var(--ng)] text-[11px] font-bold border border-emerald-500/20 flex items-center gap-1">
-                  <CheckCircle2 size={12} /> {selectedScenario.proofBadge}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-1.5 text-xs text-[var(--ink)]/70 font-medium">
-                <MapPin size={13} className="text-[var(--ng)]" />
-                <span>{selectedScenario.location}</span>
-              </div>
+            {/* Top-Left Floating 3D Cross Accent */}
+            <div className="absolute -top-6 -left-4 sm:-top-8 sm:-left-6 z-20 w-16 h-16 sm:w-20 sm:h-20 pointer-events-none transform -rotate-12 transition-transform duration-700 hover:rotate-6">
+              <GlossyCross className="w-full h-full drop-shadow-xl" />
             </div>
 
-            {/* Main Waybill Visual Dossier (Hero Image + Overlays) */}
-            <div className="relative aspect-[16/10] w-full rounded-2xl overflow-hidden bg-neutral-100 border border-black/[0.06] shadow-inner group">
+            {/* Bottom-Right Floating 3D Star Accent */}
+            <div className="absolute -bottom-6 -right-4 sm:-bottom-8 sm:-right-6 z-20 w-16 h-16 sm:w-20 sm:h-20 pointer-events-none transform rotate-12 transition-transform duration-700 hover:-rotate-6">
+              <GlossyStar className="w-full h-full drop-shadow-xl" />
+            </div>
+
+            {/* Main Rounded Portrait Frame */}
+            <div className="relative w-full aspect-[4/5] sm:aspect-[3/4] lg:h-[540px] rounded-[32px] sm:rounded-[40px] overflow-hidden shadow-2xl bg-black/5 border-4 border-white group">
               <Image
-                src={selectedScenario.image}
-                alt={selectedScenario.title}
+                src={activeScenario.image}
+                alt={activeScenario.title}
                 fill
-                sizes="(max-width: 1024px) 100vw, 60vw"
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                sizes="(max-width: 1024px) 100vw, 400px"
+                className="object-cover object-center transition-all duration-700"
+                priority
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/20" />
 
-              {/* Watermark GPS & Timestamp Chip (Top Left) */}
-              <div className="absolute top-3.5 left-3.5 bg-black/75 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20 text-[10px] font-mono text-emerald-300 space-y-0.5">
-                <div className="flex items-center gap-1.5 font-bold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                  GPS: {selectedScenario.coordinates}
-                </div>
-                <div className="text-white/60 text-[9px]">
-                  TIMESTAMP: 12 OCT 2026 · 14:28:04 WAT
-                </div>
-              </div>
+              {/* On-Image Floating Navigation Arrow Buttons "<" and ">" */}
+              <button
+                onClick={handlePrev}
+                aria-label="Previous errand"
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-white/95 hover:bg-white text-[var(--ink)] shadow-lg shadow-black/20 flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-90 cursor-pointer backdrop-blur-xs border border-black/[0.08]"
+              >
+                <ChevronLeft size={20} strokeWidth={2.5} />
+              </button>
 
-              {/* Runner Badge (Top Right) */}
-              <div className="absolute top-3.5 right-3.5 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-xl border border-black/10 text-xs font-medium text-[var(--ink)] flex items-center gap-2 shadow-md">
-                <div className="w-6 h-6 rounded-full bg-[var(--ng)] text-white font-bold flex items-center justify-center text-[10px]">
-                  {selectedScenario.runnerName[0]}
-                </div>
-                <div>
-                  <div className="text-[11px] font-bold leading-tight flex items-center gap-1 text-[var(--ink)]">
-                    {selectedScenario.runnerName} <BadgeCheck size={12} className="text-[var(--ng)]" />
+              <button
+                onClick={handleNext}
+                aria-label="Next errand"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-white/95 hover:bg-white text-[var(--ink)] shadow-lg shadow-black/20 flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-90 cursor-pointer backdrop-blur-xs border border-black/[0.08]"
+              >
+                <ChevronRight size={20} strokeWidth={2.5} />
+              </button>
+
+              {/* Gradient Scrim for Bottom Pill */}
+              <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-black/85 via-black/40 to-transparent pointer-events-none" />
+
+              {/* Bottom Live Verification Tag */}
+              <div className="absolute inset-x-4 bottom-4 z-10 p-3 sm:p-3.5 rounded-2xl bg-white/95 backdrop-blur-md border border-white/40 shadow-lg text-left">
+                <div className="flex items-center justify-between gap-2 mb-0.5">
+                  <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--ng)] uppercase tracking-wider">
+                    <span className="w-2 h-2 rounded-full bg-[var(--ng)] animate-pulse" />
+                    {activeScenario.badge}
                   </div>
-                  <div className="text-[9.5px] text-[var(--ink)]/50">
-                    {selectedScenario.runnerJobs} Tasks · NIN Verified
-                  </div>
-                </div>
-              </div>
-
-              {/* Bottom Waybill Proof Summary Overlay */}
-              <div className="absolute bottom-4 left-4 right-4 p-4 rounded-xl bg-white/95 backdrop-blur-md border border-black/10 space-y-2 shadow-lg text-[var(--ink)]">
-                <div className="text-xs font-bold text-[var(--ink)] flex items-center justify-between">
-                  <span className="text-[var(--ng)] text-[11px] uppercase tracking-wider flex items-center gap-1.5 font-bold">
-                    <Camera size={13} /> Mandatory Proof Requirement
-                  </span>
-                  <span className="text-[11px] text-[var(--ink)]/60 font-medium">
-                    Verified before payout release
+                  <span className="text-[11px] font-medium text-[var(--ink)]/50">
+                    {activeScenario.turnaround}
                   </span>
                 </div>
-                <p className="text-xs text-[var(--ink)]/80 leading-snug">
-                  {selectedScenario.proofType}
-                </p>
-
-                {/* 6-Digit PIN Vault Highlight (if applicable) */}
-                {selectedScenario.pin && (
-                  <div className="pt-2 border-t border-black/5 flex items-center justify-between">
-                    <span className="text-[11px] text-amber-800 font-medium flex items-center gap-1.5">
-                      <Lock size={12} className="text-amber-700" /> Confidential Recipient Delivery PIN:
-                    </span>
-                    <span className="font-mono text-sm font-black tracking-widest text-amber-900 bg-amber-100/90 px-2.5 py-0.5 rounded-md border border-amber-300">
-                      [ {selectedScenario.pin.split("").join(" ")} ]
-                    </span>
-                  </div>
-                )}
+                <div className="text-xs sm:text-sm font-bold text-[var(--ink)] truncate">
+                  {activeScenario.title}
+                </div>
+                <div className="flex items-center gap-1 text-[11px] text-[var(--ink)]/50 mt-0.5 truncate">
+                  <MapPin size={11} className="shrink-0 text-[var(--ng)]" />
+                  <span>{activeScenario.location}</span>
+                </div>
               </div>
             </div>
 
-            {/* Scenario Story Narrative */}
-            <div className="space-y-2">
-              <h4 className="text-lg font-bold text-[var(--ink)]">
-                {selectedScenario.title}
-              </h4>
-              <p className="text-xs sm:text-sm text-[var(--ink)]/65 leading-relaxed font-normal">
-                {selectedScenario.description}
+            {/* ================= "< >" CAROUSEL BUTTONS CONTROLLER ================= */}
+            <div className="mt-5 w-full flex items-center justify-between gap-3 px-1">
+              
+              {/* Previous "<" Button */}
+              <button
+                onClick={handlePrev}
+                aria-label="Previous errand"
+                className="group flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white border border-black/10 hover:border-[var(--ng)] text-[var(--ink)] hover:text-[var(--ng)] transition-all shadow-xs hover:shadow-md cursor-pointer active:scale-95"
+              >
+                <ChevronLeft size={18} strokeWidth={2.5} className="transition-transform group-hover:-translate-x-0.5" />
+                <span className="text-xs font-bold hidden sm:inline">Prev</span>
+              </button>
+
+              {/* Middle Errand Counter & Progress Dots */}
+              <div className="flex-1 flex flex-col items-center justify-center text-center px-2">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--ink)]">
+                  <span className="text-[var(--ng)] font-mono">{String(currentIndex + 1).padStart(2, "0")}</span>
+                  <span className="text-black/25">/</span>
+                  <span className="text-black/45 font-mono">{String(SCENARIOS.length).padStart(2, "0")}</span>
+                  <span className="text-black/30 mx-1">·</span>
+                  <span className="truncate max-w-[140px] sm:max-w-[180px] font-semibold text-[var(--ink)]/85">
+                    {activeScenario.tabLabel}
+                  </span>
+                </div>
+
+                {/* Progress Indicators */}
+                <div className="flex items-center gap-1.5 mt-1.5">
+                  {SCENARIOS.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentIndex(idx)}
+                      aria-label={`Jump to errand ${idx + 1}`}
+                      className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                        idx === currentIndex
+                          ? "w-6 bg-[var(--ng)]"
+                          : "w-1.5 bg-black/15 hover:bg-black/30"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Next ">" Button */}
+              <button
+                onClick={handleNext}
+                aria-label="Next errand"
+                className="group flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white border border-black/10 hover:border-[var(--ng)] text-[var(--ink)] hover:text-[var(--ng)] transition-all shadow-xs hover:shadow-md cursor-pointer active:scale-95"
+              >
+                <span className="text-xs font-bold hidden sm:inline">Next</span>
+                <ChevronRight size={18} strokeWidth={2.5} className="transition-transform group-hover:translate-x-0.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* ================= RIGHT COLUMN: Editorial Narrative + Pill CTA ================= */}
+          <div className="lg:col-span-4 space-y-5 lg:pl-2">
+            
+            <div>
+              {/* Eyebrow Label */}
+              <p className="text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-[var(--ink)]/50 mb-2">
+                Everyday Tasks &amp; On-the-Ground Supervision
+              </p>
+
+              {/* Dynamic Punchline Subhead for the Selected Errand */}
+              <h3 className="text-xl sm:text-2xl font-bold text-[var(--ink)] tracking-tight leading-snug sm:leading-[1.25] [font-family:var(--font-plus-jakarta)] mb-2.5 transition-all duration-200">
+                {activeScenario.punchline}
+              </h3>
+
+              {/* Narrative Paragraphs */}
+              <div className="space-y-2.5 text-sm sm:text-[15px] text-[var(--ink)]/70 leading-normal sm:leading-[1.42] font-normal">
+                <p>
+                  Staff Guru is much more than a job-matching platform. Its Tasks &amp; Errands service connects Nigerians at home and in the diaspora with trusted people who can perform everyday tasks, business errands, inspections, deliveries and on-the-ground supervision.
+                </p>
+                <p>
+                  The biggest opportunity is to help people who are busy, live far away, or cannot personally visit a location get things done through verified local workers.
+                </p>
+              </div>
+            </div>
+
+            {/* Pill CTA Button (Matching the Reference Photo) */}
+            <div className="pt-2">
+              <Link
+                href="/employer/errands/new"
+                className="group inline-flex items-center justify-between gap-4 h-14 pl-7 pr-3 rounded-full bg-[var(--ng)] hover:bg-[#007344] text-white font-bold text-sm sm:text-base transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[var(--ng)]/20 cursor-pointer w-full sm:w-auto"
+              >
+                <span>Post an errand now</span>
+                <span className="flex items-center justify-center w-9 h-9 rounded-full bg-white text-[var(--ng)] shadow-xs transition-transform duration-200 group-hover:translate-x-1 shrink-0">
+                  <ArrowRight size={17} strokeWidth={2.5} />
+                </span>
+              </Link>
+
+              {/* Price Floor & Trust Micro-Copy */}
+              <p className="text-xs text-[var(--ink)]/50 mt-3 font-medium">
+                From ₦{totalEmployerDueNaira.toLocaleString()} · Escrow protected · 100% refund guarantee
               </p>
             </div>
-
-            {/* Bottom Action Footer */}
-            <div className="pt-4 border-t border-black/[0.06] flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="text-xs text-[var(--ink)]/60 font-medium flex items-center gap-2">
-                <Clock size={14} className="text-[var(--ng)]" />
-                <span>Estimated Turnaround: <strong className="text-[var(--ink)]">{selectedScenario.turnaround}</strong></span>
-              </div>
-
-              <Link
-                href={`/employer/errands/new?type=${selectedScenario.id}&budget=${selectedScenario.defaultBudget}`}
-                className="w-full sm:w-auto h-11 px-6 rounded-full bg-[var(--ng)] hover:bg-[#007545] text-white font-bold text-xs flex items-center justify-center gap-2 transition-all hover:scale-[1.02] shadow-sm"
-              >
-                Post This Errand (₦{selectedScenario.defaultBudget.toLocaleString()}) <ArrowRight size={14} />
-              </Link>
-            </div>
           </div>
+
         </div>
-
-        {/* ================= 3. THREE PILLARS OF INSTITUTIONAL TRUST ================= */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
-          
-          {/* Pillar 1 */}
-          <div className="p-7 rounded-2xl bg-white border border-black/[0.06] shadow-sm hover:shadow-md transition-shadow space-y-3">
-            <div className="w-11 h-11 rounded-xl bg-emerald-50 text-[var(--ng)] flex items-center justify-center border border-emerald-500/20">
-              <ShieldCheck size={22} />
-            </div>
-            <h4 className="font-bold text-base text-[var(--ink)]">
-              24-Hour Automated Escrow Refund
-            </h4>
-            <p className="text-xs sm:text-sm text-[var(--ink)]/65 leading-relaxed font-normal">
-              If an errand is not claimed by an approved runner within 24 hours, the platform automatically releases the escrow lock and refunds 100% of your payment. Zero paperwork required.
-            </p>
-          </div>
-
-          {/* Pillar 2 */}
-          <div className="p-7 rounded-2xl bg-white border border-black/[0.06] shadow-sm hover:shadow-md transition-shadow space-y-3">
-            <div className="w-11 h-11 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-500/20">
-              <KeyRound size={22} />
-            </div>
-            <h4 className="font-bold text-base text-[var(--ink)]">
-              Mandatory Photo Proof & HMAC PIN
-            </h4>
-            <p className="text-xs sm:text-sm text-[var(--ink)]/65 leading-relaxed font-normal">
-              Every single errand mandates photographic proof with timestamp metadata before completion. Delivery errands require inputting the 6-digit confidential PIN held only by the recipient.
-            </p>
-          </div>
-
-          {/* Pillar 3 */}
-          <div className="p-7 rounded-2xl bg-white border border-black/[0.06] shadow-sm hover:shadow-md transition-shadow space-y-3">
-            <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center border border-blue-500/20">
-              <Wallet size={22} />
-            </div>
-            <h4 className="font-bold text-base text-[var(--ink)]">
-              NIN-Verified Runners With CBN Nuban
-            </h4>
-            <p className="text-xs sm:text-sm text-[var(--ink)]/65 leading-relaxed font-normal">
-              Zero anonymous accounts. Every runner completes National Identity Number (NIN) checks and maintains an encrypted, check-digit-validated Nigerian bank account on file for secure disbursements.
-            </p>
-          </div>
-        </div>
-
       </div>
     </section>
   );

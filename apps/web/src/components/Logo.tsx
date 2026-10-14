@@ -1,33 +1,66 @@
 import React from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 interface LogoProps {
   className?: string;
   iconClassName?: string;
   textClassName?: string;
+  showText?: boolean;
+  size?: "sm" | "md" | "lg";
+  variant?: "default" | "dark" | "light";
 }
 
-export function Logo({ className, iconClassName, textClassName }: LogoProps) {
+export function Logo({
+  className,
+  iconClassName,
+  textClassName,
+  showText = true,
+  size = "md",
+  variant = "default",
+}: LogoProps) {
+  const sizeMap = {
+    sm: { dimension: 28, text: "text-base" },
+    md: { dimension: 34, text: "text-lg" },
+    lg: { dimension: 40, text: "text-2xl" },
+  };
+
+  const currentSize = sizeMap[size];
+
   return (
-    <div className={cn("flex items-center gap-2", className)}>
-      <div className={cn("flex items-center justify-center w-8 h-8 rounded-lg bg-[var(--ng)] text-white shrink-0", iconClassName)}>
-        {/* Needle/Pin SVG */}
-        <svg 
-          width="16" 
-          height="16" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          stroke="currentColor" 
-          strokeWidth="2.5" 
-          strokeLinecap="round" 
-          strokeLinejoin="round"
-        >
-          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-        </svg>
+    <div className={cn("inline-flex items-center gap-2.5 select-none", className)}>
+      <div
+        className={cn(
+          "relative overflow-hidden rounded-full shrink-0 shadow-xs ring-1 ring-black/10 bg-[#008751]",
+          iconClassName
+        )}
+        style={{ width: currentSize.dimension, height: currentSize.dimension }}
+      >
+        <Image
+          src="/logo.jpg"
+          alt="Staff Guru logo"
+          width={currentSize.dimension * 2}
+          height={currentSize.dimension * 2}
+          priority
+          className="w-full h-full object-cover"
+        />
       </div>
-      <span className={cn("font-bold text-lg tracking-tight text-[var(--ink)] [font-family:var(--font-bricolage)]", textClassName)}>
-        Staff Guru
-      </span>
+
+      {showText && (
+        <span
+          className={cn(
+            "font-bold tracking-tight [font-family:var(--font-plus-jakarta)]",
+            currentSize.text,
+            variant === "light" || variant === "dark"
+              ? "text-white"
+              : "text-[var(--ink)]",
+            textClassName
+          )}
+        >
+          staff<span className={variant === "light" || variant === "dark" ? "text-[var(--lime)]" : "text-[var(--ng)]"}>guru</span>
+          <i className="text-[var(--orange)] not-italic">.</i>
+        </span>
+      )}
     </div>
   );
 }

@@ -42,8 +42,8 @@ export function PublicFooter() {
       <div className="relative mx-auto max-w-7xl px-5 pt-20 lg:px-8">
         <div className="grid grid-cols-2 gap-10 md:grid-cols-6">
           <div className="col-span-2">
-            <Logo />
-            <p className="mt-5 max-w-xs text-sm leading-relaxed">
+            <Logo variant="dark" />
+            <p className="mt-5 max-w-xs text-sm leading-normal sm:leading-[1.4] text-white/60">
               Nigeria&apos;s marketplace for skilled work. Verified professionals, serious employers, one trusted place.
             </p>
           </div>

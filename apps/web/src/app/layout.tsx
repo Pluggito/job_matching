@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Bricolage_Grotesque, DM_Sans, DM_Mono, Inter } from "next/font/google";
+import { Bricolage_Grotesque, DM_Sans, DM_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -20,14 +20,25 @@ const dmMono = DM_Mono({
   subsets: ["latin"],
 });
 
-const inter = Inter({
-  variable: "--font-inter",
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-plus-jakarta",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
   title: "STAFF GURU | Skilled work, closer to home",
   description: "A demo marketplace connecting skilled professionals and employers across Nigeria.",
+  icons: {
+    icon: [
+      { url: "/logo.jpg" },
+      { url: "/icon-192x192.jpg", sizes: "192x192", type: "image/jpeg" },
+      { url: "/icon-512x512.jpg", sizes: "512x512", type: "image/jpeg" },
+    ],
+    apple: [
+      { url: "/logo.jpg" },
+    ],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -49,7 +60,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en-NG"
-      className={cn("h-full", "antialiased", bricolageGrotesque.variable, dmSans.variable, dmMono.variable, inter.variable, "font-sans")}
+      className={cn(
+        "h-full",
+        "antialiased",
+        bricolageGrotesque.variable,
+        dmSans.variable,
+        dmMono.variable,
+        plusJakartaSans.variable,
+        "font-sans"
+      )}
     >
       <body className="min-h-full flex flex-col font-sans">
         <TooltipProvider>

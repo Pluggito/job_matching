@@ -17,6 +17,7 @@ import {
 import { NavUser } from "@/components/nav-user"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { Logo } from "@/components/Logo"
 
 export function AppSidebar({ role, userEmail, ...props }: React.ComponentProps<typeof Sidebar> & { role: Role, userEmail: string }) {
   const navItems = getNavItems(role)
@@ -26,12 +27,9 @@ export function AppSidebar({ role, userEmail, ...props }: React.ComponentProps<t
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <div className="flex h-12 items-center justify-center mt-2">
-          <Link href="/" className={`flex items-center gap-2 text-black font-bold tracking-tight overflow-hidden transition-all duration-200 ${state === 'collapsed' ? 'w-8 h-8' : 'w-full px-2 text-xl'}`}>
-            <span className="flex items-center justify-center w-8 h-8 min-w-8 rounded-lg bg-[var(--ng)] text-white font-bold text-sm tracking-tighter shrink-0 shadow-sm shadow-[var(--ng)]/20">sg</span>
-            <div className={`flex whitespace-nowrap transition-all duration-200 ${state === 'collapsed' ? 'opacity-0 w-0' : 'opacity-100 w-auto'}`}>
-              staff<span className="text-[var(--ng)]">guru</span><i className="text-[var(--orange)] not-italic">.</i>
-            </div>
+        <div className="flex h-12 items-center justify-center mt-2 px-2">
+          <Link href="/" className="flex items-center overflow-hidden transition-all duration-200 hover:opacity-85">
+            <Logo size="sm" showText={state !== 'collapsed'} />
           </Link>
         </div>
       </SidebarHeader>
