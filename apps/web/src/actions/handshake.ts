@@ -1,6 +1,6 @@
 "use server";
 
-import { db, selections, hiringRequests, workerProfiles, employerProfiles } from "@repo/db";
+import { db, selections, hiringRequests, workerProfiles, employerProfiles, placements } from "@repo/db";
 import { getCurrentUser } from "./auth";
 import { eq, and } from "@repo/db";
 import { revalidatePath } from "next/cache";
@@ -112,7 +112,31 @@ export async function respondToHandshake(selectionId: string, accept: boolean) {
     .set({ status: newStatus, termsAcceptedAt: accept ? new Date() : null })
     .where(eq(selections.id, selectionId));
 
+  if (accept) {
+    const [existingPlacement] = await db
+      .select({ id: placements.id })
+      .from(placements)
+      .where(eq(placements.selectionId, selectionId))
+      .limit(1);
+
+    if (!existingPlacement) {
+      const startDate = new Date();
+      const replacementDeadline = new Date(startDate.getTime() + 14 * 24 * 60 * 60 * 1000);
+      await db.insert(placements).values({
+        selectionId,
+        startDate,
+        status: "ACTIVE",
+        replacementDeadline,
+      });
+    }
+  }
+
   revalidatePath("/dashboard");
+  if (selection.hiringRequestId) {
+    revalidatePath(`/employer/requests/${selection.hiringRequestId}/matches`);
+  }
+  revalidatePath(`/employer/workers/${selection.workerProfileId}`);
+  revalidatePath("/employer/workers");
 
   return { success: true, status: newStatus };
 }
