@@ -216,7 +216,7 @@ export async function initializeSelectionPayment(selectionId: string) {
 
   // 5. Call Paystack API to initialize transaction
   const host = getAppBaseUrl();
-  const callbackUrl = `${host}/employer/requests/${sel.hiringRequestId}?payment_ref=${reference}`;
+  const callbackUrl = `${host}/employer/requests/${sel.hiringRequestId}/matches?payment_ref=${reference}`;
 
   const paystackRes = await fetch("https://api.paystack.co/transaction/initialize", {
     method: "POST",
