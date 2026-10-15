@@ -20,17 +20,40 @@ This guide contains everything you need to test the entire Staff Guru platform e
 
 ---
 
-## 1. Test User Credentials Summary
+## 1. Test User Credentials Summary (All Passwords: `Password123!`)
 
-| Role | Email | Password | Full Name / Business | Primary Testing Purpose |
+### A. Employers
+| Business / Name | Email | Password | Location | Primary Role & Active Request |
 | :--- | :--- | :--- | :--- | :--- |
-| **Employer** | `employer.test@staffguru.com` | `Password123!` | *Adebayo Adewale* (Zenith Garments Ltd) | Job Requests, Shortlisting, Agency Fee, Posting Errands |
-| **Worker (Artisan)** | `tailor.worker@staffguru.com` | `Password123!` | *Chinedu Okafor* | Job Matching, 100-Point Score, Handshake Acceptance |
-| **Worker (Runner)** | `runner.worker@staffguru.com` | `Password123!` | *Ibrahim Musa* | Alabaru Errand Claiming, Proof Submission, Delivery PIN |
-| **Super Admin #1** *(Open for You)* | *Your own email* | *Your own password* | *Your own name* | Founding Super Admin Slot 1 (Portal: `http://localhost:3001`) |
-| **Super Admin #2** *(Open Slot)* | `superadmin2@staffguru.com` | `Password123!` | *Amina Bello* | Open Founding Slot 2 (No invite code required) |
-| **Super Admin #3** *(Open Slot)* | `superadmin3@staffguru.com` | `Password123!` | *Emeka Nnamdi* | Open Founding Slot 3 (No invite code required) |
-| **Admin #4+** *(Invite-Only)* | `staff.admin@staffguru.com` | `Password123!` | *Fatima Aliu* | Requires 7-day Invite Code from `/settings/team` |
+| **Zenith Garments Ltd** *(Adebayo Adewale)* | `employer.test@staffguru.com` | `Password123!` | Ikeja, Lagos | Hiring Request: **Master Tailor & Pattern Cutter** |
+| **Apex Logistics** *(Chief Folake Balogun)* | `apex.employer@staffguru.com` | `Password123!` | Victoria Island, Lagos | Hiring Request: **Executive Corporate Driver** |
+
+### B. Smart Match Candidates — Fashion, Tailoring & Textile
+| Candidate | Email | Match Score | Primary Signals | Expected Badges / Reasons |
+| :--- | :--- | :--- | :--- | :--- |
+| **Chinedu Okafor** | `tailor.worker@staffguru.com` | **100% Match** | 6 yrs exp, Ikeja (same area), ₦140k (within budget), NIN Verified | Has all 3 required skills • Same area (Ikeja) • Highly experienced • Available now |
+| **Amina Yusuf** | `amina.tailor@staffguru.com` | **71% Match** | 4 yrs exp, Surulere (same state), ₦140k, NIN Verified | Has 2 of 3 required skills • Same state (Lagos) • Available now • ⚠️ *Missing some required skills* |
+| **Babatunde Adeleke** | `babatunde.tailor@staffguru.com` | **68% Match** | 3 yrs exp, Yaba (same state), ₦125k, NIN Pending | Has 2 of 3 required skills • Same state (Lagos) • Available now • ⚠️ *Missing some required skills* |
+| **Blessing Okon** | `blessing.tailor@staffguru.com` | **32% Match** | 2 yrs exp (below min), ₦190k (above budget), NIN Pending | Same state (Lagos) • Available now • ⚠️ *Missing required skills* |
+
+### C. Smart Match Candidates — Transport & Driving
+| Candidate | Email | Match Score | Primary Signals | Expected Badges / Reasons |
+| :--- | :--- | :--- | :--- | :--- |
+| **Sunday Eze** | `sunday.driver@staffguru.com` | **100% Match** | 7 yrs exp, Victoria Island (same area), ₦140k, NIN Verified | Has all 3 required skills • Same area (VI) • Highly experienced • Available now |
+| **Musa Danjuma** | `musa.driver@staffguru.com` | **82% Match** | 4 yrs exp, Ikeja (same state), ₦130k, NIN Verified | Has all 3 required skills • Same state (Lagos) • Meets experience • Available now |
+
+### D. Other Verticals & Alabaru Errands
+| Candidate | Email | Role / Vertical | Details |
+| :--- | :--- | :--- | :--- |
+| **Kemi Adeyemi** | `kemi.tech@staffguru.com` | **Technology & Digital** | React, TypeScript, Next.js, Figma, 4 yrs exp, Lekki Phase 1, Lagos |
+| **Ibrahim Musa** | `runner.worker@staffguru.com` | **Alabaru Errand Runner** | Cleaning & Domestic Services, GTBank account on file, Open to on-demand errands |
+
+### E. Super Admin
+| Admin Name | Email | Password | Portal URL |
+| :--- | :--- | :--- | :--- |
+| **Super Admin** | `pluggitoshfl5050@gmail.com` | `Password123!` | `http://localhost:3001` (Admin Portal) |
+| **Founding Slot 2** | `superadmin2@staffguru.com` | `Password123!` | `http://localhost:3001` |
+| **Founding Slot 3** | `superadmin3@staffguru.com` | `Password123!` | `http://localhost:3001` |
 
 ---
 
