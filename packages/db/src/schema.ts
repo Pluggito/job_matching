@@ -117,6 +117,7 @@ export const selections = pgTable("selections", {
   feeAmount: doublePrecision("fee_amount").notNull(),
   termsVersion: text("terms_version").notNull(),
   termsAcceptedAt: timestamp("terms_accepted_at"),
+  hiredAt: timestamp("hired_at"),
 });
 
 // ==========================================

@@ -17,7 +17,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { markSelectionFeeAsPaid, releaseWorkerAccess } from "@/lib/actions";
+import { markSelectionFeeAsPaid, releaseWorkerAccess, confirmWorkerJobAcceptance } from "@/lib/actions";
 import { maskNin } from "@repo/shared";
 
 export interface ShortlistedWorker {
@@ -30,6 +30,7 @@ export interface ShortlistedWorker {
   location: string;
   expectedPay: number;
   selectionStatus: string;
+  termsAcceptedAt: string | null;
   feeAmount: number;
   paymentStatus: string | null;
   paymentAdminId: string | null;
@@ -146,6 +147,40 @@ export default function HireRequestsView({ requests }: HireRequestsViewProps) {
       setSuccessMessage("Worker contact details released to employer!");
     } catch (err: any) {
       setErrorMessage(err.message || "Failed to release access.");
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const handleConfirmWorkerAcceptance = async (selectionId: string) => {
+    setActionLoadingId(selectionId);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    try {
+      await confirmWorkerJobAcceptance({
+        selectionId,
+        notes: "Admin confirmed candidate accepted the job offer",
+      });
+
+      // Update state locally
+      setData((prev) =>
+        prev.map((req) => ({
+          ...req,
+          candidates: req.candidates.map((cand) =>
+            cand.selectionId === selectionId
+              ? {
+                  ...cand,
+                  selectionStatus: "CONFIRMED",
+                  termsAcceptedAt: new Date().toISOString(),
+                }
+              : cand
+          ),
+        }))
+      );
+      setSuccessMessage("Worker job offer acceptance confirmed! Contact details released.");
+    } catch (err: any) {
+      setErrorMessage(err.message || "Failed to confirm worker acceptance.");
     } finally {
       setActionLoadingId(null);
     }
@@ -277,13 +312,13 @@ export default function HireRequestsView({ requests }: HireRequestsViewProps) {
                     ) : (
                       <div className="grid grid-cols-1 gap-3">
                         {req.candidates.map((cand) => {
-                          const isConnected =
-                            cand.selectionStatus === "connected" ||
-                            cand.selectionStatus === "CONFIRMED";
                           const isFeePaid =
                             cand.paymentStatus === "VERIFIED" ||
                             cand.selectionStatus === "fee_paid" ||
-                            isConnected;
+                            cand.selectionStatus === "connected" ||
+                            cand.selectionStatus === "CONFIRMED";
+                          const hasWorkerAccepted = !!cand.termsAcceptedAt;
+                          const isConnected = isFeePaid && hasWorkerAccepted;
 
                           return (
                             <div
@@ -317,17 +352,22 @@ export default function HireRequestsView({ requests }: HireRequestsViewProps) {
                               </div>
 
                               {/* Protected Contact Display */}
-                              <div className="p-2.5 rounded-lg border border-black/5 bg-neutral-50 min-w-[220px]">
+                              <div className="p-2.5 rounded-lg border border-black/5 bg-neutral-50 min-w-[240px]">
                                 <div className="flex items-center gap-1.5 text-xs font-semibold mb-1">
                                   {isConnected ? (
                                     <>
                                       <Unlock size={14} className="text-emerald-600" />
                                       <span className="text-emerald-700">Contact Released</span>
                                     </>
-                                  ) : (
+                                  ) : isFeePaid ? (
                                     <>
                                       <Lock size={14} className="text-amber-600" />
-                                      <span className="text-amber-700">Protected Contact</span>
+                                      <span className="text-amber-700">Protected (Awaiting Worker Acceptance)</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Lock size={14} className="text-neutral-500" />
+                                      <span className="text-neutral-600">Protected Contact</span>
                                     </>
                                   )}
                                 </div>
@@ -363,18 +403,26 @@ export default function HireRequestsView({ requests }: HireRequestsViewProps) {
                                   </Button>
                                 )}
 
-                                {isFeePaid && !isConnected && (
-                                  <Button
-                                    size="sm"
-                                    className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold gap-1.5"
-                                    disabled={actionLoadingId === cand.selectionId}
-                                    onClick={() => handleReleaseAccess(cand.selectionId)}
-                                  >
-                                    <UserCheck size={14} />
-                                    {actionLoadingId === cand.selectionId
-                                      ? "Releasing..."
-                                      : "Release Access"}
-                                  </Button>
+                                {isFeePaid && !hasWorkerAccepted && (
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-800 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-200">
+                                      <Clock size={14} className="text-amber-600" />
+                                      Awaiting Worker Acceptance
+                                    </span>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="border-neutral-300 hover:bg-neutral-100 text-neutral-800 text-xs font-bold gap-1 cursor-pointer"
+                                      disabled={actionLoadingId === cand.selectionId}
+                                      onClick={() => handleConfirmWorkerAcceptance(cand.selectionId)}
+                                      title="Confirm that the worker has accepted the offer"
+                                    >
+                                      <UserCheck size={14} className="text-emerald-600" />
+                                      {actionLoadingId === cand.selectionId
+                                        ? "Confirming..."
+                                        : "Confirm Worker Accepted"}
+                                    </Button>
+                                  </div>
                                 )}
 
                                 {isConnected && (

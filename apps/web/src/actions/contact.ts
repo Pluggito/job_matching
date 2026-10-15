@@ -68,6 +68,7 @@ export async function revealWorkerPhone(placementId: string): Promise<RevealCont
       employerProfileId: selections.employerProfileId,
       workerProfileId: selections.workerProfileId,
       status: selections.status,
+      termsAcceptedAt: selections.termsAcceptedAt,
     })
     .from(selections)
     .where(eq(selections.id, placement.selectionId))
@@ -77,7 +78,15 @@ export async function revealWorkerPhone(placementId: string): Promise<RevealCont
     return { success: false, error: "Associated placement selection not found." };
   }
 
-  // 2. Authorization check: if employer, must own the placement
+  // 2. Worker Acceptance Check: Must have explicitly accepted the offer
+  if (!selection.termsAcceptedAt) {
+    return {
+      success: false,
+      error: "The candidate has not yet accepted this job offer. Direct contact details will unlock immediately once the candidate reviews and accepts.",
+    };
+  }
+
+  // 3. Authorization check: if employer, must own the placement
   if (session.role === "EMPLOYER") {
     const [employer] = await db
       .select({ id: employerProfiles.id })
@@ -90,7 +99,7 @@ export async function revealWorkerPhone(placementId: string): Promise<RevealCont
     }
   }
 
-  // 3. Payment check: Must have a VERIFIED payment for this selection
+  // 4. Payment check: Must have a VERIFIED payment for this selection
   const [verifiedPayment] = await db
     .select({ id: payments.id, status: payments.status })
     .from(payments)

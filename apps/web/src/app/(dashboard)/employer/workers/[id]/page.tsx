@@ -37,9 +37,9 @@ export default async function WorkerProfilePage({ params }: { params: { id: stri
       .limit(1);
 
     if (emp) {
-      // Check confirmed selection
+      // Check confirmed selection (worker must have explicitly accepted offer)
       const [conn] = await db
-        .select({ id: selections.id })
+        .select({ id: selections.id, termsAcceptedAt: selections.termsAcceptedAt })
         .from(selections)
         .where(
           and(
@@ -50,7 +50,7 @@ export default async function WorkerProfilePage({ params }: { params: { id: stri
         )
         .limit(1);
 
-      isConnected = !!conn;
+      isConnected = !!conn && !!conn.termsAcceptedAt;
 
       if (conn) {
         // Find placement

@@ -8,6 +8,9 @@ import {
   workerProfiles,
   placements,
   eq,
+  and,
+  or,
+  isNotNull,
 } from "@repo/db";
 import { getCurrentUser } from "../../actions/auth";
 import BankPromptBanner from "@/components/dashboard/BankPromptBanner";
@@ -52,7 +55,12 @@ export default async function WorkerJobsView() {
     .innerJoin(hiringRequests, eq(selections.hiringRequestId, hiringRequests.id))
     .innerJoin(employerProfiles, eq(hiringRequests.employerId, employerProfiles.id))
     .leftJoin(placements, eq(placements.selectionId, selections.id))
-    .where(eq(selections.workerProfileId, workerProfile.id));
+    .where(
+      and(
+        eq(selections.workerProfileId, workerProfile.id),
+        or(isNotNull(selections.hiredAt), isNotNull(selections.termsAcceptedAt))
+      )
+    );
 
   return (
     <div className="space-y-6">
