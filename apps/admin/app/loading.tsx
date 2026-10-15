@@ -8,17 +8,15 @@ export default function GlobalLoading() {
         <div className="relative flex items-center justify-center">
           <div className="absolute w-24 h-24 rounded-full bg-[var(--ng)]/15 blur-xl animate-pulse" />
 
-          {/* Official Emblem with Gold / Nigerian Green Border */}
-          <div className="relative w-20 h-20 rounded-full p-[3px] bg-gradient-to-tr from-[var(--ng)] via-[#e6c86e] to-[var(--ng)] shadow-xl shadow-[var(--ng)]/10 animate-in fade-in duration-300">
-            <div className="relative w-full h-full rounded-full overflow-hidden bg-[#008751] ring-2 ring-white shadow-inner">
-              <Image
-                src="/logo.jpg"
-                alt="Staff Guru"
-                fill
-                priority
-                className="object-cover"
-              />
-            </div>
+          {/* Official Emblem */}
+          <div className="relative w-24 h-24 sm:w-28 sm:h-28 drop-shadow-2xl animate-in fade-in duration-300">
+            <Image
+              src="/logo.png"
+              alt="Staff Guru"
+              fill
+              priority
+              className="object-contain"
+            />
           </div>
         </div>
 

@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   verifyPaystackWebhookSignature,
 } from "../src/security";
+import { calculatePaystackFee } from "../src/pricing";
 import { createHmac } from "crypto";
 
 describe("Paystack Webhook Verification & Security", () => {
@@ -130,5 +131,52 @@ describe("Direct Worker Payment Invariants", () => {
     };
 
     expect(directProof.amountKobo).toBe(12_000_000);
+  });
+});
+
+describe("Paystack Processing Fee Calculation", () => {
+  it("calculates 1.5% + NGN 100 for standard transactions (e.g. ₦50,000)", () => {
+    // ₦50,000 = 5,000,000 kobo
+    // 1.5% of 50,000 = ₦750
+    // + ₦100 flat fee = ₦850 fee
+    // Total = ₦50,850
+    const result = calculatePaystackFee(5_000_000);
+    expect(result.feeNaira).toBe(850);
+    expect(result.totalNaira).toBe(50_850);
+    expect(result.feeKobo).toBe(85_000);
+    expect(result.totalKobo).toBe(5_085_000);
+    expect(result.isFlatFeeWaived).toBe(false);
+    expect(result.isCapped).toBe(false);
+  });
+
+  it("waives ₦100 flat fee for transactions under ₦2,500", () => {
+    // ₦2,000 = 200,000 kobo (< ₦2,500)
+    // 1.5% of 2,000 = ₦30
+    // flat fee waived = ₦0
+    // Total = ₦2,030
+    const result = calculatePaystackFee(200_000);
+    expect(result.feeNaira).toBe(30);
+    expect(result.totalNaira).toBe(2_030);
+    expect(result.isFlatFeeWaived).toBe(true);
+    expect(result.isCapped).toBe(false);
+  });
+
+  it("caps transaction fee at ₦2,000 maximum for large transactions", () => {
+    // ₦200,000 = 20,000,000 kobo
+    // 1.5% of 200,000 = ₦3,000 + ₦100 = ₦3,100
+    // Capped at ₦2,000
+    // Total = ₦202,000
+    const result = calculatePaystackFee(20_000_000);
+    expect(result.feeNaira).toBe(2_000);
+    expect(result.totalNaira).toBe(202_000);
+    expect(result.feeKobo).toBe(200_000);
+    expect(result.totalKobo).toBe(20_200_000);
+    expect(result.isCapped).toBe(true);
+  });
+
+  it("handles zero or negative amounts gracefully", () => {
+    const result = calculatePaystackFee(0);
+    expect(result.feeNaira).toBe(0);
+    expect(result.totalNaira).toBe(0);
   });
 });

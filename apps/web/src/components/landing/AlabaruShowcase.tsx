@@ -249,8 +249,13 @@ export default function AlabaruShowcase({
             </div>
 
             {/* Main Headline */}
-            <h2 className="text-3xl sm:text-4xl xl:text-[42px] font-bold tracking-tight text-[var(--ink)] leading-[1.08] [font-family:var(--font-bricolage)]">
-              On-the-ground tasks, solved.
+            <h2 className="text-4xl sm:text-5xl xl:text-[54px] font-bold tracking-tight leading-[1.05] [font-family:var(--font-bricolage)]">
+              <span className="relative inline-block text-[var(--ng)] pb-2">
+                ALABARU
+                <svg className="absolute -bottom-1 left-0 w-full" viewBox="0 0 200 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2 9.5C45.5 -1.5 155.5 -1.5 198 9.5" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
+                </svg>
+              </span>
             </h2>
 
             {/* Dynamic White Feature Card */}

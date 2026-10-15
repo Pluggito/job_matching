@@ -293,12 +293,17 @@ export default function PublicWorkerProfileClient({
               ) : pendingSelectionId ? (
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider text-amber-700 mb-2">
-                    Handshake Offer Pending Fee
+                    Handshake Offer Pending Placement Fee
                   </p>
                   <p className="text-xs text-[var(--ink-soft)] mb-4">
-                    Pay the ₦50,000 agency handshake fee to unlock candidate direct phone number and email backed by our 14-day SLA guarantee.
+                    Review why we charge the regulated ₦50,000 placement fee and unlock candidate direct contact details backed by our 14-day SLA guarantee.
                   </p>
-                  <PayAgencyFeeButton selectionId={pendingSelectionId} feeAmount={50000} className="w-full" />
+                  <PayAgencyFeeButton
+                    selectionId={pendingSelectionId}
+                    feeAmount={50000}
+                    candidateName={worker.category || "Candidate"}
+                    className="w-full"
+                  />
                 </div>
               ) : (
                 <div>

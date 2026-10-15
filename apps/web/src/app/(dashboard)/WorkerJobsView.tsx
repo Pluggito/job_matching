@@ -55,6 +55,8 @@ export default async function WorkerJobsView() {
       id: selections.id,
       status: selections.status,
       feeAmount: selections.feeAmount,
+      budgetMin: hiringRequests.budgetMin,
+      budgetMax: hiringRequests.budgetMax,
       title: hiringRequests.title,
       locationState: hiringRequests.locationState,
       locationArea: hiringRequests.locationArea,
@@ -134,10 +136,10 @@ export default async function WorkerJobsView() {
                   <div className="flex items-center gap-4">
                     <div className="text-right">
                       <div className="font-bold text-[var(--ink)]">
-                        ₦{offer.feeAmount.toLocaleString()}
+                        ₦{offer.budgetMax.toLocaleString()}
                       </div>
                       <div className="text-xs text-[var(--ink-soft)] font-medium uppercase tracking-wider mt-0.5">
-                        Agreed Wage
+                        Offered Salary
                       </div>
                     </div>
                     {offer.status === "PENDING" && (

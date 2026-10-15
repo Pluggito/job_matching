@@ -31,12 +31,13 @@ export const metadata: Metadata = {
   description: "A demo marketplace connecting skilled professionals and employers across Nigeria.",
   icons: {
     icon: [
-      { url: "/logo.jpg" },
+      { url: "/logo.png", type: "image/png" },
+      { url: "/logo.jpg", type: "image/jpeg" },
       { url: "/icon-192x192.jpg", sizes: "192x192", type: "image/jpeg" },
       { url: "/icon-512x512.jpg", sizes: "512x512", type: "image/jpeg" },
     ],
     apple: [
-      { url: "/logo.jpg" },
+      { url: "/logo.png" },
     ],
   },
   appleWebApp: {
