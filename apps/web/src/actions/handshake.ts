@@ -5,6 +5,7 @@ import { getCurrentUser } from "./auth";
 import { eq, and } from "@repo/db";
 import { revalidatePath } from "next/cache";
 import { AGENCY_FEE_PER_WORKER } from "@repo/shared";
+import { sendPushToUser } from "@/server/services/pushNotifications";
 
 export async function sendHandshakeOffer(workerProfileId: string, hiringRequestId: string) {
   const session = await getCurrentUser();
@@ -131,6 +132,34 @@ export async function respondToHandshake(selectionId: string, accept: boolean) {
     }
   }
 
+  // Notify employer of worker's response
+  const [empProfile] = await db
+    .select({ userId: employerProfiles.userId, businessName: employerProfiles.businessName })
+    .from(employerProfiles)
+    .where(eq(employerProfiles.id, selection.employerProfileId))
+    .limit(1);
+
+  if (empProfile) {
+    const notifyContent = accept
+      ? "Candidate accepted your job placement offer! Direct contact details are now unlocked."
+      : "Candidate declined the job offer. You may review other candidates in your matches.";
+
+    await db.insert(notifications).values({
+      userId: empProfile.userId,
+      type: accept ? "HANDSHAKE_ACCEPTED" : "HANDSHAKE_DECLINED",
+      content: notifyContent,
+    });
+
+    sendPushToUser(empProfile.userId, {
+      title: accept ? "Job Offer Accepted! 🎉" : "Job Offer Declined",
+      body: notifyContent,
+      url: selection.hiringRequestId
+        ? `/employer/requests/${selection.hiringRequestId}/matches`
+        : "/employer",
+      tag: "handshake-response",
+    }).catch(console.error);
+  }
+
   revalidatePath("/dashboard");
   if (selection.hiringRequestId) {
     revalidatePath(`/employer/requests/${selection.hiringRequestId}/matches`);
@@ -181,11 +210,19 @@ export async function confirmEmployerHire(selectionId: string) {
     .limit(1);
 
   if (worker) {
+    const offerContent = `${employerProfile.businessName} has sent you an official job placement offer! Please review the terms and accept or decline in your dashboard.`;
     await db.insert(notifications).values({
       userId: worker.userId,
       type: "HANDSHAKE_OFFER",
-      content: `${employerProfile.businessName} has sent you an official job offer! Please review the terms and accept or decline in your dashboard.`,
+      content: offerContent,
     });
+
+    sendPushToUser(worker.userId, {
+      title: "New Job Placement Offer! 💼",
+      body: `${employerProfile.businessName} sent you an official offer. Tap to preview and accept.`,
+      url: "/dashboard",
+      tag: "job-offer",
+    }).catch(console.error);
   }
 
   revalidatePath(`/employer/requests/${selection.hiringRequestId}/matches`);

@@ -29,6 +29,7 @@ import {
 import { getCurrentUser } from "./auth";
 import crypto from "crypto";
 import { revalidatePath } from "next/cache";
+import { sendPushToUser } from "@/server/services/pushNotifications";
 
 const SECRET_SALT = process.env.JWT_SECRET || "staffguru_errand_secure_salt_2026";
 
@@ -344,6 +345,13 @@ export async function claimErrand(errandId: string) {
           type: "ERRAND_CLAIMED",
           content: `A verified local runner has claimed your errand "${lockedErrand.title}". Task is now in progress!`,
         });
+
+        sendPushToUser(employer.userId, {
+          title: "Runner Claimed Your Errand! 🏃‍♂️",
+          body: `A verified runner claimed "${lockedErrand.title}". Task is now in progress.`,
+          url: `/employer/errands/${errandId}`,
+          tag: `errand-${errandId}`,
+        }).catch(console.error);
       }
 
       return { success: true };
@@ -510,6 +518,13 @@ export async function submitErrandProof(params: {
         type: "PROOF_SUBMITTED",
         content: `Proof of completion has been submitted for errand "${errand.title}". Please review and confirm within 24 hours.`,
       });
+
+      sendPushToUser(emp.userId, {
+        title: "Errand Proof Submitted 📸",
+        body: `Proof has been submitted for "${errand.title}". Review and release payment within 24 hours.`,
+        url: `/employer/errands/${params.errandId}`,
+        tag: `errand-${params.errandId}`,
+      }).catch(console.error);
     }
   });
 
@@ -603,6 +618,15 @@ export async function approveErrandCompletion(errandId: string) {
             (errand.workerPayoutKobo || 0) / 100
           ).toLocaleString()} payout has been released to your bank account on file.`,
         });
+
+        sendPushToUser(wrk.userId, {
+          title: "Errand Approved! Payout Released 💰",
+          body: `Errand "${errand.title}" approved! ₦${(
+            (errand.workerPayoutKobo || 0) / 100
+          ).toLocaleString()} payout has been released.`,
+          url: `/dashboard/errands/${errandId}`,
+          tag: `errand-${errandId}`,
+        }).catch(console.error);
       }
     }
   });
@@ -784,6 +808,13 @@ export async function requestErrandChanges(params: {
           type: "ERRAND_REVISION_REQUESTED",
           content: `Changes requested on errand "${errand.title}": "${notes.trim()}". Please re-submit proof before ${graceExpiry.toLocaleString()}.`,
         });
+
+        sendPushToUser(wrk.userId, {
+          title: "Revision Requested on Errand ⚠️",
+          body: `The client requested changes on "${errand.title}": "${notes.trim()}". Please review and re-submit.`,
+          url: `/dashboard/errands/${errandId}`,
+          tag: `errand-${errandId}`,
+        }).catch(console.error);
       }
     }
   });
