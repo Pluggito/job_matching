@@ -4,6 +4,7 @@ import { db, selections, hiringRequests, workerProfiles, employerProfiles } from
 import { getCurrentUser } from "./auth";
 import { eq, and } from "@repo/db";
 import { revalidatePath } from "next/cache";
+import { AGENCY_FEE_PER_WORKER } from "@repo/shared";
 
 export async function sendHandshakeOffer(workerProfileId: string, hiringRequestId: string) {
   const session = await getCurrentUser();
@@ -49,7 +50,7 @@ export async function sendHandshakeOffer(workerProfileId: string, hiringRequestI
     throw new Error("An offer has already been sent to this worker for this role.");
   }
 
-  // Create the selection (Handshake)
+  // Create the selection (Handshake) with regulated flat placement fee
   const [newSelection] = await db
     .insert(selections)
     .values({
@@ -57,7 +58,7 @@ export async function sendHandshakeOffer(workerProfileId: string, hiringRequestI
       workerProfileId,
       hiringRequestId,
       status: "PENDING",
-      feeAmount: request.budgetMax, // Example default fee/budget logic
+      feeAmount: AGENCY_FEE_PER_WORKER,
       termsVersion: "1.0",
     })
     .returning();

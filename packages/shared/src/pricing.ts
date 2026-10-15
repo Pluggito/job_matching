@@ -193,3 +193,63 @@ export function calculateErrandPricingBreakdown(
   };
 }
 
+export interface PaystackFeeCalculation {
+  baseAmountKobo: number;
+  baseAmountNaira: number;
+  feeKobo: number;
+  feeNaira: number;
+  totalKobo: number;
+  totalNaira: number;
+  isFlatFeeWaived: boolean;
+  isCapped: boolean;
+}
+
+/**
+ * Calculates Paystack processing fee according to standard Nigerian merchant pricing:
+ * - 1.5% + NGN 100
+ * - ₦100 fee waived for transactions under ₦2,500 (250,000 kobo)
+ * - Capped at ₦2,000 (200,000 kobo) maximum per transaction
+ *
+ * @param baseAmountKobo The base amount to be charged in kobo (e.g. 5,000,000 for ₦50,000)
+ */
+export function calculatePaystackFee(baseAmountKobo: number): PaystackFeeCalculation {
+  if (baseAmountKobo <= 0) {
+    return {
+      baseAmountKobo: 0,
+      baseAmountNaira: 0,
+      feeKobo: 0,
+      feeNaira: 0,
+      totalKobo: 0,
+      totalNaira: 0,
+      isFlatFeeWaived: true,
+      isCapped: false,
+    };
+  }
+
+  const baseAmountNaira = baseAmountKobo / 100;
+  const isFlatFeeWaived = baseAmountNaira < 2500;
+
+  // 1.5% in kobo
+  const percentFeeKobo = Math.round(baseAmountKobo * 0.015);
+  // ₦100 flat fee (10,000 kobo), waived if under ₦2,500
+  const flatFeeKobo = isFlatFeeWaived ? 0 : 100 * 100;
+  const rawFeeKobo = percentFeeKobo + flatFeeKobo;
+
+  // Maximum fee cap: ₦2,000 (200,000 kobo)
+  const capKobo = 2000 * 100;
+  const isCapped = rawFeeKobo > capKobo;
+  const feeKobo = Math.min(rawFeeKobo, capKobo);
+  const totalKobo = baseAmountKobo + feeKobo;
+
+  return {
+    baseAmountKobo,
+    baseAmountNaira,
+    feeKobo,
+    feeNaira: feeKobo / 100,
+    totalKobo,
+    totalNaira: totalKobo / 100,
+    isFlatFeeWaived,
+    isCapped,
+  };
+}
+

@@ -173,6 +173,8 @@ export default async function MatchesPage({
                       <PayAgencyFeeButton
                         selectionId={sel.id}
                         feeAmount={50000}
+                        candidateName={match.preview.category}
+                        jobTitle={request.title}
                         compact
                       />
                       <span className="text-[11px] text-center text-amber-700 font-medium">

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { formatNaira } from "@repo/shared";
+import { formatNaira, calculatePaystackFee } from "@repo/shared";
 import { initializeErrandPayment } from "@/actions/payments";
 import {
   ShieldCheck,
@@ -33,7 +33,9 @@ export default function ErrandCheckoutClient({ errand }: Props) {
 
   const taskPriceKobo = errand.taskPriceKobo || errand.budgetKobo;
   const creationFeeKobo = errand.creationFeeKobo || 0;
-  const totalKobo = taskPriceKobo + creationFeeKobo;
+  const subtotalKobo = taskPriceKobo + creationFeeKobo;
+  const paystackCalc = calculatePaystackFee(subtotalKobo);
+  const totalKobo = paystackCalc.totalKobo;
 
   const handlePay = async () => {
     setIsLoading(true);
@@ -96,6 +98,18 @@ export default function ErrandCheckoutClient({ errand }: Props) {
           <span>Platform Creation & Outreach Fee:</span>
           <span className="font-mono font-semibold text-[var(--ink)]">
             {formatNaira(creationFeeKobo)}
+          </span>
+        </div>
+        <div className="flex items-center justify-between text-neutral-600">
+          <span className="flex items-center gap-1">
+            <span>Paystack Processing Fee:</span>
+            <span className="text-[10px] text-neutral-400 font-normal">
+              ({paystackCalc.isFlatFeeWaived ? "1.5%" : "1.5% + ₦100"}
+              {paystackCalc.isCapped ? ", capped at ₦2,000" : ""})
+            </span>
+          </span>
+          <span className="font-mono font-semibold text-[var(--ink)]">
+            {formatNaira(paystackCalc.feeKobo)}
           </span>
         </div>
         <div className="border-t border-black/10 pt-3 flex items-center justify-between font-bold text-base text-[var(--ink)]">

@@ -31,18 +31,18 @@ export function Logo({
     <div className={cn("inline-flex items-center gap-2.5 select-none", className)}>
       <div
         className={cn(
-          "relative overflow-hidden rounded-full shrink-0 shadow-xs ring-1 ring-black/10 bg-[#008751]",
+          "relative shrink-0",
           iconClassName
         )}
         style={{ width: currentSize.dimension, height: currentSize.dimension }}
       >
         <Image
-          src="/logo.jpg"
+          src="/logo.png"
           alt="Staff Guru logo"
           width={currentSize.dimension * 2}
           height={currentSize.dimension * 2}
           priority
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain"
         />
       </div>
 
