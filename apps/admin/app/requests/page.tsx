@@ -8,6 +8,7 @@ import {
   payments,
   eq,
   desc,
+  isNotNull,
 } from "@repo/db";
 import HireRequestsView, {
   HiringRequestItem,
@@ -39,7 +40,7 @@ export default async function RequestsPage() {
     .innerJoin(users, eq(employerProfiles.userId, users.id))
     .orderBy(desc(hiringRequests.createdAt));
 
-  // Query all selections joined with workerProfiles and payments
+  // Query selections directly (1 row per selection, preventing cartesian duplicates)
   const selRows = await db
     .select({
       selectionId: selections.id,
@@ -53,20 +54,47 @@ export default async function RequestsPage() {
       expectedPay: workerProfiles.expectedPay,
       profileData: workerProfiles.profileData,
       workerEmail: users.email,
-      paymentStatus: payments.status,
-      paymentAdminId: payments.adminId,
-      paymentVerifiedAt: payments.verifiedAt,
     })
     .from(selections)
     .innerJoin(workerProfiles, eq(selections.workerProfileId, workerProfiles.id))
-    .innerJoin(users, eq(workerProfiles.userId, users.id))
-    .leftJoin(payments, eq(selections.id, payments.selectionId));
+    .innerJoin(users, eq(workerProfiles.userId, users.id));
 
-  // Group selections by hiringRequestId
+  // Query payments for selections to map payment status without duplicating selections
+  const paymentRows = await db
+    .select({
+      selectionId: payments.selectionId,
+      status: payments.status,
+      adminId: payments.adminId,
+      verifiedAt: payments.verifiedAt,
+    })
+    .from(payments)
+    .where(isNotNull(payments.selectionId))
+    .orderBy(desc(payments.verifiedAt), desc(payments.expiresAt));
+
+  // Map selectionId to its best payment record (VERIFIED takes highest priority)
+  const paymentMap = new Map<
+    string,
+    { status: string; adminId: string | null; verifiedAt: Date | null }
+  >();
+  for (const p of paymentRows) {
+    if (!p.selectionId) continue;
+    const existing = paymentMap.get(p.selectionId);
+    if (!existing || (existing.status !== "VERIFIED" && p.status === "VERIFIED")) {
+      paymentMap.set(p.selectionId, {
+        status: p.status,
+        adminId: p.adminId,
+        verifiedAt: p.verifiedAt,
+      });
+    }
+  }
+
+  // Group selections by hiringRequestId (each selectionId added exactly once)
   const groupedCandidates = new Map<string, ShortlistedWorker[]>();
   for (const s of selRows) {
     const list = groupedCandidates.get(s.hiringRequestId) || [];
     const pData = (s.profileData as Record<string, any>) || {};
+    const payment = paymentMap.get(s.selectionId);
+
     list.push({
       selectionId: s.selectionId,
       workerProfileId: s.workerProfileId,
@@ -78,9 +106,9 @@ export default async function RequestsPage() {
       expectedPay: s.expectedPay,
       selectionStatus: s.selectionStatus,
       feeAmount: s.feeAmount || 50000,
-      paymentStatus: s.paymentStatus || null,
-      paymentAdminId: s.paymentAdminId || null,
-      paymentVerifiedAt: s.paymentVerifiedAt ? s.paymentVerifiedAt.toISOString() : null,
+      paymentStatus: payment?.status || null,
+      paymentAdminId: payment?.adminId || null,
+      paymentVerifiedAt: payment?.verifiedAt ? payment.verifiedAt.toISOString() : null,
       contactPhone: pData.contactPhone || null,
       contactEmail: pData.email || null,
       nin: pData.nin || null,

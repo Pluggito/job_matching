@@ -461,3 +461,17 @@ export async function POST(req: Request) {
     });
   }
 }
+
+export async function GET() {
+  return Response.json(
+    {
+      status: "healthy",
+      service: "StaffGuru Paystack Webhook Listener",
+      timestamp: new Date().toISOString(),
+      acceptedMethods: ["POST"],
+      documentation: "Configured for Paystack Test and Live Webhooks",
+    },
+    { status: 200 }
+  );
+}
+
