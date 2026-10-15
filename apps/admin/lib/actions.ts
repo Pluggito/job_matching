@@ -217,6 +217,13 @@ export async function releaseWorkerAccess(params: {
 
   if (!sel) throw new Error(`Selection with ID ${selectionId} not found.`);
 
+  // ENFORCE: worker must have accepted before contact can be released!
+  if (!sel.termsAcceptedAt) {
+    throw new Error(
+      "Worker has not accepted the job offer yet. You must confirm that the worker has accepted the offer before releasing contact details."
+    );
+  }
+
   await db.transaction(async (tx) => {
     // Update selection to connected / CONFIRMED
     await tx
@@ -233,7 +240,71 @@ export async function releaseWorkerAccess(params: {
       action: "SELECTION_RELEASE_ACCESS",
       targetType: "SELECTION",
       targetId: selectionId,
-      reason: notes || "Direct worker access released by admin",
+      reason: notes || "Direct worker access released by admin after confirming worker acceptance",
+      metadata: {
+        employerProfileId: sel.employerProfileId,
+        workerProfileId: sel.workerProfileId,
+      },
+    });
+  });
+
+  revalidatePath("/requests");
+  revalidatePath("/workers");
+  revalidatePath("/");
+  return { success: true };
+}
+
+export async function confirmWorkerJobAcceptance(params: {
+  selectionId: string;
+  notes?: string;
+}) {
+  const admin = await getAdminUser();
+  const { selectionId, notes } = params;
+
+  const [sel] = await db
+    .select()
+    .from(selections)
+    .where(eq(selections.id, selectionId))
+    .limit(1);
+
+  if (!sel) throw new Error(`Selection with ID ${selectionId} not found.`);
+
+  await db.transaction(async (tx) => {
+    const acceptedAt = new Date();
+    await tx
+      .update(selections)
+      .set({
+        status: "CONFIRMED",
+        termsAcceptedAt: acceptedAt,
+      })
+      .where(eq(selections.id, selectionId));
+
+    // Also activate placement with 14-day SLA
+    const [existingPlacement] = await tx
+      .select({ id: placements.id })
+      .from(placements)
+      .where(eq(placements.selectionId, selectionId))
+      .limit(1);
+
+    if (!existingPlacement) {
+      const startDate = new Date();
+      const replacementDeadline = new Date(startDate.getTime() + 14 * 24 * 60 * 60 * 1000);
+      await tx.insert(placements).values({
+        selectionId,
+        startDate,
+        status: "ACTIVE",
+        replacementDeadline,
+      });
+    }
+
+    // Audit log entry
+    await insertAuditLog(tx, {
+      adminId: admin.id,
+      adminEmail: admin.email,
+      action: "CONFIRM_WORKER_ACCEPTANCE",
+      targetType: "SELECTION",
+      targetId: selectionId,
+      reason: notes || "Admin verified worker accepted offer via communication",
       metadata: {
         employerProfileId: sel.employerProfileId,
         workerProfileId: sel.workerProfileId,
