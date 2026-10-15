@@ -14,6 +14,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { initializeSelectionPayment } from "@/actions/payments";
+import { calculatePaystackFee } from "@repo/shared";
 
 interface PayAgencyFeeButtonProps {
   selectionId: string;
@@ -37,6 +38,8 @@ export default function PayAgencyFeeButton({
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const paystackCalc = calculatePaystackFee(feeAmount * 100);
 
   // Close modal on escape key and prevent body background scroll
   useEffect(() => {
@@ -137,22 +140,35 @@ export default function PayAgencyFeeButton({
               StaffGuru operates a transparent, one-time placement model. Rather than cutting into worker salaries each month, our single fee protects both you and your candidate.
             </p>
 
-            {/* Price Banner Card */}
-            <div className="mt-4 p-4 rounded-2xl bg-gradient-to-br from-emerald-50/80 via-white to-green-50/40 border border-emerald-200/80 flex items-center justify-between">
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-800">
-                  {candidateName ? `${candidateName} Placement` : "One-Time Agency Placement"}
-                </p>
-                <div className="flex items-baseline gap-2 mt-0.5">
-                  <span className="text-2xl sm:text-3xl font-extrabold text-[var(--ink)] font-mono">
-                    ₦{feeAmount.toLocaleString()}
+            {/* Price Banner Card with Paystack breakdown */}
+            <div className="mt-4 p-4 rounded-2xl bg-gradient-to-br from-emerald-50/80 via-white to-green-50/40 border border-emerald-200/80 space-y-2.5">
+              <div className="flex items-center justify-between text-xs text-[var(--ink-soft)]">
+                <span>{candidateName ? `${candidateName} Placement` : "Agency Placement & 14-Day SLA"}</span>
+                <span className="font-mono font-bold text-[var(--ink)]">
+                  ₦{feeAmount.toLocaleString()}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs text-[var(--ink-soft)]">
+                <span className="flex items-center gap-1">
+                  Paystack Processing Fee
+                  <span className="text-[10px] text-gray-500 font-normal">
+                    ({paystackCalc.isFlatFeeWaived ? "1.5%" : "1.5% + ₦100"}
+                    {paystackCalc.isCapped ? ", capped at ₦2,000" : ""})
                   </span>
-                  <span className="text-xs font-medium text-gray-500">
-                    one-time fee
+                </span>
+                <span className="font-mono font-bold text-[var(--ink)]">
+                  ₦{paystackCalc.feeNaira.toLocaleString()}
+                </span>
+              </div>
+              <div className="pt-2 border-t border-emerald-200/70 flex items-baseline justify-between">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-800">
+                    Total Due
+                  </p>
+                  <span className="text-2xl sm:text-3xl font-extrabold text-[var(--ink)] font-mono">
+                    ₦{paystackCalc.totalNaira.toLocaleString()}
                   </span>
                 </div>
-              </div>
-              <div className="text-right">
                 <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--ng)] bg-white px-2.5 py-1 rounded-full border border-emerald-200 shadow-xs">
                   <CheckCircle2 size={12} strokeWidth={2.5} /> 100% Guaranteed
                 </span>
@@ -245,7 +261,7 @@ export default function PayAgencyFeeButton({
                 ) : (
                   <>
                     <CreditCard size={18} strokeWidth={2.2} />
-                    <span>Pay ₦{feeAmount.toLocaleString()} & Unlock Contact</span>
+                    <span>Pay ₦{paystackCalc.totalNaira.toLocaleString()} & Unlock Contact</span>
                   </>
                 )}
               </button>

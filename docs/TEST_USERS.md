@@ -214,8 +214,9 @@ This guide contains everything you need to test the entire Staff Guru platform e
      * **0% Deductions from Worker Wages**: Worker keeps 100% of their earned salary.
      * **Government NIN & Skill Vetting**: Pre-screened identity and background checks.
      * **Instant Contact Unlock**: Unmasked direct phone and WhatsApp access.
-   * Click **"Pay ₦50,000 & Unlock Contact"**.
-   * Paystack checkout initializes with the candidate placement metadata.
+   * Shows breakdown: Placement Fee (₦50,000) + Paystack Processing Fee (₦850, 1.5% + ₦100) = **Total: ₦50,850**.
+   * Click **"Pay ₦50,850 & Unlock Contact"**.
+   * Paystack checkout initializes displaying **Pay NGN 50,850**.
    * In Paystack Test Mode, click **"Success"** or submit test card (`4084084084084081`, any CVV/future expiry).
 4. After callback verification:
    * The green alert banner appears: **"Agency Handshake Fee Verified!"**
