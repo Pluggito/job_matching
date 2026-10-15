@@ -143,19 +143,22 @@ export async function respondToHandshake(selectionId: string, accept: boolean) {
     const notifyContent = accept
       ? "Candidate accepted your job placement offer! Direct contact details are now unlocked."
       : "Candidate declined the job offer. You may review other candidates in your matches.";
+    const targetLink = selection.hiringRequestId
+      ? `/employer/requests/${selection.hiringRequestId}/matches`
+      : "/employer";
 
     await db.insert(notifications).values({
       userId: empProfile.userId,
       type: accept ? "HANDSHAKE_ACCEPTED" : "HANDSHAKE_DECLINED",
+      title: accept ? "Job Offer Accepted! 🎉" : "Job Offer Declined",
       content: notifyContent,
+      link: targetLink,
     });
 
     sendPushToUser(empProfile.userId, {
       title: accept ? "Job Offer Accepted! 🎉" : "Job Offer Declined",
       body: notifyContent,
-      url: selection.hiringRequestId
-        ? `/employer/requests/${selection.hiringRequestId}/matches`
-        : "/employer",
+      url: targetLink,
       tag: "handshake-response",
     }).catch(console.error);
   }
@@ -213,8 +216,10 @@ export async function confirmEmployerHire(selectionId: string) {
     const offerContent = `${employerProfile.businessName} has sent you an official job placement offer! Please review the terms and accept or decline in your dashboard.`;
     await db.insert(notifications).values({
       userId: worker.userId,
-      type: "HANDSHAKE_OFFER",
+      type: "JOB_OFFER",
+      title: "New Job Placement Offer! 💼",
       content: offerContent,
+      link: "/dashboard",
     });
 
     sendPushToUser(worker.userId, {

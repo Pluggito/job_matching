@@ -96,7 +96,9 @@ export async function processUnclaimedExpiredErrands() {
         await tx.insert(notifications).values({
           userId: emp.userId,
           type: "ERRAND_EXPIRED",
+          title: "Errand Guarantee Refund Issued 💰",
           content: `Your errand "${errand.title}" was not claimed within the 24-hour guarantee window. A 100% full refund has been initiated to your account.`,
+          link: `/employer/errands/${errand.id}`,
         });
       }
     });
@@ -162,8 +164,10 @@ export async function processAutoReleaseProofPayouts() {
       if (worker) {
         await tx.insert(notifications).values({
           userId: worker.userId,
-          type: "ERRAND_PAYOUT_RELEASED",
+          type: "ERRAND_COMPLETED",
+          title: "Errand Payout Auto-Released 💰",
           content: `Proof auto-approved after 24 hours! Your payout of ${formatNaira(payoutKobo)} has been transferred to your registered bank account.`,
+          link: `/dashboard/errands/${errand.id}`,
         });
       }
 
@@ -178,7 +182,9 @@ export async function processAutoReleaseProofPayouts() {
         await tx.insert(notifications).values({
           userId: emp.userId,
           type: "ERRAND_COMPLETED",
+          title: "Errand Auto-Completed ✅",
           content: `Errand "${errand.title}" automatically completed after the 24-hour review window.`,
+          link: `/employer/errands/${errand.id}`,
         });
       }
     });
@@ -231,7 +237,9 @@ export async function processLiftBankPayoutHolds() {
         await tx.insert(notifications).values({
           userId: worker.userId,
           type: "SECURITY_UPDATE",
+          title: "Bank Payout Hold Lifted 🛡️",
           content: "Your 24-hour bank payout security hold has completed. Payouts to your updated account are now active.",
+          link: "/dashboard/profile/bank",
         });
       }
     });

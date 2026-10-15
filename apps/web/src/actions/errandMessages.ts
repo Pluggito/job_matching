@@ -1,6 +1,6 @@
 "use server";
 
-import { db, errandThreads, errandMessages, errands, users, workerProfiles, eq, and, desc } from "@repo/db";
+import { db, errandThreads, errandMessages, errands, users, workerProfiles, notifications, eq, and, desc } from "@repo/db";
 import { getCurrentUser } from "./auth";
 import { revalidatePath } from "next/cache";
 import { sendPushToUser } from "@/server/services/pushNotifications";
@@ -113,9 +113,18 @@ export async function sendErrandMessage(params: {
   }
 
   if (recipientUserId) {
+    const preview = cleanContent.length > 80 ? `${cleanContent.slice(0, 77)}...` : cleanContent;
+    await db.insert(notifications).values({
+      userId: recipientUserId,
+      type: "NEW_ERRAND_MESSAGE",
+      title: "New Errand Message 💬",
+      content: preview,
+      link: targetUrl,
+    });
+
     sendPushToUser(recipientUserId, {
       title: "New Errand Message 💬",
-      body: cleanContent.length > 80 ? `${cleanContent.slice(0, 77)}...` : cleanContent,
+      body: preview,
       url: targetUrl,
       tag: `errand-${errandId}`,
     }).catch(console.error);
