@@ -59,8 +59,8 @@ export default function ClientLayout({
 
         {/* Content area */}
         <div className="flex-1 flex flex-col min-w-0 bg-[#f4f7f5]">
-          <div className="flex-1 p-4 sm:p-8 overflow-y-auto">
-            <div className="max-w-6xl mx-auto h-full">
+          <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+            <div className="w-full max-w-7xl mx-auto h-full">
               {children}
             </div>
           </div>
