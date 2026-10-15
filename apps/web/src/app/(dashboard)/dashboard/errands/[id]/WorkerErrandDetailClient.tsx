@@ -194,45 +194,42 @@ export default function WorkerErrandDetailClient({
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-12">
+    <div className="space-y-6 w-full pb-12">
       {/* Top Breadcrumb & Status */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <Link
           href="/dashboard/errands"
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-neutral-500 hover:text-[var(--ink)]"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-500 hover:text-neutral-900 transition-colors"
         >
           <ChevronLeft size={16} /> Back to Errands Hub
         </Link>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-neutral-400">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500 bg-white border border-neutral-200/80 px-2.5 py-1 rounded-md shadow-2xs">
             Task ID: #{errand.id.slice(0, 8)}
           </span>
-          <span
-            className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-              status === "claimed"
-                ? "bg-amber-100 text-amber-800"
-                : status === "in_progress"
-                ? "bg-blue-100 text-blue-800 animate-pulse"
-                : status === "proof_submitted"
-                ? "bg-purple-100 text-purple-800"
-                : status === "completed"
-                ? "bg-green-100 text-green-800"
-                : "bg-neutral-100 text-neutral-700"
-            }`}
-          >
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wider bg-neutral-100 text-neutral-800 border border-neutral-200/80 shadow-2xs">
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${
+                status === "completed"
+                  ? "bg-[#008751]"
+                  : status === "in_progress" || status === "claimed"
+                  ? "bg-[#008751] animate-pulse"
+                  : "bg-neutral-400"
+              }`}
+            />
             {status.replace("_", " ")}
           </span>
         </div>
       </div>
 
       {/* Main Grid: Details (Left) + Chat (Right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column (2 Cols) */}
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Left Column (7 Cols) */}
+        <div className="lg:col-span-7 space-y-6">
           {/* Header Card */}
-          <div className="bg-white rounded-2xl p-6 border border-black/10 shadow-xs space-y-4">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--ng)]">
-              <Bike size={16} /> {errand.type.replace("_", " ")}
+          <div className="bg-white rounded-2xl p-6 border border-neutral-200/80 shadow-xs space-y-4">
+            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-neutral-500 bg-neutral-50 border border-neutral-200/60 px-2.5 py-1 rounded-md w-fit">
+              <Bike size={14} className="text-[#008751]" /> {errand.type.replace("_", " ")}
             </div>
             <h1 className="text-2xl font-bold text-[var(--ink)]">{errand.title}</h1>
             <p className="text-xs text-neutral-600 leading-relaxed">{errand.description}</p>
@@ -354,29 +351,29 @@ export default function WorkerErrandDetailClient({
           </div>
         </div>
 
-        {/* Right Column: Coordination Chat (1 Col) */}
-        <div className="space-y-4">
-          <div className="bg-white rounded-2xl border border-black/10 shadow-xs flex flex-col h-[560px]">
+        {/* Right Column: Coordination Chat (5 Cols) */}
+        <div className="lg:col-span-5 space-y-4">
+          <div className="bg-white rounded-2xl border border-neutral-200/80 shadow-xs flex flex-col min-h-[560px]">
             {/* Chat Header */}
-            <div className="p-4 border-b border-black/10 flex items-center justify-between bg-neutral-50 rounded-t-2xl">
+            <div className="p-4 border-b border-neutral-200/70 flex items-center justify-between bg-neutral-50 rounded-t-2xl">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-[var(--ng)] text-white flex items-center justify-center font-bold text-xs">
+                <div className="w-8 h-8 rounded-full bg-neutral-100 border border-neutral-200 text-neutral-700 flex items-center justify-center font-bold text-xs shadow-2xs">
                   <Building size={14} />
                 </div>
                 <div>
-                  <h3 className="text-xs font-bold text-[var(--ink)]">{employerInfo.name}</h3>
+                  <h3 className="text-xs font-semibold text-neutral-900">{employerInfo.name}</h3>
                   <span className="text-[10px] text-neutral-500">Task Employer</span>
                 </div>
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-neutral-700 bg-neutral-100 px-2.5 py-0.5 rounded-md border border-neutral-200/60">
                 Active Thread
               </span>
             </div>
 
             {/* Chat Privacy Warning */}
-            <div className="p-2.5 bg-amber-50/80 border-b border-amber-200/50 text-[10px] text-amber-900 flex items-center gap-1.5 px-3">
-              <AlertCircle size={12} className="shrink-0 text-amber-700" />
-              <span>Safety Filter Active: Phone numbers and bank details are hidden.</span>
+            <div className="p-2.5 bg-neutral-50 border-b border-neutral-200/60 text-[10px] text-neutral-500 flex items-center gap-1.5 px-3">
+              <AlertCircle size={12} className="shrink-0 text-neutral-400" />
+              <span>Safety Filter Active: Direct phone numbers and bank details are hidden.</span>
             </div>
 
             {/* Messages List */}
@@ -400,8 +397,8 @@ export default function WorkerErrandDetailClient({
                       <div
                         className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-xs leading-relaxed ${
                           isMe
-                            ? "bg-[var(--ng)] text-white rounded-br-xs"
-                            : "bg-neutral-100 text-[var(--ink)] rounded-bl-xs"
+                            ? "bg-[#008751] text-white rounded-br-xs"
+                            : "bg-neutral-100 text-neutral-900 rounded-bl-xs border border-neutral-200/60"
                         }`}
                       >
                         {m.content}
@@ -419,18 +416,18 @@ export default function WorkerErrandDetailClient({
             </div>
 
             {/* Chat Input */}
-            <form onSubmit={handleSendMessage} className="p-3 border-t border-black/10 flex items-center gap-2">
+            <form onSubmit={handleSendMessage} className="p-3 border-t border-neutral-200/70 flex items-center gap-2">
               <input
                 type="text"
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder="Type coordination message..."
-                className="flex-1 px-3 py-2 text-xs rounded-xl border border-black/15 focus:outline-none focus:ring-2 focus:ring-[var(--ng)]"
+                className="flex-1 px-3.5 py-2 text-xs rounded-xl border border-neutral-300 focus:outline-none focus:border-neutral-500 focus:ring-1 focus:ring-neutral-400 transition-colors"
               />
               <button
                 type="submit"
                 disabled={isSending || !newMessage.trim()}
-                className="w-8 h-8 rounded-xl bg-[var(--ng)] text-white flex items-center justify-center hover:opacity-90 disabled:opacity-40 cursor-pointer shrink-0"
+                className="w-8 h-8 rounded-xl bg-[#008751] hover:bg-[#007043] text-white flex items-center justify-center transition-colors disabled:opacity-40 cursor-pointer shrink-0 shadow-xs"
               >
                 {isSending ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
               </button>

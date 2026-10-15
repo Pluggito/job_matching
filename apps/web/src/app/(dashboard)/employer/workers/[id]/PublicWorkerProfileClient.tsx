@@ -294,23 +294,23 @@ export default function PublicWorkerProfileClient({
                 </div>
               ) : pendingSelectionId && isSelectionPaid ? (
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-amber-700 mb-2">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-2">
                     Placement Fee Paid · Offer Dispatched
                   </p>
-                  <p className="text-xs text-[var(--ink-soft)] mb-4 leading-relaxed">
+                  <p className="text-xs text-neutral-600 mb-4 leading-relaxed">
                     You have hired this candidate! We are waiting for the job seeker to review and accept the offer. Direct contact details will unlock immediately once accepted.
                   </p>
-                  <div className="w-full h-11 px-4 rounded-xl bg-[var(--ng)] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-md shadow-[var(--ng)]/20">
+                  <div className="w-full h-11 px-4 rounded-xl bg-[#008751] text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-xs">
                     <CheckCircle2 size={16} strokeWidth={2.4} />
                     <span>Hire Active · Waiting for Candidate</span>
                   </div>
                 </div>
               ) : pendingSelectionId ? (
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-amber-700 mb-2">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-2">
                     Handshake Offer Pending Placement Fee
                   </p>
-                  <p className="text-xs text-[var(--ink-soft)] mb-4">
+                  <p className="text-xs text-neutral-600 mb-4 leading-relaxed">
                     Review why we charge the regulated ₦50,000 placement fee and unlock candidate direct contact details backed by our 14-day SLA guarantee.
                   </p>
                   <PayAgencyFeeButton

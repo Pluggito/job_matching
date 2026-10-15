@@ -67,7 +67,7 @@ export default async function MatchesPage({
   const selectionMap = new Map(requestSelections.map(s => [s.workerProfileId, s]));
 
   return (
-    <div className="max-w-5xl mx-auto py-8 px-4">
+    <div className="w-full py-4">
       <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <Link href="/employer" className="text-sm font-bold text-[var(--green)] hover:text-[var(--ink)] mb-4 inline-block">&larr; Back to Dashboard</Link>
@@ -165,21 +165,21 @@ export default async function MatchesPage({
                     />
                   ) : sel.isPaid && (sel.status === "CONFIRMED" || sel.termsAcceptedAt) ? (
                     <div className="flex flex-col gap-1 text-center">
-                      <span className="inline-flex items-center gap-1 bg-green-100 text-green-800 text-xs font-bold px-3 py-1.5 rounded-xl justify-center">
-                        <CheckCircle2 size={13} strokeWidth={2.5} /> Handshake Confirmed
+                      <span className="inline-flex items-center gap-1.5 bg-neutral-100 text-neutral-800 border border-neutral-200/80 text-xs font-semibold px-3 py-1.5 rounded-xl justify-center">
+                        <CheckCircle2 size={13} strokeWidth={2.5} className="text-[#008751]" /> Handshake Confirmed
                       </span>
-                      <span className="text-[10px] text-gray-500 font-medium">
+                      <span className="text-[10px] text-neutral-500 font-medium">
                         14-day SLA active
                       </span>
                     </div>
                   ) : sel.isPaid && sel.hiredAt ? (
                     <div className="flex flex-col gap-1.5 text-center">
-                      <div className="h-10 px-4 rounded-xl bg-amber-500/10 text-amber-900 border border-amber-200 font-bold text-xs flex items-center justify-center gap-2">
-                        <Clock size={15} className="text-amber-600" />
+                      <div className="h-10 px-4 rounded-xl bg-neutral-100 text-neutral-800 border border-neutral-200 font-semibold text-xs flex items-center justify-center gap-2">
+                        <Clock size={14} className="text-neutral-500" />
                         <span>Offer Sent</span>
                       </div>
-                      <span className="text-[11px] text-amber-700 font-medium text-center">
-                        Waiting for job seeker to accept or decline
+                      <span className="text-[11px] text-neutral-500 font-medium text-center">
+                        Waiting for candidate response
                       </span>
                     </div>
                   ) : sel.isPaid ? (
@@ -192,13 +192,13 @@ export default async function MatchesPage({
                       <button
                         type="button"
                         disabled
-                        className="h-10 px-4 rounded-xl bg-amber-50 text-amber-800 border border-amber-300 font-bold text-xs flex items-center justify-center gap-2 opacity-90 cursor-not-allowed"
+                        className="h-10 px-4 rounded-xl bg-neutral-100 text-neutral-600 border border-neutral-200 font-semibold text-xs flex items-center justify-center gap-2 cursor-not-allowed"
                       >
-                        <Clock size={15} className="text-amber-600 animate-spin" />
-                        <span>Pending</span>
+                        <Clock size={14} className="text-neutral-400 animate-spin" />
+                        <span>Payment Pending</span>
                       </button>
-                      <span className="text-[11px] text-center text-amber-700 font-medium">
-                        Fee pending · Awaiting Staff Guru confirmation
+                      <span className="text-[11px] text-center text-neutral-500 font-medium">
+                        Awaiting Staff Guru confirmation
                       </span>
                     </div>
                   ) : (

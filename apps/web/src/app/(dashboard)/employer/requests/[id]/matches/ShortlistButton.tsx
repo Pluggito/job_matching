@@ -33,8 +33,8 @@ export default function ShortlistButton({
 
   if (sent) {
     return (
-      <button disabled className="h-10 px-6 rounded-xl bg-[var(--green)] text-[var(--ink)] font-bold text-sm flex items-center justify-center gap-2 opacity-80 cursor-not-allowed">
-        <Check size={16} strokeWidth={3} /> Offer Sent
+      <button disabled className="h-10 px-6 rounded-xl bg-neutral-100 text-neutral-800 border border-neutral-200 font-semibold text-sm flex items-center justify-center gap-2 cursor-not-allowed">
+        <Check size={16} strokeWidth={2.5} className="text-[#008751]" /> Offer Sent
       </button>
     );
   }
@@ -43,7 +43,7 @@ export default function ShortlistButton({
     <button
       onClick={handleShortlist}
       disabled={loading}
-      className="h-10 px-6 rounded-xl bg-[var(--ink)] text-[var(--lime)] font-bold text-sm hover:-translate-y-0.5 transition-transform shadow-lg shadow-[var(--ink)]/10 disabled:opacity-70 disabled:hover:translate-y-0 disabled:shadow-none"
+      className="h-10 px-6 rounded-xl bg-[#008751] hover:bg-[#007043] text-white font-semibold text-sm transition-colors shadow-xs disabled:opacity-60 cursor-pointer"
     >
       {loading ? "Sending..." : "Send Offer"}
     </button>
