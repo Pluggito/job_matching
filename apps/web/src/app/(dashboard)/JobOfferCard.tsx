@@ -7,16 +7,11 @@ import {
   MapPin,
   Clock,
   CheckCircle2,
-  XCircle,
-  Clock3,
   Building,
   Check,
   X,
   Eye,
-  Calendar,
   ShieldCheck,
-  Coins,
-  Sparkles,
   Loader2,
 } from "lucide-react";
 import { respondToHandshake } from "../../actions/handshake";
@@ -117,16 +112,16 @@ export default function JobOfferCard({ offer }: { offer: JobOfferData }) {
           <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 pt-4 sm:pt-0 border-t sm:border-t-0 border-[var(--line)] w-full sm:w-auto">
             {/* Status Badge */}
             {isConfirmed ? (
-              <span className="flex items-center gap-1.5 px-3 py-1 bg-[var(--lime)] text-[var(--ng)] border border-[var(--ng)]/20 rounded-full text-xs font-bold uppercase tracking-wider">
-                <CheckCircle2 size={14} /> Confirmed Handshake
+              <span className="flex items-center gap-1.5 px-2.5 py-1 bg-neutral-100 text-neutral-800 border border-neutral-200/80 rounded-md text-[11px] font-semibold uppercase tracking-wider">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#008751]" /> Confirmed Handshake
               </span>
             ) : isDeclined ? (
-              <span className="flex items-center gap-1.5 px-3 py-1 bg-red-50 text-red-700 border border-red-200 rounded-full text-xs font-bold uppercase tracking-wider">
-                <XCircle size={14} /> Declined
+              <span className="flex items-center gap-1.5 px-2.5 py-1 bg-neutral-100 text-neutral-600 border border-neutral-200/80 rounded-md text-[11px] font-semibold uppercase tracking-wider">
+                <span className="w-1.5 h-1.5 rounded-full bg-neutral-400" /> Declined
               </span>
             ) : (
-              <span className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-800 border border-amber-200 rounded-full text-xs font-bold uppercase tracking-wider animate-pulse">
-                <Clock3 size={14} className="text-amber-600" /> Action Required
+              <span className="flex items-center gap-1.5 px-2.5 py-1 bg-neutral-100 text-neutral-900 border border-neutral-300 rounded-md text-[11px] font-semibold uppercase tracking-wider">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#008751] animate-pulse" /> Action Required
               </span>
             )}
 
@@ -146,7 +141,7 @@ export default function JobOfferCard({ offer }: { offer: JobOfferData }) {
                 <button
                   type="button"
                   onClick={() => setIsPreviewOpen(true)}
-                  className="h-9 px-3.5 bg-white border border-[var(--ink)] text-[var(--ink)] font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 hover:bg-neutral-50 transition-colors cursor-pointer shadow-xs"
+                  className="h-9 px-3.5 bg-white border border-neutral-300 text-neutral-800 font-semibold text-xs rounded-xl flex items-center justify-center gap-1.5 hover:bg-neutral-50 hover:border-neutral-400 transition-colors cursor-pointer shadow-xs"
                 >
                   <Eye size={14} /> Preview Offer
                 </button>
@@ -154,12 +149,12 @@ export default function JobOfferCard({ offer }: { offer: JobOfferData }) {
                   type="button"
                   disabled={loadingAction !== null}
                   onClick={() => handleRespond(true)}
-                  className="h-9 px-3.5 bg-[var(--ng)] text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 hover:bg-[var(--ng-deep)] transition-colors disabled:opacity-50 cursor-pointer shadow-xs"
+                  className="h-9 px-3.5 bg-[#008751] hover:bg-[#007043] text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 cursor-pointer shadow-xs"
                 >
                   {loadingAction === "accept" ? (
                     <Loader2 size={14} className="animate-spin" />
                   ) : (
-                    <Check size={14} strokeWidth={3} />
+                    <Check size={14} strokeWidth={2.5} />
                   )}
                   Accept
                 </button>
@@ -167,12 +162,12 @@ export default function JobOfferCard({ offer }: { offer: JobOfferData }) {
                   type="button"
                   disabled={loadingAction !== null}
                   onClick={() => handleRespond(false)}
-                  className="h-9 px-3 bg-gray-50 border border-gray-200 text-red-600 font-bold text-xs rounded-xl flex items-center justify-center gap-1 hover:bg-red-50 transition-colors disabled:opacity-50 cursor-pointer"
+                  className="h-9 px-3 bg-white border border-neutral-200 text-neutral-600 hover:text-red-700 hover:border-red-200 hover:bg-red-50/50 font-semibold text-xs rounded-xl flex items-center justify-center gap-1 transition-colors disabled:opacity-50 cursor-pointer"
                 >
                   {loadingAction === "decline" ? (
                     <Loader2 size={14} className="animate-spin" />
                   ) : (
-                    <X size={14} strokeWidth={3} />
+                    <X size={14} strokeWidth={2.5} />
                   )}
                   Decline
                 </button>
@@ -184,21 +179,21 @@ export default function JobOfferCard({ offer }: { offer: JobOfferData }) {
         {/* If the candidate accepted the offer, show "The employer will contact you" banner */}
         {isConfirmed && (
           <div className="pt-3 border-t border-[var(--line)]">
-            <div className="rounded-xl bg-emerald-50/90 p-3.5 text-xs text-emerald-900 border border-emerald-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+            <div className="rounded-xl bg-neutral-50 p-3.5 text-xs text-neutral-800 border border-neutral-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
               <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
-                  <CheckCircle2 size={16} strokeWidth={2.5} />
+                <div className="w-7 h-7 rounded-full bg-white border border-neutral-200 text-[#008751] flex items-center justify-center shrink-0 shadow-2xs">
+                  <CheckCircle2 size={15} strokeWidth={2.5} />
                 </div>
                 <div>
-                  <p className="font-bold text-emerald-950 text-sm">
-                    Offer Accepted!
+                  <p className="font-semibold text-neutral-900 text-sm">
+                    Offer Accepted
                   </p>
-                  <p className="text-emerald-800 text-xs mt-0.5">
-                    The employer has unlocked your contact details and will reach out to you directly to coordinate resumption.
+                  <p className="text-neutral-600 text-xs mt-0.5">
+                    Your contact details are unlocked. The employer will reach out to you directly to coordinate resumption.
                   </p>
                 </div>
               </div>
-              <span className="font-bold text-emerald-900 bg-emerald-200/90 px-3 py-1.5 rounded-full text-xs shrink-0 self-start sm:self-auto border border-emerald-300">
+              <span className="font-semibold text-neutral-800 bg-white px-3 py-1.5 rounded-lg text-xs shrink-0 self-start sm:self-auto border border-neutral-200/80 shadow-2xs">
                 The employer will contact you
               </span>
             </div>
@@ -208,165 +203,170 @@ export default function JobOfferCard({ offer }: { offer: JobOfferData }) {
 
       {/* Preview Job Offer Modal */}
       {isPreviewOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
-          onClick={(e) => {
-            if (e.target === e.currentTarget && !loadingAction) {
-              setIsPreviewOpen(false);
-            }
-          }}
-        >
-          <div className="relative w-full max-w-xl rounded-3xl bg-white p-6 sm:p-7 shadow-2xl border border-[var(--line)] max-h-[92vh] overflow-y-auto">
-            {/* Close Button */}
-            <button
-              type="button"
-              onClick={() => !loadingAction && setIsPreviewOpen(false)}
-              disabled={loadingAction !== null}
-              className="absolute right-4 top-4 rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors cursor-pointer"
-              aria-label="Close dialog"
-            >
-              <X size={20} />
-            </button>
+      <div
+        role="dialog"
+        aria-modal="true"
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+        onClick={(e) => {
+          if (e.target === e.currentTarget && !loadingAction) {
+            setIsPreviewOpen(false);
+          }
+        }}
+      >
+        <div className="relative w-full max-w-xl rounded-3xl bg-white p-6 sm:p-7 shadow-2xl border border-[var(--line)] max-h-[92vh] overflow-y-auto">
+          {/* Close Button */}
+          <button
+            type="button"
+            onClick={() => !loadingAction && setIsPreviewOpen(false)}
+            disabled={loadingAction !== null}
+            className="absolute right-4 top-4 rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors cursor-pointer"
+            aria-label="Close dialog"
+          >
+            <X size={20} />
+          </button>
 
-            {/* Header */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--ng)]/10 text-[var(--ng)] text-xs font-bold mb-3">
-              <Briefcase size={14} strokeWidth={2.5} />
-              <span>Official Job Placement Offer</span>
-            </div>
-
-            <h3 className="text-xl sm:text-2xl font-bold text-[var(--ink)] tracking-tight [font-family:var(--font-bricolage)]">
+          {/* Header */}
+          <div className="mb-2">
+            <span className="text-[11px] font-semibold tracking-wider uppercase text-neutral-400">
+              Official Placement Offer
+            </span>
+            <h3 className="text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight mt-1">
               {offer.title}
             </h3>
-            <p className="text-sm font-semibold text-[var(--ink-soft)] mt-1">
-              Offered by <span className="text-[var(--ink)]">{offer.businessName}</span>
+            <p className="text-sm text-neutral-500 mt-0.5">
+              Offered by <span className="font-semibold text-neutral-800">{offer.businessName}</span>
             </p>
+          </div>
 
-            {/* Salary & Key Snapshot Card */}
-            <div className="mt-4 p-4 rounded-2xl bg-gradient-to-br from-emerald-50/90 via-white to-green-50/50 border border-emerald-200/80 space-y-3">
-              <div className="flex items-baseline justify-between">
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-800">
-                    Offered Monthly Salary
-                  </p>
-                  <span className="text-2xl sm:text-3xl font-extrabold text-[var(--ink)] font-mono">
+          {/* Salary & Key Snapshot Card */}
+          <div className="mt-4 p-4 sm:p-5 rounded-2xl bg-neutral-50 border border-neutral-200/80 space-y-3.5">
+            <div className="flex items-baseline justify-between gap-2">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+                  Offered Monthly Salary
+                </p>
+                <div className="flex items-baseline gap-1 mt-0.5">
+                  <span className="text-2xl sm:text-3xl font-extrabold text-neutral-900 font-mono tracking-tight">
                     ₦{offer.budgetMax.toLocaleString()}
                   </span>
-                  <span className="text-xs text-gray-500 font-medium ml-1">/ month</span>
+                  <span className="text-xs text-neutral-500 font-medium">/ month</span>
                 </div>
-                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--ng)] bg-white px-2.5 py-1 rounded-full border border-emerald-200 shadow-xs">
-                  <Coins size={13} /> 100% Wage Protected
+              </div>
+              <span className="inline-flex items-center gap-1.5 text-xs font-medium text-neutral-700 bg-white px-2.5 py-1 rounded-md border border-neutral-200/80 shadow-xs shrink-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#008751]" />
+                100% Wage Protected
+              </span>
+            </div>
+
+            <div className="pt-3 border-t border-neutral-200/70 grid grid-cols-2 gap-3 text-xs">
+              <div>
+                <span className="font-semibold text-neutral-400 block text-[10px] uppercase tracking-wider">Location</span>
+                <span className="font-medium text-neutral-800 flex items-center gap-1.5 mt-0.5">
+                  <MapPin size={13} className="text-neutral-400 shrink-0" />
+                  {offer.locationArea}, {offer.locationState}
                 </span>
               </div>
-
-              <div className="pt-2 border-t border-emerald-200/70 grid grid-cols-2 gap-2 text-xs text-[var(--ink-soft)]">
-                <div>
-                  <span className="font-semibold text-gray-500 block text-[10px] uppercase">Location</span>
-                  <span className="font-bold text-[var(--ink)]">
-                    {offer.locationArea}, {offer.locationState}
-                  </span>
-                </div>
-                <div>
-                  <span className="font-semibold text-gray-500 block text-[10px] uppercase">Type</span>
-                  <span className="font-bold text-[var(--ink)]">
-                    {offer.engagementType === "ONSITE" ? "Onsite Position" : "Remote Position"}
-                  </span>
-                </div>
+              <div>
+                <span className="font-semibold text-neutral-400 block text-[10px] uppercase tracking-wider">Workplace</span>
+                <span className="font-medium text-neutral-800 flex items-center gap-1.5 mt-0.5">
+                  <Briefcase size={13} className="text-neutral-400 shrink-0" />
+                  {offer.engagementType === "ONSITE" ? "Onsite Position" : "Remote Position"}
+                </span>
               </div>
-            </div>
-
-            {/* Description */}
-            {offer.description && (
-              <div className="mt-5 space-y-1.5">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--ink-soft)]">
-                  Job Description & Scope
-                </h4>
-                <div className="p-3.5 rounded-xl bg-gray-50 border border-gray-200/80 text-xs sm:text-sm text-[var(--ink)] leading-relaxed whitespace-pre-wrap">
-                  {offer.description}
-                </div>
-              </div>
-            )}
-
-            {/* Required Skills */}
-            {offer.requiredSkills && offer.requiredSkills.length > 0 && (
-              <div className="mt-4 space-y-1.5">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--ink-soft)]">
-                  Required Skills
-                </h4>
-                <div className="flex flex-wrap gap-1.5">
-                  {offer.requiredSkills.map((skill, i) => (
-                    <span
-                      key={i}
-                      className="inline-flex items-center bg-gray-100 text-gray-800 text-xs font-semibold px-2.5 py-1 rounded-lg border border-gray-200"
-                    >
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Wage Guarantee Protection Note */}
-            <div className="mt-5 p-3 rounded-xl bg-blue-50 border border-blue-200/80 flex items-start gap-2.5">
-              <ShieldCheck size={18} className="text-blue-700 shrink-0 mt-0.5" />
-              <div className="text-xs text-blue-900 leading-relaxed">
-                <span className="font-bold">Staff Guru Zero-Deduction Guarantee:</span> Unlike traditional agencies that deduct 20%–30% of worker salaries, you keep 100% of your earnings. The employer has settled all platform fees directly with Staff Guru.
-              </div>
-            </div>
-
-            {/* Actions Inside Modal */}
-            <div className="mt-6 flex flex-col sm:flex-row items-center gap-3">
-              <button
-                type="button"
-                disabled={loadingAction !== null}
-                onClick={() => handleRespond(true)}
-                className="w-full sm:flex-1 h-11 rounded-xl bg-[var(--ng)] text-white font-bold text-sm transition-all hover:bg-[var(--ng-deep)] hover:-translate-y-0.5 shadow-md shadow-[var(--ng)]/20 disabled:opacity-60 cursor-pointer flex items-center justify-center gap-2"
-              >
-                {loadingAction === "accept" ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin" />
-                    <span>Accepting...</span>
-                  </>
-                ) : (
-                  <>
-                    <Check size={16} strokeWidth={3} />
-                    <span>Accept Offer</span>
-                  </>
-                )}
-              </button>
-
-              <button
-                type="button"
-                disabled={loadingAction !== null}
-                onClick={() => handleRespond(false)}
-                className="w-full sm:w-auto h-11 px-5 rounded-xl border border-red-200 bg-red-50 text-red-700 font-bold text-sm hover:bg-red-100 transition-colors disabled:opacity-50 cursor-pointer flex items-center justify-center gap-1.5"
-              >
-                {loadingAction === "decline" ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin" />
-                    <span>Declining...</span>
-                  </>
-                ) : (
-                  <>
-                    <X size={16} strokeWidth={3} />
-                    <span>Decline Offer</span>
-                  </>
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsPreviewOpen(false)}
-                disabled={loadingAction !== null}
-                className="w-full sm:w-auto h-11 px-4 text-xs font-semibold text-gray-500 hover:text-gray-800 transition-colors cursor-pointer"
-              >
-                Close
-              </button>
             </div>
           </div>
+
+          {/* Description */}
+          {offer.description && (
+            <div className="mt-4 space-y-1">
+              <h4 className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+                Job Description & Scope
+              </h4>
+              <div className="p-3.5 rounded-xl bg-neutral-50/70 border border-neutral-200/60 text-xs sm:text-sm text-neutral-700 leading-relaxed whitespace-pre-wrap">
+                {offer.description}
+              </div>
+            </div>
+          )}
+
+          {/* Required Skills */}
+          {offer.requiredSkills && offer.requiredSkills.length > 0 && (
+            <div className="mt-4 space-y-1.5">
+              <h4 className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+                Required Skills
+              </h4>
+              <div className="flex flex-wrap gap-1.5">
+                {offer.requiredSkills.map((skill, i) => (
+                  <span
+                    key={i}
+                    className="inline-flex items-center bg-neutral-100 text-neutral-700 text-xs font-medium px-2.5 py-1 rounded-md border border-neutral-200/60"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Zero-Deduction Guarantee Note */}
+          <div className="mt-4 p-3.5 rounded-xl bg-neutral-50 border border-neutral-200/70 flex items-start gap-2.5">
+            <ShieldCheck size={16} className="text-[#008751] shrink-0 mt-0.5" />
+            <p className="text-xs text-neutral-600 leading-relaxed">
+              <strong className="text-neutral-900 font-semibold">Staff Guru Zero-Deduction Guarantee:</strong> Unlike traditional agencies that deduct 20%–30% of worker salaries, you keep 100% of your earnings. The employer has settled all platform fees directly with Staff Guru.
+            </p>
+          </div>
+
+          {/* Actions Inside Modal */}
+          <div className="mt-6 flex flex-col sm:flex-row items-center gap-3">
+            <button
+              type="button"
+              disabled={loadingAction !== null}
+              onClick={() => handleRespond(true)}
+              className="w-full sm:flex-1 h-11 rounded-xl bg-[#008751] hover:bg-[#007043] text-white font-semibold text-sm transition-all shadow-xs disabled:opacity-60 cursor-pointer flex items-center justify-center gap-2"
+            >
+              {loadingAction === "accept" ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  <span>Accepting...</span>
+                </>
+              ) : (
+                <>
+                  <Check size={16} strokeWidth={2.5} />
+                  <span>Accept Offer</span>
+                </>
+              )}
+            </button>
+
+            <button
+              type="button"
+              disabled={loadingAction !== null}
+              onClick={() => handleRespond(false)}
+              className="w-full sm:w-auto h-11 px-5 rounded-xl border border-neutral-200 bg-white text-neutral-700 font-semibold text-sm hover:text-red-700 hover:border-red-200 hover:bg-red-50/50 transition-colors disabled:opacity-50 cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              {loadingAction === "decline" ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  <span>Declining...</span>
+                </>
+              ) : (
+                <>
+                  <X size={16} strokeWidth={2.5} />
+                  <span>Decline Offer</span>
+                </>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsPreviewOpen(false)}
+              disabled={loadingAction !== null}
+              className="w-full sm:w-auto h-11 px-4 text-xs font-medium text-neutral-500 hover:text-neutral-800 transition-colors cursor-pointer"
+            >
+              Close
+            </button>
+          </div>
         </div>
-      )}
-    </>
-  );
+      </div>
+    )}
+  </>
+);
 }

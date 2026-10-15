@@ -128,49 +128,49 @@ export default function PayAgencyFeeButton({
             </button>
 
             {/* Header Badge */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--ng)]/10 text-[var(--ng)] text-xs font-bold mb-3">
-              <ShieldCheck size={14} className="text-[var(--ng)]" strokeWidth={2.5} />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-100 text-neutral-800 text-xs font-semibold mb-3 border border-neutral-200/80">
+              <ShieldCheck size={14} className="text-[#008751]" strokeWidth={2.5} />
               <span>Regulated Placement Guarantee</span>
             </div>
 
-            <h3 className="text-xl sm:text-2xl font-bold text-[var(--ink)] tracking-tight [font-family:var(--font-bricolage)]">
+            <h3 className="text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight [font-family:var(--font-bricolage)]">
               Why We Charge an Agency Placement Fee
             </h3>
-            <p className="text-xs sm:text-sm text-[var(--ink-soft)] mt-1.5 leading-relaxed">
+            <p className="text-xs sm:text-sm text-neutral-500 mt-1.5 leading-relaxed">
               StaffGuru operates a transparent, one-time placement model. Rather than cutting into worker salaries each month, our single fee protects both you and your candidate.
             </p>
 
             {/* Price Banner Card with Paystack breakdown */}
-            <div className="mt-4 p-4 rounded-2xl bg-gradient-to-br from-emerald-50/80 via-white to-green-50/40 border border-emerald-200/80 space-y-2.5">
-              <div className="flex items-center justify-between text-xs text-[var(--ink-soft)]">
+            <div className="mt-4 p-4 rounded-2xl bg-neutral-50 border border-neutral-200/80 space-y-2.5">
+              <div className="flex items-center justify-between text-xs text-neutral-600">
                 <span>{candidateName ? `${candidateName} Placement` : "Agency Placement & 14-Day SLA"}</span>
-                <span className="font-mono font-bold text-[var(--ink)]">
+                <span className="font-mono font-bold text-neutral-900">
                   ₦{feeAmount.toLocaleString()}
                 </span>
               </div>
-              <div className="flex items-center justify-between text-xs text-[var(--ink-soft)]">
+              <div className="flex items-center justify-between text-xs text-neutral-500">
                 <span className="flex items-center gap-1">
                   Paystack Processing Fee
-                  <span className="text-[10px] text-gray-500 font-normal">
+                  <span className="text-[10px] text-neutral-400 font-normal">
                     ({paystackCalc.isFlatFeeWaived ? "1.5%" : "1.5% + ₦100"}
                     {paystackCalc.isCapped ? ", capped at ₦2,000" : ""})
                   </span>
                 </span>
-                <span className="font-mono font-bold text-[var(--ink)]">
+                <span className="font-mono font-bold text-neutral-700">
                   ₦{paystackCalc.feeNaira.toLocaleString()}
                 </span>
               </div>
-              <div className="pt-2 border-t border-emerald-200/70 flex items-baseline justify-between">
+              <div className="pt-2 border-t border-neutral-200 flex items-baseline justify-between">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-800">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
                     Total Due
                   </p>
-                  <span className="text-2xl sm:text-3xl font-extrabold text-[var(--ink)] font-mono">
+                  <span className="text-2xl sm:text-3xl font-extrabold text-neutral-900 font-mono tracking-tight">
                     ₦{paystackCalc.totalNaira.toLocaleString()}
                   </span>
                 </div>
-                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--ng)] bg-white px-2.5 py-1 rounded-full border border-emerald-200 shadow-xs">
-                  <CheckCircle2 size={12} strokeWidth={2.5} /> 100% Guaranteed
+                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-neutral-700 bg-white px-2.5 py-1 rounded-md border border-neutral-200/80 shadow-xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#008751]" /> 100% Guaranteed
                 </span>
               </div>
             </div>
@@ -178,60 +178,60 @@ export default function PayAgencyFeeButton({
             {/* 4 Pillars Explaining The Fee */}
             <div className="mt-4 space-y-2.5">
               {/* Pillar 1 */}
-              <div className="p-3 sm:p-3.5 rounded-xl bg-gray-50 border border-gray-200/80 flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-emerald-100 text-[var(--ng)] flex items-center justify-center shrink-0 mt-0.5">
-                  <RotateCcw size={16} strokeWidth={2.4} />
+              <div className="p-3 sm:p-3.5 rounded-xl bg-white border border-neutral-200/80 flex items-start gap-3 shadow-xs">
+                <div className="w-8 h-8 rounded-lg bg-neutral-100 text-neutral-700 border border-neutral-200/60 flex items-center justify-center shrink-0 mt-0.5">
+                  <RotateCcw size={16} strokeWidth={2.2} />
                 </div>
                 <div>
-                  <h4 className="text-xs sm:text-sm font-bold text-[var(--ink)]">
+                  <h4 className="text-xs sm:text-sm font-semibold text-neutral-900">
                     14-Day Replacement SLA Guarantee
                   </h4>
-                  <p className="text-xs text-[var(--ink-soft)] mt-0.5 leading-relaxed">
+                  <p className="text-xs text-neutral-500 mt-0.5 leading-relaxed">
                     If the worker does not show up, resigns, or is not the right fit within 14 days, we match and provide a verified replacement immediately at zero extra charge.
                   </p>
                 </div>
               </div>
 
               {/* Pillar 2 */}
-              <div className="p-3 sm:p-3.5 rounded-xl bg-gray-50 border border-gray-200/80 flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 mt-0.5">
-                  <Coins size={16} strokeWidth={2.4} />
+              <div className="p-3 sm:p-3.5 rounded-xl bg-white border border-neutral-200/80 flex items-start gap-3 shadow-xs">
+                <div className="w-8 h-8 rounded-lg bg-neutral-100 text-neutral-700 border border-neutral-200/60 flex items-center justify-center shrink-0 mt-0.5">
+                  <Coins size={16} strokeWidth={2.2} />
                 </div>
                 <div>
-                  <h4 className="text-xs sm:text-sm font-bold text-[var(--ink)]">
+                  <h4 className="text-xs sm:text-sm font-semibold text-neutral-900">
                     Zero Deductions from Worker Wages
                   </h4>
-                  <p className="text-xs text-[var(--ink-soft)] mt-0.5 leading-relaxed">
+                  <p className="text-xs text-neutral-500 mt-0.5 leading-relaxed">
                     Traditional agencies take 20%–30% of worker salaries monthly. With StaffGuru, your worker keeps 100% of their earned salary.
                   </p>
                 </div>
               </div>
 
               {/* Pillar 3 */}
-              <div className="p-3 sm:p-3.5 rounded-xl bg-gray-50 border border-gray-200/80 flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-800 flex items-center justify-center shrink-0 mt-0.5">
-                  <UserCheck size={16} strokeWidth={2.4} />
+              <div className="p-3 sm:p-3.5 rounded-xl bg-white border border-neutral-200/80 flex items-start gap-3 shadow-xs">
+                <div className="w-8 h-8 rounded-lg bg-neutral-100 text-neutral-700 border border-neutral-200/60 flex items-center justify-center shrink-0 mt-0.5">
+                  <UserCheck size={16} strokeWidth={2.2} />
                 </div>
                 <div>
-                  <h4 className="text-xs sm:text-sm font-bold text-[var(--ink)]">
+                  <h4 className="text-xs sm:text-sm font-semibold text-neutral-900">
                     NIN Identity & Background Vetting
                   </h4>
-                  <p className="text-xs text-[var(--ink-soft)] mt-0.5 leading-relaxed">
+                  <p className="text-xs text-neutral-500 mt-0.5 leading-relaxed">
                     Every candidate undergoes government NIN verification, skill vetting, and background checks so you don't hire blind.
                   </p>
                 </div>
               </div>
 
               {/* Pillar 4 */}
-              <div className="p-3 sm:p-3.5 rounded-xl bg-gray-50 border border-gray-200/80 flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-800 flex items-center justify-center shrink-0 mt-0.5">
-                  <PhoneCall size={16} strokeWidth={2.4} />
+              <div className="p-3 sm:p-3.5 rounded-xl bg-white border border-neutral-200/80 flex items-start gap-3 shadow-xs">
+                <div className="w-8 h-8 rounded-lg bg-neutral-100 text-neutral-700 border border-neutral-200/60 flex items-center justify-center shrink-0 mt-0.5">
+                  <PhoneCall size={16} strokeWidth={2.2} />
                 </div>
                 <div>
-                  <h4 className="text-xs sm:text-sm font-bold text-[var(--ink)]">
+                  <h4 className="text-xs sm:text-sm font-semibold text-neutral-900">
                     Instant Direct Phone & WhatsApp Access
                   </h4>
-                  <p className="text-xs text-[var(--ink-soft)] mt-0.5 leading-relaxed">
+                  <p className="text-xs text-neutral-500 mt-0.5 leading-relaxed">
                     Unlocks unmasked direct phone and messaging access to schedule interviews and coordinate resumption immediately.
                   </p>
                 </div>
