@@ -1,4 +1,4 @@
-import { Briefcase, MapPin, Clock, CheckCircle2, XCircle, Clock3, ChevronRight, Building, Bike } from "lucide-react";
+import { Bike } from "lucide-react";
 import Link from "next/link";
 import {
   db,
@@ -8,34 +8,10 @@ import {
   workerProfiles,
   placements,
   eq,
-  desc,
 } from "@repo/db";
 import { getCurrentUser } from "../../actions/auth";
-import HandshakeActions from "./HandshakeActions";
 import BankPromptBanner from "@/components/dashboard/BankPromptBanner";
-
-const StatusBadge = ({ status }: { status: string }) => {
-  switch (status) {
-    case 'CONFIRMED':
-      return (
-        <span className="flex items-center gap-1.5 px-3 py-1 bg-[var(--lime)] text-[var(--ng)] border border-[var(--ng)]/20 rounded-full text-xs font-bold uppercase tracking-wider">
-          <CheckCircle2 size={14} /> Confirmed Handshake
-        </span>
-      );
-    case 'CANCELLED':
-      return (
-        <span className="flex items-center gap-1.5 px-3 py-1 bg-red-50 text-red-700 border border-red-200 rounded-full text-xs font-bold uppercase tracking-wider">
-          <XCircle size={14} /> Declined
-        </span>
-      );
-    default:
-      return (
-        <span className="flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-xs font-bold uppercase tracking-wider animate-pulse">
-          <Clock3 size={14} /> Action Required
-        </span>
-      );
-  }
-};
+import JobOfferCard from "./JobOfferCard";
 
 export default async function WorkerJobsView() {
   const session = await getCurrentUser();
@@ -49,18 +25,25 @@ export default async function WorkerJobsView() {
 
   if (!workerProfile) return null;
 
-  // Fetch real offers (selections) and associated placements
+  // Fetch real offers (selections) and associated hiring request details
   const offers = await db
     .select({
       id: selections.id,
       status: selections.status,
+      termsAcceptedAt: selections.termsAcceptedAt,
       feeAmount: selections.feeAmount,
       budgetMin: hiringRequests.budgetMin,
       budgetMax: hiringRequests.budgetMax,
       title: hiringRequests.title,
+      description: hiringRequests.description,
+      category: hiringRequests.category,
+      requiredSkills: hiringRequests.requiredSkills,
+      preferredSkills: hiringRequests.preferredSkills,
+      minExperienceYears: hiringRequests.minExperienceYears,
       locationState: hiringRequests.locationState,
       locationArea: hiringRequests.locationArea,
       engagementType: hiringRequests.engagementType,
+      startDate: hiringRequests.startDate,
       businessName: employerProfiles.businessName,
       createdAt: hiringRequests.createdAt,
       placementId: placements.id,
@@ -79,7 +62,7 @@ export default async function WorkerJobsView() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
         <div>
           <h1 className="text-2xl font-bold text-[var(--ink)] tracking-tight">Active Offers</h1>
-          <p className="text-[var(--ink-soft)] mt-1">Review and respond to handshakes from employers.</p>
+          <p className="text-[var(--ink-soft)] mt-1">Review, preview and respond to handshakes from employers.</p>
         </div>
         <Link
           href="/dashboard/errands"
@@ -92,69 +75,15 @@ export default async function WorkerJobsView() {
 
       <div className="grid grid-cols-1 gap-4">
         {offers.length === 0 && (
-          <div className="bg-white border border-[var(--line)] rounded-xl p-12 text-center text-[var(--ink-soft)]">
-            You haven't received any offers yet. Make sure your profile is complete and available!
+          <div className="bg-white border border-[var(--line)] rounded-2xl p-12 text-center text-[var(--ink-soft)]">
+            You haven't received any job offers yet. Make sure your profile is complete and available!
           </div>
         )}
-        
-        {offers.map((offer) => {
-          return (
-            <div
-              key={offer.id}
-              className="bg-white border border-[var(--line)] rounded-xl p-6 hover:shadow-md transition-shadow group flex flex-col gap-4"
-            >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-                <div className="flex gap-5 items-start sm:items-center">
-                  <div className="w-14 h-14 bg-[var(--canvas)] rounded-xl border border-[var(--line)] flex items-center justify-center shrink-0">
-                    <Building size={24} className="text-[var(--ink-soft)]" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-[var(--ink)] group-hover:text-[var(--green)] transition-colors">
-                      {offer.title}
-                    </h3>
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2 text-sm text-[var(--ink-soft)] font-medium">
-                      <span className="flex items-center gap-1 text-[var(--ink)]">
-                        <Briefcase size={14} className="text-gray-400" />
-                        {offer.businessName}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <MapPin size={14} />{" "}
-                        {offer.engagementType === "ONSITE"
-                          ? `${offer.locationArea}, ${offer.locationState}`
-                          : "Remote"}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Clock size={14} /> Received{" "}
-                        {new Date(offer.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-                </div>
 
-                <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-4 pt-4 sm:pt-0 border-t sm:border-t-0 border-[var(--line)] w-full sm:w-auto">
-                  <StatusBadge status={offer.status} />
-                  <div className="flex items-center gap-4">
-                    <div className="text-right">
-                      <div className="font-bold text-[var(--ink)]">
-                        ₦{offer.budgetMax.toLocaleString()}
-                      </div>
-                      <div className="text-xs text-[var(--ink-soft)] font-medium uppercase tracking-wider mt-0.5">
-                        Offered Salary
-                      </div>
-                    </div>
-                    {offer.status === "PENDING" && (
-                      <HandshakeActions selectionId={offer.id} />
-                    )}
-                  </div>
-                </div>
-              </div>
-
-
-            </div>
-          );
-        })}
+        {offers.map((offer) => (
+          <JobOfferCard key={offer.id} offer={offer} />
+        ))}
       </div>
     </div>
   );
 }
-

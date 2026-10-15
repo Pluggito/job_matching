@@ -185,16 +185,12 @@ export default async function MatchesPage({
                     </div>
                   ) : sel.isPaid ? (
                     <div className="flex flex-col gap-1.5 text-center">
-                      <button
-                        type="button"
-                        disabled
-                        className="h-10 px-6 rounded-xl bg-amber-500/10 text-amber-800 border border-amber-300 font-bold text-sm flex items-center justify-center gap-2 cursor-not-allowed opacity-90 shadow-xs"
-                      >
-                        <Clock className="w-4 h-4 text-amber-600 animate-pulse" />
-                        <span>Pending</span>
-                      </button>
+                      <div className="h-10 px-6 rounded-xl bg-[var(--ng)] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-md shadow-[var(--ng)]/20">
+                        <CheckCircle2 size={16} strokeWidth={2.4} />
+                        <span>Hire</span>
+                      </div>
                       <span className="text-[11px] text-amber-700 font-medium text-center">
-                        Fee paid (₦50,850) · Awaiting candidate
+                        Offer sent · Waiting for job seeker to accept or decline
                       </span>
                     </div>
                   ) : (
@@ -204,10 +200,11 @@ export default async function MatchesPage({
                         feeAmount={50000}
                         candidateName={match.preview.category}
                         jobTitle={request.title}
+                        triggerText="Pay Agency Fee"
                         compact
                       />
                       <span className="text-[11px] text-center text-amber-700 font-medium">
-                        Offer sent · Fee pending
+                        Fee pending · Awaiting confirmation
                       </span>
                     </div>
                   )}

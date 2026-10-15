@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPin, Check, Building, Hash, User, Copy, PhoneCall, Mail, Loader2, ShieldCheck, Clock } from "lucide-react";
+import { MapPin, Check, Building, Hash, User, Copy, PhoneCall, Mail, Loader2, ShieldCheck, Clock, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import PayAgencyFeeButton from "@/components/payments/PayAgencyFeeButton";
@@ -295,19 +295,15 @@ export default function PublicWorkerProfileClient({
               ) : pendingSelectionId && isSelectionPaid ? (
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider text-amber-700 mb-2">
-                    Placement Fee Paid · Awaiting Candidate
+                    Placement Fee Paid · Offer Dispatched
                   </p>
                   <p className="text-xs text-[var(--ink-soft)] mb-4 leading-relaxed">
-                    You have paid the placement fee (₦50,850). We have notified the candidate to review and accept your offer. Unmasked phone and direct contact details will unlock immediately once accepted.
+                    You have hired this candidate! We are waiting for the job seeker to review and accept the offer. Direct contact details will unlock immediately once accepted.
                   </p>
-                  <button
-                    type="button"
-                    disabled
-                    className="w-full h-11 px-4 rounded-xl bg-amber-500/10 text-amber-800 border border-amber-300 font-bold text-sm flex items-center justify-center gap-2 cursor-not-allowed opacity-90 shadow-xs"
-                  >
-                    <Clock className="w-4 h-4 text-amber-600 animate-pulse" />
-                    <span>Pending</span>
-                  </button>
+                  <div className="w-full h-11 px-4 rounded-xl bg-[var(--ng)] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-md shadow-[var(--ng)]/20">
+                    <CheckCircle2 size={16} strokeWidth={2.4} />
+                    <span>Hire Active · Waiting for Candidate</span>
+                  </div>
                 </div>
               ) : pendingSelectionId ? (
                 <div>
