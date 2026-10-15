@@ -368,12 +368,15 @@ export async function verifyPaymentReference(reference: string) {
             .limit(1);
 
           if (emp) {
+            const empLink = `/employer/requests/${sel.hiringRequestId}/matches`;
             await tx.insert(notifications).values({
               userId: emp.userId,
               type: "SELECTION_CONFIRMED",
+              title: "Agency Fee Verified! 💼",
               content: isAccepted
                 ? "Handshake agency fee confirmed! Candidate direct contact details are now unlocked with our 14-day SLA guarantee."
                 : "Payment of ₦50,850 verified! Your offer is pending candidate acceptance.",
+              link: empLink,
             });
 
             sendPushToUser(emp.userId, {
@@ -381,18 +384,21 @@ export async function verifyPaymentReference(reference: string) {
               body: isAccepted
                 ? "Handshake agency fee confirmed! Candidate direct contact details are now unlocked."
                 : "Payment verified! Your offer is pending candidate acceptance.",
-              url: `/employer/requests/${sel.hiringRequestId}/matches`,
+              url: empLink,
               tag: `selection-${sel.id}`,
             }).catch(console.error);
           }
 
           if (wrk) {
+            const wrkLink = "/dashboard";
             await tx.insert(notifications).values({
               userId: wrk.userId,
               type: "SELECTION_CONFIRMED",
+              title: isAccepted ? "Placement Confirmed! 🎉" : "Handshake Offer Funded! 💼",
               content: isAccepted
                 ? "Congratulations! Your placement handshake is confirmed."
                 : "Great news! An employer funded the placement fee for your handshake offer. Please review and accept on your dashboard to unlock direct contacts.",
+              link: wrkLink,
             });
 
             sendPushToUser(wrk.userId, {
@@ -400,7 +406,7 @@ export async function verifyPaymentReference(reference: string) {
               body: isAccepted
                 ? "Congratulations! Your placement handshake is confirmed."
                 : "Great news! An employer funded the placement fee for your handshake offer. Accept on your dashboard.",
-              url: "/dashboard",
+              url: wrkLink,
               tag: `selection-${sel.id}`,
             }).catch(console.error);
           }
@@ -428,6 +434,14 @@ export async function verifyPaymentReference(reference: string) {
             .limit(1);
 
           if (emp) {
+            await tx.insert(notifications).values({
+              userId: emp.userId,
+              type: "SELECTION_CONFIRMED",
+              title: "Errand Funded & Live! 🚀",
+              content: `Your errand "${err.title}" is funded and broadcast to nearby runners.`,
+              link: `/employer/errands/${payment.errandId}`,
+            });
+
             sendPushToUser(emp.userId, {
               title: "Errand Funded & Live! 🚀",
               body: `Your errand "${err.title}" is funded and broadcast to nearby runners.`,

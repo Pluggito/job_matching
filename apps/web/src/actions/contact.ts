@@ -17,6 +17,7 @@ import {
 } from "@repo/db";
 import { getCurrentUser } from "./auth";
 import { headers } from "next/headers";
+import { sendPushToUser } from "@/server/services/pushNotifications";
 
 export interface RevealContactResult {
   success: boolean;
@@ -174,12 +175,21 @@ export async function revealWorkerPhone(placementId: string): Promise<RevealCont
     .limit(1);
 
   if (!priorReveal) {
-    // First reveal for this placement -> notify worker in-app
+    // First reveal for this placement -> notify worker in-app and push
     await db.insert(notifications).values({
       userId: worker.userId,
-      type: "CONTACT_DETAILS_REVEALED",
+      type: "SELECTION_CONFIRMED",
+      title: "Contact Details Unlocked 📞",
       content: "An employer has unlocked your contact details (phone and email) for an active job placement. Expect their reachout for next steps.",
+      link: "/dashboard",
     });
+
+    sendPushToUser(worker.userId, {
+      title: "Contact Details Unlocked 📞",
+      body: "An employer has unlocked your contact details for an active job placement.",
+      url: "/dashboard",
+      tag: "contact-revealed",
+    }).catch(console.error);
   }
 
   // 7. Audit log in contact_access_logs
