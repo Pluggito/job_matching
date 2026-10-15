@@ -343,7 +343,9 @@ export async function claimErrand(errandId: string) {
         await tx.insert(notifications).values({
           userId: employer.userId,
           type: "ERRAND_CLAIMED",
+          title: "Runner Claimed Your Errand! 🏃‍♂️",
           content: `A verified local runner has claimed your errand "${lockedErrand.title}". Task is now in progress!`,
+          link: `/employer/errands/${errandId}`,
         });
 
         sendPushToUser(employer.userId, {
@@ -516,7 +518,9 @@ export async function submitErrandProof(params: {
       await tx.insert(notifications).values({
         userId: emp.userId,
         type: "PROOF_SUBMITTED",
+        title: "Errand Proof Submitted 📸",
         content: `Proof of completion has been submitted for errand "${errand.title}". Please review and confirm within 24 hours.`,
+        link: `/employer/errands/${params.errandId}`,
       });
 
       sendPushToUser(emp.userId, {
@@ -614,9 +618,11 @@ export async function approveErrandCompletion(errandId: string) {
         await tx.insert(notifications).values({
           userId: wrk.userId,
           type: "ERRAND_COMPLETED",
+          title: "Errand Approved! Payout Released 💰",
           content: `Errand "${errand.title}" approved! ₦${(
             (errand.workerPayoutKobo || 0) / 100
           ).toLocaleString()} payout has been released to your bank account on file.`,
+          link: `/dashboard/errands/${errandId}`,
         });
 
         sendPushToUser(wrk.userId, {
@@ -806,7 +812,9 @@ export async function requestErrandChanges(params: {
         await tx.insert(notifications).values({
           userId: wrk.userId,
           type: "ERRAND_REVISION_REQUESTED",
+          title: "Revision Requested on Errand ⚠️",
           content: `Changes requested on errand "${errand.title}": "${notes.trim()}". Please re-submit proof before ${graceExpiry.toLocaleString()}.`,
+          link: `/dashboard/errands/${errandId}`,
         });
 
         sendPushToUser(wrk.userId, {

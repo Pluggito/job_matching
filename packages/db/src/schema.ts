@@ -484,7 +484,9 @@ export const notifications = pgTable("notifications", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id").references(() => users.id).notNull(),
   type: text("type").notNull(),
+  title: text("title"),
   content: text("content").notNull(),
+  link: text("link"),
   readAt: timestamp("read_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

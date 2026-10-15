@@ -4,7 +4,7 @@ import { Role } from "@repo/shared";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
-import { PushNotificationManager } from "@/components/notifications/PushNotificationManager";
+import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { PushNotificationBanner } from "@/components/notifications/PushNotificationBanner";
 
 export default function ClientLayout({ 
@@ -34,7 +34,7 @@ export default function ClientLayout({
             </div>
           </div>
           <div className="flex items-center gap-3 sm:gap-4">
-            <PushNotificationManager role={role} />
+            <NotificationCenter role={role} />
             <div className="flex items-center gap-3 pl-3 sm:pl-4 border-l border-black/10">
               {avatarUrl ? (
                 <img
