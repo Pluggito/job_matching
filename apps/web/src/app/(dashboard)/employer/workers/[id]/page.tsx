@@ -4,8 +4,10 @@ import {
   employerProfiles,
   selections,
   placements,
+  payments,
   eq,
   and,
+  sql,
 } from "@repo/db";
 import { notFound } from "next/navigation";
 import { getCurrentUser } from "@/actions/auth";
@@ -25,6 +27,7 @@ export default async function WorkerProfilePage({ params }: { params: { id: stri
   let isConnected = false;
   let placementId: string | undefined;
   let pendingSelectionId: string | undefined;
+  let isSelectionPaid = false;
 
   if (session && session.role === "EMPLOYER") {
     const [emp] = await db
@@ -61,9 +64,16 @@ export default async function WorkerProfilePage({ params }: { params: { id: stri
           placementId = placement.id;
         }
       } else {
-        // Check if there is a pending selection awaiting fee payment
+        // Check if there is a pending selection awaiting fee payment or candidate acceptance
         const [pendingSel] = await db
-          .select({ id: selections.id })
+          .select({
+            id: selections.id,
+            isPaid: sql<boolean>`EXISTS (
+              SELECT 1 FROM ${payments} 
+              WHERE ${payments.selectionId} = ${selections.id} 
+              AND ${payments.status} = 'VERIFIED'
+            )`,
+          })
           .from(selections)
           .where(
             and(
@@ -76,6 +86,7 @@ export default async function WorkerProfilePage({ params }: { params: { id: stri
 
         if (pendingSel) {
           pendingSelectionId = pendingSel.id;
+          isSelectionPaid = !!pendingSel.isPaid;
         }
       }
     }
@@ -95,6 +106,7 @@ export default async function WorkerProfilePage({ params }: { params: { id: stri
         isConnected={isConnected}
         placementId={placementId}
         pendingSelectionId={pendingSelectionId}
+        isSelectionPaid={isSelectionPaid}
       />
     </div>
   );

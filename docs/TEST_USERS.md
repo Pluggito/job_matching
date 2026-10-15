@@ -64,7 +64,8 @@ This guide contains everything you need to test the entire Staff Guru platform e
 * **Signup URL:** `http://localhost:3000/signup`
 * **Role Selection:** Select **"Worker / Find Work"**
 * **Email:** `tailor.worker@staffguru.com`
-* **Password:** `Password123!`
+* **Password:** `
+`
 
 #### Step-by-Step Onboarding Form (`/onboarding`):
 #### Step 1 — Personal Details:

@@ -2,9 +2,9 @@ import { getMatchesForRequest } from "../../../../../../server/services/matching
 import { getHiringRequest } from "../../../../../../server/services/hiringRequests";
 import { getCurrentUser } from "../../../../../../actions/auth";
 import { verifyPaymentReference } from "../../../../../../actions/payments";
-import { CheckCircle2, MapPin, Briefcase, Calendar, Star, AlertTriangle, ShieldCheck } from "lucide-react";
+import { CheckCircle2, MapPin, Briefcase, Calendar, Star, AlertTriangle, ShieldCheck, Clock } from "lucide-react";
 import Link from "next/link";
-import { db, selections, eq } from "@repo/db";
+import { db, selections, payments, eq, sql } from "@repo/db";
 import ShortlistButton from "./ShortlistButton";
 import PayAgencyFeeButton from "@/components/payments/PayAgencyFeeButton";
 import { notFound } from "next/navigation";
@@ -44,13 +44,19 @@ export default async function MatchesPage({
 
   if (!request) return notFound();
 
-  // Fetch existing selections with their status
+  // Fetch existing selections with their status and verified payment
   const requestSelections = await db
     .select({
       id: selections.id,
       workerProfileId: selections.workerProfileId,
       status: selections.status,
       feeAmount: selections.feeAmount,
+      termsAcceptedAt: selections.termsAcceptedAt,
+      isPaid: sql<boolean>`EXISTS (
+        SELECT 1 FROM ${payments} 
+        WHERE ${payments.selectionId} = ${selections.id} 
+        AND ${payments.status} = 'VERIFIED'
+      )`,
     })
     .from(selections)
     .where(eq(selections.hiringRequestId, request.id));
@@ -168,7 +174,30 @@ export default async function MatchesPage({
                       hiringRequestId={request.id} 
                       initialSent={false} 
                     />
-                  ) : sel.status === "PENDING" ? (
+                  ) : sel.isPaid && (sel.status === "CONFIRMED" || sel.termsAcceptedAt) ? (
+                    <div className="flex flex-col gap-1 text-center">
+                      <span className="inline-flex items-center gap-1 bg-green-100 text-green-800 text-xs font-bold px-3 py-1.5 rounded-xl justify-center">
+                        <CheckCircle2 size={13} strokeWidth={2.5} /> Handshake Confirmed
+                      </span>
+                      <span className="text-[10px] text-gray-500 font-medium">
+                        14-day SLA active
+                      </span>
+                    </div>
+                  ) : sel.isPaid ? (
+                    <div className="flex flex-col gap-1.5 text-center">
+                      <button
+                        type="button"
+                        disabled
+                        className="h-10 px-6 rounded-xl bg-amber-500/10 text-amber-800 border border-amber-300 font-bold text-sm flex items-center justify-center gap-2 cursor-not-allowed opacity-90 shadow-xs"
+                      >
+                        <Clock className="w-4 h-4 text-amber-600 animate-pulse" />
+                        <span>Pending</span>
+                      </button>
+                      <span className="text-[11px] text-amber-700 font-medium text-center">
+                        Fee paid (₦50,850) · Awaiting candidate
+                      </span>
+                    </div>
+                  ) : (
                     <div className="flex flex-col gap-1.5">
                       <PayAgencyFeeButton
                         selectionId={sel.id}
@@ -181,22 +210,15 @@ export default async function MatchesPage({
                         Offer sent · Fee pending
                       </span>
                     </div>
-                  ) : (
-                    <div className="flex flex-col gap-1 text-center">
-                      <span className="inline-flex items-center gap-1 bg-green-100 text-green-800 text-xs font-bold px-3 py-1.5 rounded-xl justify-center">
-                        <CheckCircle2 size={13} strokeWidth={2.5} /> Handshake Confirmed
-                      </span>
-                      <span className="text-[10px] text-gray-500 font-medium">
-                        14-day SLA active
-                      </span>
-                    </div>
                   )}
 
                   <Link
                     href={`/employer/workers/${match.workerId}`}
                     className="h-10 px-6 rounded-xl border border-[var(--ink)] text-[var(--ink)] font-bold text-sm hover:bg-[var(--canvas)] transition-colors flex items-center justify-center text-center"
                   >
-                    {sel?.status === "CONFIRMED" ? "View Phone Number" : "View Profile"}
+                    {sel?.isPaid && (sel?.status === "CONFIRMED" || sel?.termsAcceptedAt)
+                      ? "View Phone Number"
+                      : "View Profile"}
                   </Link>
                 </div>
 
