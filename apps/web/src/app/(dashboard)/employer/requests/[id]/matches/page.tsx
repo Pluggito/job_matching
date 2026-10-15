@@ -6,6 +6,7 @@ import { CheckCircle2, MapPin, Briefcase, Calendar, Star, AlertTriangle, ShieldC
 import Link from "next/link";
 import { db, selections, payments, eq, sql } from "@repo/db";
 import ShortlistButton from "./ShortlistButton";
+import HireButton from "./HireButton";
 import PayAgencyFeeButton from "@/components/payments/PayAgencyFeeButton";
 import { notFound } from "next/navigation";
 
@@ -20,14 +21,10 @@ export default async function MatchesPage({
   const session = await getCurrentUser();
   if (!session) return notFound();
 
-  // If returning from Paystack redirect with a payment reference, verify it in real-time
-  let paymentVerifiedBanner = false;
+  // If returning from Paystack redirect with a payment reference, verify it in real-time in background
   if (searchParams?.payment_ref) {
     try {
-      const verRes = await verifyPaymentReference(searchParams.payment_ref);
-      if (verRes.success) {
-        paymentVerifiedBanner = true;
-      }
+      await verifyPaymentReference(searchParams.payment_ref);
     } catch (e) {
       console.error("[Payment Callback Verify Error]:", e);
     }
@@ -52,10 +49,16 @@ export default async function MatchesPage({
       status: selections.status,
       feeAmount: selections.feeAmount,
       termsAcceptedAt: selections.termsAcceptedAt,
+      hiredAt: selections.hiredAt,
       isPaid: sql<boolean>`EXISTS (
         SELECT 1 FROM ${payments} 
         WHERE ${payments.selectionId} = ${selections.id} 
         AND ${payments.status} = 'VERIFIED'
+      )`,
+      isPendingPayment: sql<boolean>`EXISTS (
+        SELECT 1 FROM ${payments} 
+        WHERE ${payments.selectionId} = ${selections.id} 
+        AND ${payments.status} = 'PENDING'
       )`,
     })
     .from(selections)
@@ -65,20 +68,6 @@ export default async function MatchesPage({
 
   return (
     <div className="max-w-5xl mx-auto py-8 px-4">
-      {paymentVerifiedBanner && (
-        <div className="mb-6 rounded-2xl bg-green-50 border border-green-200 p-4 sm:p-5 flex items-start gap-3 shadow-sm animate-in fade-in">
-          <ShieldCheck size={22} className="text-green-700 shrink-0 mt-0.5" />
-          <div>
-            <h4 className="text-sm font-bold text-green-900">
-              Agency Handshake Fee Verified!
-            </h4>
-            <p className="text-xs text-green-700 mt-1">
-              Your candidate placement is officially confirmed with a 14-day replacement guarantee. Candidate direct phone number is now accessible.
-            </p>
-          </div>
-        </div>
-      )}
-
       <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <Link href="/employer" className="text-sm font-bold text-[var(--green)] hover:text-[var(--ink)] mb-4 inline-block">&larr; Back to Dashboard</Link>
@@ -183,14 +172,33 @@ export default async function MatchesPage({
                         14-day SLA active
                       </span>
                     </div>
-                  ) : sel.isPaid ? (
+                  ) : sel.isPaid && sel.hiredAt ? (
                     <div className="flex flex-col gap-1.5 text-center">
-                      <div className="h-10 px-6 rounded-xl bg-[var(--ng)] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-md shadow-[var(--ng)]/20">
-                        <CheckCircle2 size={16} strokeWidth={2.4} />
-                        <span>Hire</span>
+                      <div className="h-10 px-4 rounded-xl bg-amber-500/10 text-amber-900 border border-amber-200 font-bold text-xs flex items-center justify-center gap-2">
+                        <Clock size={15} className="text-amber-600" />
+                        <span>Offer Sent</span>
                       </div>
                       <span className="text-[11px] text-amber-700 font-medium text-center">
-                        Offer sent · Waiting for job seeker to accept or decline
+                        Waiting for job seeker to accept or decline
+                      </span>
+                    </div>
+                  ) : sel.isPaid ? (
+                    <HireButton
+                      selectionId={sel.id}
+                      candidateName={match.preview.category}
+                    />
+                  ) : sel.isPendingPayment ? (
+                    <div className="flex flex-col gap-1.5 text-center">
+                      <button
+                        type="button"
+                        disabled
+                        className="h-10 px-4 rounded-xl bg-amber-50 text-amber-800 border border-amber-300 font-bold text-xs flex items-center justify-center gap-2 opacity-90 cursor-not-allowed"
+                      >
+                        <Clock size={15} className="text-amber-600 animate-spin" />
+                        <span>Pending</span>
+                      </button>
+                      <span className="text-[11px] text-center text-amber-700 font-medium">
+                        Fee pending · Awaiting Staff Guru confirmation
                       </span>
                     </div>
                   ) : (
@@ -203,8 +211,8 @@ export default async function MatchesPage({
                         triggerText="Pay Agency Fee"
                         compact
                       />
-                      <span className="text-[11px] text-center text-amber-700 font-medium">
-                        Fee pending · Awaiting confirmation
+                      <span className="text-[11px] text-center text-[var(--ink-soft)] font-medium">
+                        ₦50,000 handshake fee required
                       </span>
                     </div>
                   )}

@@ -218,10 +218,12 @@ This guide contains everything you need to test the entire Staff Guru platform e
    * Click **"Pay ₦50,850 & Unlock Contact"**.
    * Paystack checkout initializes displaying **Pay NGN 50,850**.
    * In Paystack Test Mode, click **"Success"** or submit test card (`4084084084084081`, any CVV/future expiry).
-4. After callback verification:
-   * The green alert banner appears: **"Agency Handshake Fee Verified!"**
-   * Handshake status moves to **"Handshake Confirmed — 14-day SLA active"**.
-   * Click **"View Phone Number"** to view Chinedu's unmasked direct phone number (`+2348029876543`).
+4. After payment:
+   * Candidate card button moves to **"Pending"** (awaiting Staff Guru fee confirmation).
+   * In Admin Portal (`/requests`), Admin clicks **"Mark Fee Paid (₦50,000)"**. Contact details remain protected until worker accepts.
+   * Back in Employer Portal, candidate card unlocks the **"Hire"** button.
+   * Employer clicks **"Hire"** to send the offer to the worker.
+   * Worker accepts offer on Worker Dashboard (`/dashboard`) -> Contact details unlock for employer and admin!
 
 ---
 

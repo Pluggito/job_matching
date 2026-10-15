@@ -1,6 +1,6 @@
 "use server";
 
-import { db, selections, hiringRequests, workerProfiles, employerProfiles, placements } from "@repo/db";
+import { db, selections, hiringRequests, workerProfiles, employerProfiles, placements, notifications, users } from "@repo/db";
 import { getCurrentUser } from "./auth";
 import { eq, and } from "@repo/db";
 import { revalidatePath } from "next/cache";
@@ -139,4 +139,59 @@ export async function respondToHandshake(selectionId: string, accept: boolean) {
   revalidatePath("/employer/workers");
 
   return { success: true, status: newStatus };
+}
+
+export async function confirmEmployerHire(selectionId: string) {
+  const session = await getCurrentUser();
+  if (!session || session.role !== "EMPLOYER") {
+    throw new Error("Unauthorized");
+  }
+
+  const [selection] = await db
+    .select()
+    .from(selections)
+    .where(eq(selections.id, selectionId))
+    .limit(1);
+
+  if (!selection) {
+    throw new Error("Selection not found");
+  }
+
+  const [employerProfile] = await db
+    .select()
+    .from(employerProfiles)
+    .where(eq(employerProfiles.userId, session.userId))
+    .limit(1);
+
+  if (!employerProfile || selection.employerProfileId !== employerProfile.id) {
+    throw new Error("Unauthorized access to this selection");
+  }
+
+  // Update selection with hiredAt timestamp
+  await db
+    .update(selections)
+    .set({ hiredAt: new Date() })
+    .where(eq(selections.id, selectionId));
+
+  // Find worker userId to send notification
+  const [worker] = await db
+    .select({ userId: workerProfiles.userId })
+    .from(workerProfiles)
+    .where(eq(workerProfiles.id, selection.workerProfileId))
+    .limit(1);
+
+  if (worker) {
+    await db.insert(notifications).values({
+      userId: worker.userId,
+      type: "HANDSHAKE_OFFER",
+      content: `${employerProfile.businessName} has sent you an official job offer! Please review the terms and accept or decline in your dashboard.`,
+    });
+  }
+
+  revalidatePath(`/employer/requests/${selection.hiringRequestId}/matches`);
+  revalidatePath("/dashboard");
+  revalidatePath(`/employer/workers/${selection.workerProfileId}`);
+  revalidatePath("/employer/workers");
+
+  return { success: true };
 }
