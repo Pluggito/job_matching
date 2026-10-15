@@ -4,15 +4,18 @@ import { useRouter } from "next/navigation";
 import { updateWorkerDetails } from "../../../../../actions/profile";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
+import PhotoUploadField from "@/components/profile/PhotoUploadField";
 
 export default function WorkerEditForm({ profile }: { profile: any }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const profileData = (profile.profileData as Record<string, any>) || {};
+  const [avatarUrl, setAvatarUrl] = useState<string>(profileData.avatar || "");
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+    formData.set("avatar", avatarUrl);
     startTransition(async () => {
       try {
         await updateWorkerDetails(formData);
@@ -25,6 +28,16 @@ export default function WorkerEditForm({ profile }: { profile: any }) {
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
+      <PhotoUploadField
+        label="Profile Photo"
+        sublabel="Update your profile photo. Visible to employers searching for workers."
+        value={avatarUrl}
+        name="avatar"
+        onChange={(url) => setAvatarUrl(url)}
+        shape="circle"
+        iconType="user"
+      />
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <label className="text-sm font-bold text-[var(--ink)]">Full Name</label>
