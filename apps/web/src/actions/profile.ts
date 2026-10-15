@@ -3,6 +3,8 @@
 import { db, workerProfiles, employerProfiles, eq } from "@repo/db";
 import { getCurrentUser } from "./auth";
 
+import { revalidatePath } from "next/cache";
+
 export async function updateWorkerAvatar(url: string) {
   const session = await getCurrentUser();
   if (!session) throw new Error("Unauthorized");
@@ -22,6 +24,10 @@ export async function updateWorkerAvatar(url: string) {
     .update(workerProfiles)
     .set({ profileData })
     .where(eq(workerProfiles.userId, session.userId));
+
+  revalidatePath("/dashboard/profile");
+  revalidatePath("/dashboard/profile/edit");
+  revalidatePath("/", "layout");
 }
 
 export async function addWorkerPortfolio(urls: string[]) {
@@ -47,6 +53,8 @@ export async function addWorkerPortfolio(urls: string[]) {
     .update(workerProfiles)
     .set({ profileData })
     .where(eq(workerProfiles.userId, session.userId));
+
+  revalidatePath("/dashboard/profile");
 }
 
 export async function updateEmployerLogo(url: string) {
@@ -63,14 +71,17 @@ export async function updateEmployerLogo(url: string) {
 
   const profileData = (profile.profileData as Record<string, any>) || {};
   profileData.logo = url;
+  profileData.avatar = url;
 
   await db
     .update(employerProfiles)
     .set({ profileData })
     .where(eq(employerProfiles.userId, session.userId));
-}
 
-import { revalidatePath } from "next/cache";
+  revalidatePath("/employer/profile");
+  revalidatePath("/employer/profile/edit");
+  revalidatePath("/", "layout");
+}
 
 export async function updateWorkerDetails(formData: FormData) {
   const session = await getCurrentUser();
@@ -99,6 +110,11 @@ export async function updateWorkerDetails(formData: FormData) {
   profileData.phone = formData.get("phone") as string;
   profileData.aboutMe = formData.get("aboutMe") as string;
 
+  const avatar = formData.get("avatar");
+  if (avatar !== null && avatar !== undefined) {
+    profileData.avatar = String(avatar).trim();
+  }
+
   let locationState = profile.locationState;
   let locationArea = profile.locationArea;
   if (location && location.includes(",")) {
@@ -124,6 +140,8 @@ export async function updateWorkerDetails(formData: FormData) {
     .where(eq(workerProfiles.userId, session.userId));
 
   revalidatePath("/dashboard/profile");
+  revalidatePath("/dashboard/profile/edit");
+  revalidatePath("/", "layout");
 }
 
 export async function updateEmployerDetails(formData: FormData) {
@@ -147,6 +165,13 @@ export async function updateEmployerDetails(formData: FormData) {
   profileData.rcNumber = formData.get("rcNumber") as string;
   profileData.aboutCompany = formData.get("aboutCompany") as string;
 
+  const logoOrAvatar = formData.get("logo") || formData.get("avatar");
+  if (logoOrAvatar !== null && logoOrAvatar !== undefined) {
+    const url = String(logoOrAvatar).trim();
+    profileData.logo = url;
+    profileData.avatar = url;
+  }
+
   await db
     .update(employerProfiles)
     .set({
@@ -158,4 +183,6 @@ export async function updateEmployerDetails(formData: FormData) {
     .where(eq(employerProfiles.userId, session.userId));
 
   revalidatePath("/employer/profile");
+  revalidatePath("/employer/profile/edit");
+  revalidatePath("/", "layout");
 }
