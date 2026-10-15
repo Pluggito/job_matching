@@ -20,6 +20,7 @@ import {
 import { getCurrentUser } from "./auth";
 import crypto from "crypto";
 import { revalidatePath } from "next/cache";
+import { AGENCY_FEE_PER_WORKER } from "@repo/shared";
 
 function getPaystackSecretKey(): string {
   const key =
@@ -77,6 +78,16 @@ export async function initializeSelectionPayment(selectionId: string) {
     };
   }
 
+  const agencyFeeKobo = AGENCY_FEE_PER_WORKER * 100; // 5,000,000 kobo (₦50,000)
+
+  // Ensure selection feeAmount is set to regulated agency fee if it previously stored candidate salary budget
+  if (sel.feeAmount !== AGENCY_FEE_PER_WORKER) {
+    await db
+      .update(selections)
+      .set({ feeAmount: AGENCY_FEE_PER_WORKER })
+      .where(eq(selections.id, selectionId));
+  }
+
   // 2. Fetch or create Quote for this selection
   let [quote] = await db
     .select()
@@ -86,16 +97,14 @@ export async function initializeSelectionPayment(selectionId: string) {
     .limit(1);
 
   if (!quote) {
-    // Default ₦50,000 handshake agency fee = 5,000,000 kobo
-    const defaultFeeKobo = Math.round((sel.feeAmount || 50000) * 100);
     const [newQuote] = await db
       .insert(quotes)
       .values({
         selectionId,
         type: "agency_fee",
         workerPayoutKobo: 0, // Worker salary is paid directly by employer to worker
-        commissionKobo: defaultFeeKobo,
-        totalKobo: defaultFeeKobo,
+        commissionKobo: agencyFeeKobo,
+        totalKobo: agencyFeeKobo,
         commissionMode: "fixed_override",
         status: "sent",
         currency: "NGN",
@@ -104,6 +113,17 @@ export async function initializeSelectionPayment(selectionId: string) {
       })
       .returning();
     quote = newQuote;
+  } else if (quote.status !== "paid" && quote.totalKobo !== agencyFeeKobo) {
+    // Automatically correct existing quote if it had an erroneous amount (e.g. ₦150k from salary budget)
+    const [updatedQuote] = await db
+      .update(quotes)
+      .set({
+        commissionKobo: agencyFeeKobo,
+        totalKobo: agencyFeeKobo,
+      })
+      .where(eq(quotes.id, quote.id))
+      .returning();
+    quote = updatedQuote;
   }
 
   if (!quote) {
@@ -131,6 +151,17 @@ export async function initializeSelectionPayment(selectionId: string) {
       )
     )
     .limit(1);
+
+  // If previous active payment has incorrect amount, invalidate it
+  if (activePayment && activePayment.totalKobo !== agencyFeeKobo) {
+    await db
+      .update(payments)
+      .set({
+        status: "FAILED",
+        manualReason: "Superseded by corrected ₦50,000 placement fee",
+      })
+      .where(eq(payments.id, activePayment.id));
+  }
 
   // 4. Generate transaction reference and 30-minute expiry
   const reference = `SG_TXN_${Date.now()}_${crypto.randomBytes(4).toString("hex")}`;
