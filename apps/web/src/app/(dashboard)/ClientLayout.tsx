@@ -1,10 +1,11 @@
 "use client";
 
 import { Role } from "@repo/shared";
-import { Bell } from "lucide-react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
+import { PushNotificationManager } from "@/components/notifications/PushNotificationManager";
+import { PushNotificationBanner } from "@/components/notifications/PushNotificationBanner";
 
 export default function ClientLayout({ 
   children, 
@@ -33,10 +34,7 @@ export default function ClientLayout({
             </div>
           </div>
           <div className="flex items-center gap-3 sm:gap-4">
-            <button className="relative p-2 text-muted-foreground hover:text-black transition-colors">
-              <Bell size={20} />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-[var(--ng)] rounded-full"></span>
-            </button>
+            <PushNotificationManager role={role} />
             <div className="flex items-center gap-3 pl-3 sm:pl-4 border-l border-black/10">
               {avatarUrl ? (
                 <img
@@ -61,6 +59,7 @@ export default function ClientLayout({
         <div className="flex-1 flex flex-col min-w-0 bg-[#f4f7f5]">
           <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
             <div className="w-full max-w-7xl mx-auto h-full">
+              <PushNotificationBanner />
               {children}
             </div>
           </div>

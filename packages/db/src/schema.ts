@@ -494,6 +494,7 @@ export const pushSubscriptions = pgTable("push_subscriptions", {
   userId: uuid("user_id").references(() => users.id).notNull(),
   endpoint: text("endpoint").notNull(),
   keys: json("keys").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // ==========================================
