@@ -21,6 +21,7 @@ import { getCurrentUser } from "./auth";
 import crypto from "crypto";
 import { revalidatePath } from "next/cache";
 import { AGENCY_FEE_PER_WORKER, calculatePaystackFee } from "@repo/shared";
+import { sendPushToUser } from "@/server/services/pushNotifications";
 
 function getPaystackSecretKey(): string {
   const key =
@@ -374,6 +375,15 @@ export async function verifyPaymentReference(reference: string) {
                 ? "Handshake agency fee confirmed! Candidate direct contact details are now unlocked with our 14-day SLA guarantee."
                 : "Payment of ₦50,850 verified! Your offer is pending candidate acceptance.",
             });
+
+            sendPushToUser(emp.userId, {
+              title: "Agency Fee Verified! 💼",
+              body: isAccepted
+                ? "Handshake agency fee confirmed! Candidate direct contact details are now unlocked."
+                : "Payment verified! Your offer is pending candidate acceptance.",
+              url: `/employer/requests/${sel.hiringRequestId}/matches`,
+              tag: `selection-${sel.id}`,
+            }).catch(console.error);
           }
 
           if (wrk) {
@@ -384,6 +394,46 @@ export async function verifyPaymentReference(reference: string) {
                 ? "Congratulations! Your placement handshake is confirmed."
                 : "Great news! An employer funded the placement fee for your handshake offer. Please review and accept on your dashboard to unlock direct contacts.",
             });
+
+            sendPushToUser(wrk.userId, {
+              title: isAccepted ? "Placement Confirmed! 🎉" : "Handshake Offer Funded! 💼",
+              body: isAccepted
+                ? "Congratulations! Your placement handshake is confirmed."
+                : "Great news! An employer funded the placement fee for your handshake offer. Accept on your dashboard.",
+              url: "/dashboard",
+              tag: `selection-${sel.id}`,
+            }).catch(console.error);
+          }
+        }
+      }
+
+      // 3b. Errand activation if errand payment
+      if (payment.errandId) {
+        await tx
+          .update(errands)
+          .set({ status: "open", updatedAt: new Date() })
+          .where(and(eq(errands.id, payment.errandId), eq(errands.status, "pending_payment")));
+
+        const [err] = await tx
+          .select({ title: errands.title, employerId: errands.employerId })
+          .from(errands)
+          .where(eq(errands.id, payment.errandId))
+          .limit(1);
+
+        if (err) {
+          const [emp] = await tx
+            .select({ userId: employerProfiles.userId })
+            .from(employerProfiles)
+            .where(eq(employerProfiles.id, err.employerId))
+            .limit(1);
+
+          if (emp) {
+            sendPushToUser(emp.userId, {
+              title: "Errand Funded & Live! 🚀",
+              body: `Your errand "${err.title}" is funded and broadcast to nearby runners.`,
+              url: `/employer/errands/${payment.errandId}`,
+              tag: `errand-${payment.errandId}`,
+            }).catch(console.error);
           }
         }
       }

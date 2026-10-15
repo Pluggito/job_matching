@@ -1,8 +1,9 @@
 "use server";
 
-import { db, errandThreads, errandMessages, errands, users, eq, and, desc } from "@repo/db";
+import { db, errandThreads, errandMessages, errands, users, workerProfiles, eq, and, desc } from "@repo/db";
 import { getCurrentUser } from "./auth";
 import { revalidatePath } from "next/cache";
+import { sendPushToUser } from "@/server/services/pushNotifications";
 
 /**
  * Normalizes text to detect and redact contact information (phone numbers, NUBAN accounts, emails, handles).
@@ -91,6 +92,34 @@ export async function sendErrandMessage(params: {
     senderId: session.userId,
     content: cleanContent,
   });
+
+  // Determine recipient for push notification
+  let recipientUserId: string | null = null;
+  let targetUrl = `/dashboard/errands/${errandId}`;
+
+  if (session.userId === thread.employerId) {
+    // Sender is employer, recipient is worker
+    const [worker] = await db
+      .select({ userId: workerProfiles.userId })
+      .from(workerProfiles)
+      .where(eq(workerProfiles.id, thread.workerProfileId))
+      .limit(1);
+    recipientUserId = worker?.userId || null;
+    targetUrl = `/dashboard/errands/${errandId}`;
+  } else {
+    // Sender is worker, recipient is employer
+    recipientUserId = thread.employerId;
+    targetUrl = `/employer/errands/${errandId}`;
+  }
+
+  if (recipientUserId) {
+    sendPushToUser(recipientUserId, {
+      title: "New Errand Message 💬",
+      body: cleanContent.length > 80 ? `${cleanContent.slice(0, 77)}...` : cleanContent,
+      url: targetUrl,
+      tag: `errand-${errandId}`,
+    }).catch(console.error);
+  }
 
   revalidatePath(`/dashboard/errands/${errandId}`);
   revalidatePath(`/employer/errands/${errandId}`);
