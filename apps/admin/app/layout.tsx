@@ -3,7 +3,8 @@ import "./globals.css";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Separator } from "@/components/ui/separator";
-import { Bell, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
+import { AdminLiveWatcher } from "@/components/AdminLiveWatcher";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { headers } from "next/headers";
 import { getAdminUser } from "@/lib/auth";
@@ -89,10 +90,7 @@ export default async function RootLayout({
                   </div>
                 </div>
                 <div className="flex items-center gap-3 sm:gap-4">
-                  <button className="relative p-2 text-muted-foreground hover:text-black transition-colors">
-                    <Bell size={20} />
-                    <span className="absolute top-1 right-1 w-2 h-2 bg-[var(--ng)] rounded-full"></span>
-                  </button>
+                  <AdminLiveWatcher />
                   <div className="flex items-center gap-3 pl-3 sm:pl-4 border-l border-black/10">
                     <div className="w-8 h-8 rounded-full bg-[var(--ng)] text-white font-bold flex items-center justify-center text-sm uppercase shrink-0 shadow-sm shadow-[var(--ng)]/20">
                       {initials}
