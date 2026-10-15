@@ -149,19 +149,7 @@ export default async function WorkerJobsView() {
                 </div>
               </div>
 
-              {/* Confirmed Placement Status */}
-              {offer.status === "CONFIRMED" && (
-                <div className="pt-3 border-t border-[var(--line)]">
-                  <div className="rounded-lg bg-green-50 p-3 text-xs text-green-800 border border-green-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <span>
-                      Placement is active! The employer has unlocked your contact details and will reach out to you directly.
-                    </span>
-                    <span className="font-semibold text-green-900 bg-green-100 px-2.5 py-0.5 rounded-full shrink-0">
-                      14-Day SLA Active
-                    </span>
-                  </div>
-                </div>
-              )}
+
             </div>
           );
         })}
