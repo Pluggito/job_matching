@@ -311,41 +311,49 @@ export async function verifyPaymentReference(reference: string) {
           .where(eq(quotes.id, payment.quoteId));
       }
 
-      // 3. Mark selection CONFIRMED and activate placement
+      // 3. Selection status & placement activation
       if (payment.selectionId) {
-        await tx
-          .update(selections)
-          .set({ status: "CONFIRMED" })
-          .where(eq(selections.id, payment.selectionId));
-
-        const [existingPlacement] = await tx
-          .select()
-          .from(placements)
-          .where(eq(placements.selectionId, payment.selectionId))
-          .limit(1);
-
-        if (!existingPlacement) {
-          const startDate = new Date();
-          const replacementDeadline = new Date(startDate.getTime() + 14 * 24 * 60 * 60 * 1000);
-          await tx.insert(placements).values({
-            selectionId: payment.selectionId,
-            startDate,
-            status: "ACTIVE",
-            replacementDeadline,
-          });
-        }
-
-        // Notify employer and worker
         const [sel] = await tx
           .select({
+            id: selections.id,
             employerProfileId: selections.employerProfileId,
             workerProfileId: selections.workerProfileId,
+            status: selections.status,
+            termsAcceptedAt: selections.termsAcceptedAt,
+            hiringRequestId: selections.hiringRequestId,
           })
           .from(selections)
           .where(eq(selections.id, payment.selectionId))
           .limit(1);
 
         if (sel) {
+          const isAccepted = !!sel.termsAcceptedAt;
+
+          if (isAccepted) {
+            await tx
+              .update(selections)
+              .set({ status: "CONFIRMED" })
+              .where(eq(selections.id, payment.selectionId));
+
+            const [existingPlacement] = await tx
+              .select()
+              .from(placements)
+              .where(eq(placements.selectionId, payment.selectionId))
+              .limit(1);
+
+            if (!existingPlacement) {
+              const startDate = new Date();
+              const replacementDeadline = new Date(startDate.getTime() + 14 * 24 * 60 * 60 * 1000);
+              await tx.insert(placements).values({
+                selectionId: payment.selectionId,
+                startDate,
+                status: "ACTIVE",
+                replacementDeadline,
+              });
+            }
+          }
+
+          // In-app notifications
           const [emp] = await tx
             .select({ userId: employerProfiles.userId })
             .from(employerProfiles)
@@ -362,7 +370,9 @@ export async function verifyPaymentReference(reference: string) {
             await tx.insert(notifications).values({
               userId: emp.userId,
               type: "SELECTION_CONFIRMED",
-              content: "Handshake agency fee confirmed! Candidate contact details and worker bank details are unlocked.",
+              content: isAccepted
+                ? "Handshake agency fee confirmed! Candidate direct contact details are now unlocked with our 14-day SLA guarantee."
+                : "Payment of ₦50,850 verified! Your offer is pending candidate acceptance.",
             });
           }
 
@@ -370,7 +380,9 @@ export async function verifyPaymentReference(reference: string) {
             await tx.insert(notifications).values({
               userId: wrk.userId,
               type: "SELECTION_CONFIRMED",
-              content: "Congratulations! An employer has confirmed your placement handshake.",
+              content: isAccepted
+                ? "Congratulations! Your placement handshake is confirmed."
+                : "Great news! An employer funded the placement fee for your handshake offer. Please review and accept on your dashboard to unlock direct contacts.",
             });
           }
         }
