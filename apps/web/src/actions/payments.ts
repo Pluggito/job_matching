@@ -32,6 +32,19 @@ function getPaystackSecretKey(): string {
   return key;
 }
 
+export function getAppBaseUrl(): string {
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
+  }
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return "http://localhost:3000";
+}
+
 /**
  * Initializes a Paystack checkout for a Job Selection's Handshake Agency Fee.
  * Enforces in-flight payment locking (30-minute lock via expiresAt).
@@ -164,36 +177,45 @@ export async function initializeSelectionPayment(selectionId: string) {
       .where(eq(payments.id, activePayment.id));
   }
 
-  // 4. Generate transaction reference and 30-minute expiry
-  const reference = `SG_TXN_${Date.now()}_${crypto.randomBytes(4).toString("hex")}`;
-  const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes lock
+  const canReuseActivePayment =
+    activePayment && activePayment.totalKobo === paystackCalc.totalKobo;
+
+  // 4. Generate or reuse transaction reference and 30-minute expiry
+  const reference = canReuseActivePayment
+    ? activePayment.paystackReference
+    : `SG_TXN_${Date.now()}_${crypto.randomBytes(4).toString("hex")}`;
   const secretKey = getPaystackSecretKey();
 
-  // Create pending payment row
-  const [paymentRecord] = await db
-    .insert(payments)
-    .values({
-      quoteId: quote.id,
-      selectionId: sel.id,
-      amount: quote.totalKobo / 100,
-      totalKobo: quote.totalKobo,
-      commissionKobo: quote.commissionKobo,
-      workerPayoutKobo: quote.workerPayoutKobo,
-      currency: "NGN",
-      provider: "paystack",
-      paystackReference: reference,
-      mode: process.env.PAYSTACK_MODE || "test",
-      status: "PENDING",
-      expiresAt,
-    })
-    .returning();
+  let paymentRecord = canReuseActivePayment ? activePayment : undefined;
+
+  if (!paymentRecord) {
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes lock
+    const [newPaymentRecord] = await db
+      .insert(payments)
+      .values({
+        quoteId: quote.id,
+        selectionId: sel.id,
+        amount: quote.totalKobo / 100,
+        totalKobo: quote.totalKobo,
+        commissionKobo: quote.commissionKobo,
+        workerPayoutKobo: quote.workerPayoutKobo,
+        currency: "NGN",
+        provider: "paystack",
+        paystackReference: reference,
+        mode: process.env.PAYSTACK_MODE || "test",
+        status: "PENDING",
+        expiresAt,
+      })
+      .returning();
+    paymentRecord = newPaymentRecord;
+  }
 
   if (!paymentRecord) {
     throw new Error("Failed to create pending payment record.");
   }
 
   // 5. Call Paystack API to initialize transaction
-  const host = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const host = getAppBaseUrl();
   const callbackUrl = `${host}/employer/requests/${sel.hiringRequestId}?payment_ref=${reference}`;
 
   const paystackRes = await fetch("https://api.paystack.co/transaction/initialize", {
@@ -436,7 +458,7 @@ export async function initializeErrandPayment(errandId: string) {
     : `errand_${errandId.slice(0, 8)}_${Date.now()}`;
 
   const secretKey = getPaystackSecretKey();
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const baseUrl = getAppBaseUrl();
   const callbackUrl = `${baseUrl}/employer/errands/${errandId}?payment_ref=${reference}`;
 
   const res = await fetch("https://api.paystack.co/transaction/initialize", {
