@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { sendHandshakeOffer } from "../../../../../../actions/handshake";
 import { Check } from "lucide-react";
 
@@ -13,6 +14,7 @@ export default function ShortlistButton({
   hiringRequestId: string;
   initialSent?: boolean;
 }) {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(initialSent);
 
@@ -21,6 +23,7 @@ export default function ShortlistButton({
     try {
       await sendHandshakeOffer(workerProfileId, hiringRequestId);
       setSent(true);
+      router.refresh();
     } catch (err: any) {
       alert(err.message || "Failed to send offer");
     } finally {

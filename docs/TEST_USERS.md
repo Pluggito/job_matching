@@ -203,13 +203,19 @@ This guide contains everything you need to test the entire Staff Guru platform e
 ---
 
 ### Test Flow 2: Shortlisting & Handshake Agency Fee Payment
-**Goal:** Verify employer can shortlist a candidate and pay the regulated agency placement fee (₦50,000) to unlock direct contact details and activate the 14-day replacement SLA.
+**Goal:** Verify employer can shortlist a candidate, review the placement fee guarantee modal explaining why we charge it, and pay the regulated agency placement fee (₦50,000) to unlock direct contact details and activate the 14-day replacement SLA.
 
 1. On the **Smart Matches** page (`/employer/requests/[id]/matches`), find Chinedu's candidate card.
-2. Click **"Shortlist Candidate"**.
-   * The button transitions to **"Pay Agency Fee (₦50,000)"**.
-3. Click **"Pay Agency Fee (₦50,000)"**.
-   * Paystack transaction popup initializes with the candidate placement metadata.
+2. Click **"Shortlist Candidate"** (or "Send Offer").
+   * The button transitions to **"Unlock Contact & Hire"**.
+3. Click **"Unlock Contact & Hire"**.
+   * An explanatory modal opens detailing **Why We Charge an Agency Placement Fee**:
+     * **14-Day Replacement SLA Guarantee**: Free verified replacement if candidate underperforms or departs within 14 days.
+     * **0% Deductions from Worker Wages**: Worker keeps 100% of their earned salary.
+     * **Government NIN & Skill Vetting**: Pre-screened identity and background checks.
+     * **Instant Contact Unlock**: Unmasked direct phone and WhatsApp access.
+   * Click **"Pay ₦50,000 & Unlock Contact"**.
+   * Paystack checkout initializes with the candidate placement metadata.
    * In Paystack Test Mode, click **"Success"** or submit test card (`4084084084084081`, any CVV/future expiry).
 4. After callback verification:
    * The green alert banner appears: **"Agency Handshake Fee Verified!"**
