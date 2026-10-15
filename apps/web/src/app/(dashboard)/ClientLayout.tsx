@@ -9,15 +9,17 @@ import { Separator } from "@/components/ui/separator";
 export default function ClientLayout({ 
   children, 
   role,
-  userEmail
+  userEmail,
+  avatarUrl,
 }: { 
   children: React.ReactNode;
   role: Role;
   userEmail: string;
+  avatarUrl?: string | null;
 }) {
   return (
     <SidebarProvider>
-      <AppSidebar role={role} userEmail={userEmail} />
+      <AppSidebar role={role} userEmail={userEmail} avatarUrl={avatarUrl || ""} />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 bg-white border-b border-black/10 px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 justify-between">
           <div className="flex items-center gap-2">
@@ -36,9 +38,17 @@ export default function ClientLayout({
               <span className="absolute top-1 right-1 w-2 h-2 bg-[var(--ng)] rounded-full"></span>
             </button>
             <div className="flex items-center gap-3 pl-3 sm:pl-4 border-l border-black/10">
-              <div className="w-8 h-8 rounded-full bg-[var(--ng)] text-white font-bold flex items-center justify-center text-sm uppercase shrink-0 shadow-sm shadow-[var(--ng)]/20">
-                {userEmail.substring(0, 2)}
-              </div>
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt="Profile Avatar"
+                  className="w-8 h-8 rounded-full object-cover shrink-0 shadow-sm border border-black/10"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-[var(--ng)] text-white font-bold flex items-center justify-center text-sm uppercase shrink-0 shadow-sm shadow-[var(--ng)]/20">
+                  {userEmail.substring(0, 2)}
+                </div>
+              )}
               <div className="hidden lg:block">
                 <p className="text-sm font-semibold text-black">{userEmail}</p>
                 <p className="text-xs text-muted-foreground uppercase tracking-wider">{role}</p>

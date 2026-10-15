@@ -19,7 +19,12 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Logo } from "@/components/Logo"
 
-export function AppSidebar({ role, userEmail, ...props }: React.ComponentProps<typeof Sidebar> & { role: Role, userEmail: string }) {
+export function AppSidebar({ 
+  role, 
+  userEmail, 
+  avatarUrl,
+  ...props 
+}: React.ComponentProps<typeof Sidebar> & { role: Role; userEmail: string; avatarUrl?: string }) {
   const navItems = getNavItems(role)
   const pathname = usePathname()
   const { state } = useSidebar()
@@ -51,7 +56,7 @@ export function AppSidebar({ role, userEmail, ...props }: React.ComponentProps<t
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={{ name: role, email: userEmail, avatar: "" }} />
+        <NavUser user={{ name: role, email: userEmail, avatar: avatarUrl || "" }} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

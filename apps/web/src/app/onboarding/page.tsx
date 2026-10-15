@@ -28,6 +28,7 @@ import { useRouter } from "next/navigation";
 import BankDetailsStep from "@/components/onboarding/BankDetailsStep";
 import { saveWorkerBankDetails } from "@/actions/bank";
 import { validateNuban } from "@repo/shared";
+import PhotoUploadField from "@/components/profile/PhotoUploadField";
 
 function StepIndicator({ currentStep, totalSteps }: { currentStep: number, totalSteps: number }) {
   return (
@@ -62,7 +63,9 @@ function EmployerOnboarding() {
     contractType: "Permanent",
     compensationType: "Salary",
     amount: "",
-    hasAccommodation: "No"
+    hasAccommodation: "No",
+    avatar: "",
+    logo: ""
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -106,6 +109,15 @@ function EmployerOnboarding() {
             <h2 className="text-lg font-bold flex items-center gap-2 border-b border-[var(--line)] pb-4">
               <User className="text-[var(--ng)]" /> Personal & Business Details
             </h2>
+
+            <PhotoUploadField
+              label="Company Logo or Profile Photo"
+              sublabel="Upload a company logo or personal headshot so job candidates recognize you (PNG, JPG up to 4MB)"
+              value={formData.avatar || formData.logo || ""}
+              onChange={(url) => setFormData(prev => ({ ...prev, avatar: url, logo: url }))}
+              shape="rounded"
+              iconType="building"
+            />
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-1.5 md:col-span-2">
@@ -208,6 +220,7 @@ function WorkerOnboarding() {
   
   const [formData, setFormData] = useState({
     fullName: "", age: "", gender: "Male", phone: "", address: "", 
+    avatar: "",
     jobType: "", experience: "", compensation: "Salary", amount: "", accommodation: "No",
     openToErrands: false,
     bankName: "", bankCode: "", accountNumber: "", accountName: "",
@@ -304,6 +317,15 @@ function WorkerOnboarding() {
             <h2 className="text-lg font-bold flex items-center gap-2 border-b border-[var(--line)] pb-4">
               <User className="text-[var(--ng)]" /> Personal Details
             </h2>
+
+            <PhotoUploadField
+              label="Profile Photo"
+              sublabel="Upload a clear headshot photo (JPG, PNG up to 4MB). Increases employer trust and fast-tracks verification."
+              value={formData.avatar}
+              onChange={(url) => setFormData(prev => ({ ...prev, avatar: url }))}
+              shape="circle"
+              iconType="user"
+            />
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div className="space-y-1.5 md:col-span-3">

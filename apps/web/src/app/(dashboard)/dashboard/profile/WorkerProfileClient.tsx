@@ -78,8 +78,11 @@ export default function WorkerProfileClient({ profile }: { profile: any }) {
                   }}
                   onClientUploadComplete={async (res) => {
                     if (res?.[0]) {
-                      setAvatar(res[0].url);
-                      await updateWorkerAvatar(res[0].url);
+                      const url = res[0].url || (res[0] as any).ufsUrl;
+                      if (url) {
+                        setAvatar(url);
+                        await updateWorkerAvatar(url);
+                      }
                     }
                   }}
                 />

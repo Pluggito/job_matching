@@ -36,7 +36,9 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar()
   const router = useRouter()
-  const basePath = user.name === "EMPLOYER" ? "/employer" : user.name === "ADMIN" ? "/admin" : "/worker"
+  const basePath = user.name === "EMPLOYER" ? "/employer" : user.name === "ADMIN" ? "/admin" : "/dashboard"
+  const initials = (user.email ? user.email.slice(0, 2).toUpperCase() : user.name?.slice(0, 2).toUpperCase()) || "SG"
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -48,7 +50,7 @@ export function NavUser({
           >
             <Avatar>
               <AvatarImage src={user.avatar} alt={user.name} />
-              <AvatarFallback>CN</AvatarFallback>
+              <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-medium">{user.name}</span>
@@ -67,7 +69,7 @@ export function NavUser({
                 <div className="flex items-center gap-2 px-2 py-2 text-left text-sm">
                   <Avatar>
                     <AvatarImage src={user.avatar} alt={user.name} />
-                    <AvatarFallback>CN</AvatarFallback>
+                    <AvatarFallback>{initials}</AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-medium">{user.name}</span>

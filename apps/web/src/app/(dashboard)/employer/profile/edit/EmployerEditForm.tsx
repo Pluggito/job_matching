@@ -1,18 +1,22 @@
 "use client";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateEmployerDetails } from "../../../../../actions/profile";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
+import PhotoUploadField from "@/components/profile/PhotoUploadField";
 
 export default function EmployerEditForm({ profile }: { profile: any }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const profileData = (profile.profileData as Record<string, any>) || {};
+  const [logoUrl, setLogoUrl] = useState<string>(profileData.logo || profileData.avatar || "");
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+    formData.set("logo", logoUrl);
+    formData.set("avatar", logoUrl);
     startTransition(async () => {
       try {
         await updateEmployerDetails(formData);
@@ -25,6 +29,16 @@ export default function EmployerEditForm({ profile }: { profile: any }) {
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
+      <PhotoUploadField
+        label="Company Logo or Profile Photo"
+        sublabel="Update your business logo or representative photo."
+        value={logoUrl}
+        name="logo"
+        onChange={(url) => setLogoUrl(url)}
+        shape="rounded"
+        iconType="building"
+      />
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <label className="text-sm font-bold text-[var(--ink)]">Business Name</label>

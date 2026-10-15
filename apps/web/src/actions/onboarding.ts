@@ -15,6 +15,13 @@ export async function saveOnboardingData(role: string, data: any) {
 
   try {
     if (role === "EMPLOYER") {
+      const logoUrl = data.logo || data.avatar || "";
+      const employerProfileData = {
+        ...data,
+        logo: logoUrl,
+        avatar: logoUrl,
+      };
+
       // Check if employer profile exists
       const existing = await db.select().from(employerProfiles).where(eq(employerProfiles.userId, userId));
       
@@ -24,7 +31,7 @@ export async function saveOnboardingData(role: string, data: any) {
             businessName: data.businessName || "Unknown",
             location: data.location || "Unknown",
             hiringNeeds: data.staffType || "General",
-            profileData: data
+            profileData: employerProfileData
           })
           .where(eq(employerProfiles.userId, userId));
       } else {
@@ -33,7 +40,7 @@ export async function saveOnboardingData(role: string, data: any) {
           businessName: data.businessName || "Unknown",
           location: data.location || "Unknown",
           hiringNeeds: data.staffType || "General",
-          profileData: data
+          profileData: employerProfileData
         });
       }
     } else {
@@ -73,6 +80,9 @@ export async function saveOnboardingData(role: string, data: any) {
     }
     
     revalidatePath("/jobs/search");
+    revalidatePath("/employer/profile");
+    revalidatePath("/dashboard/profile");
+    revalidatePath("/", "layout");
     return { success: true };
   } catch (error) {
     console.error("Failed to save onboarding data:", error);

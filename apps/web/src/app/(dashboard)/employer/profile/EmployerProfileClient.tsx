@@ -23,7 +23,7 @@ export default function EmployerProfileClient({ profile }: { profile: any }) {
   const { employer, user } = profile;
   const profileData = (employer.profileData as Record<string, any>) || {};
 
-  const [logo, setLogo] = useState<string | null>(profileData.logo || null);
+  const [logo, setLogo] = useState<string | null>(profileData.logo || profileData.avatar || null);
 
   const hiringNeedsArray: string[] = employer.hiringNeeds
     ? employer.hiringNeeds.split(",").map((s: string) => s.trim()).filter(Boolean)
@@ -79,8 +79,11 @@ export default function EmployerProfileClient({ profile }: { profile: any }) {
                   }}
                   onClientUploadComplete={async (res) => {
                     if (res?.[0]) {
-                      setLogo(res[0].url);
-                      await updateEmployerLogo(res[0].url);
+                      const url = res[0].url || (res[0] as any).ufsUrl;
+                      if (url) {
+                        setLogo(url);
+                        await updateEmployerLogo(url);
+                      }
                     }
                   }}
                 />
