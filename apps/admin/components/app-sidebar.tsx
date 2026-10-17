@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { LayoutDashboard, Users, Briefcase, Star, MessageSquare, BriefcaseBusiness, ClipboardList, Sliders, Bike, ShieldCheck } from 'lucide-react';
-import { BundleCarrierMark } from "@repo/ui";
+import Image from "next/image";
 import {
   Sidebar,
   SidebarContent,
@@ -59,8 +59,15 @@ export function AppSidebar({
       <SidebarHeader>
         <div className="flex h-12 items-center justify-center mt-2">
           <Link href="/" className={`flex items-center gap-2 text-black font-bold tracking-tight overflow-hidden transition-all duration-200 ${state === 'collapsed' ? 'w-8 h-8' : 'w-full px-2 text-xl'}`}>
-            <span className="flex items-center justify-center w-8 h-8 min-w-8 rounded-lg bg-[var(--ng)] text-white shrink-0 shadow-sm shadow-[var(--ng)]/20 p-1">
-              <BundleCarrierMark className="w-5 h-5 text-white" />
+            <span className="relative flex items-center justify-center w-8 h-8 min-w-8 rounded-full overflow-hidden shrink-0 shadow-sm p-0.5">
+              <Image
+                src="/logo.png"
+                alt="Staff Guru logo"
+                width={32}
+                height={32}
+                priority
+                className="w-full h-full object-contain"
+              />
             </span>
             <div className={`flex items-center font-heading whitespace-nowrap transition-all duration-200 ${state === 'collapsed' ? 'opacity-0 w-0' : 'opacity-100 w-auto'}`}>
               staff<span className="text-[var(--ng)]">guru</span><i className="text-[var(--orange)] not-italic">.</i>

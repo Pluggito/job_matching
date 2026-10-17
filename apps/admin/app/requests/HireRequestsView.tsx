@@ -206,7 +206,7 @@ export default function HireRequestsView({ requests }: HireRequestsViewProps) {
             Agency Fee & Contact Protection Business Rules:
           </p>
           <p>
-            Employers must pay a flat, non-refundable agency fee of <strong>₦50,000</strong> per shortlisted worker before direct phone numbers or email addresses are unlocked.
+            Employers must pay a flat, non-refundable agency fee of <strong>₦50,000</strong> per shortlisted worker before direct phone numbers and email addresses are unlocked.
           </p>
         </div>
       </div>

@@ -3,12 +3,14 @@ import {
   workerProfiles,
   workerBankAccounts,
   errands,
+  payments,
   eq,
   and,
   desc,
   gt,
   or,
   isNull,
+  sql,
 } from "@repo/db";
 import { getCurrentUser } from "@/actions/auth";
 import WorkerErrandsClient, {
@@ -88,7 +90,29 @@ export default async function WorkerErrandsPage() {
 
   // 2. Fetch worker's active & claimed errands
   const rawMyErrands = await db
-    .select()
+    .select({
+      id: errands.id,
+      title: errands.title,
+      type: errands.type,
+      status: errands.status,
+      locationState: errands.locationState,
+      locationArea: errands.locationArea,
+      address: errands.address,
+      dropoffAddress: errands.dropoffAddress,
+      budgetKobo: errands.budgetKobo,
+      workerPayoutKobo: errands.workerPayoutKobo,
+      deadline: errands.deadline,
+      requiredProof: errands.requiredProof,
+      claimedAt: errands.claimedAt,
+      proofSubmittedAt: errands.proofSubmittedAt,
+      completedAt: errands.completedAt,
+      handoffAttempts: errands.handoffAttempts,
+      isPaid: sql<boolean>`EXISTS (
+        SELECT 1 FROM ${payments}
+        WHERE ${payments.errandId} = ${errands.id}
+        AND ${payments.status} = 'VERIFIED'
+      )`,
+    })
     .from(errands)
     .where(eq(errands.claimedByWorkerId, workerProfile.id))
     .orderBy(desc(errands.updatedAt));
@@ -109,6 +133,7 @@ export default async function WorkerErrandsPage() {
     proofSubmittedAt: e.proofSubmittedAt?.toISOString() || null,
     completedAt: e.completedAt?.toISOString() || null,
     handoffAttempts: e.handoffAttempts,
+    isPaid: Boolean(e.isPaid),
   }));
 
   return (

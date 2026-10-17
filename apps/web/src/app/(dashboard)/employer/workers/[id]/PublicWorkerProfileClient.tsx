@@ -12,12 +12,14 @@ export default function PublicWorkerProfileClient({
   placementId,
   pendingSelectionId,
   isSelectionPaid = false,
+  isCandidateAccepted = false,
 }: {
   worker: any;
   isConnected?: boolean;
   placementId?: string;
   pendingSelectionId?: string;
   isSelectionPaid?: boolean;
+  isCandidateAccepted?: boolean;
 }) {
   const [copiedAcc, setCopiedAcc] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
@@ -292,31 +294,40 @@ export default function PublicWorkerProfileClient({
                     </div>
                   )}
                 </div>
-              ) : pendingSelectionId && isSelectionPaid ? (
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-2">
-                    Placement Fee Paid · Offer Dispatched
-                  </p>
-                  <p className="text-xs text-neutral-600 mb-4 leading-relaxed">
-                    You have hired this candidate! We are waiting for the job seeker to review and accept the offer. Direct contact details will unlock immediately once accepted.
-                  </p>
-                  <div className="w-full h-11 px-4 rounded-xl bg-[#008751] text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-xs">
-                    <CheckCircle2 size={16} strokeWidth={2.4} />
-                    <span>Hire Active · Waiting for Candidate</span>
+              ) : pendingSelectionId && isCandidateAccepted && !isSelectionPaid ? (
+                <div className="space-y-3">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold">
+                    <CheckCircle2 size={13} className="text-emerald-600" />
+                    <span>Candidate Accepted Offer! 🎉</span>
                   </div>
-                </div>
-              ) : pendingSelectionId ? (
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-2">
-                    Handshake Offer Pending Placement Fee
-                  </p>
-                  <p className="text-xs text-neutral-600 mb-4 leading-relaxed">
-                    Review why we charge the regulated ₦50,000 placement fee and unlock candidate direct contact details backed by our 14-day SLA guarantee.
+                  <p className="text-xs text-neutral-600 leading-relaxed">
+                    The candidate has accepted your job offer. Pay the agency fee (in full or 2 installments) to immediately unlock their direct phone number and email address.
                   </p>
                   <PayAgencyFeeButton
                     selectionId={pendingSelectionId}
                     feeAmount={50000}
                     candidateName={worker.category || "Candidate"}
+                    triggerText="Pay Agency Fee to Unlock Contact"
+                    className="w-full"
+                  />
+                </div>
+              ) : pendingSelectionId && !isCandidateAccepted ? (
+                <div className="space-y-2">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-100 text-neutral-800 border border-neutral-200 text-xs font-semibold">
+                    <Clock size={13} className="text-neutral-500" />
+                    <span>Offer Sent · Awaiting Candidate</span>
+                  </div>
+                  <p className="text-xs text-neutral-600 leading-relaxed">
+                    You have sent an official placement offer to this candidate. Once the candidate accepts the offer, you will be prompted to complete the agency placement fee to unlock their contact credentials.
+                  </p>
+                </div>
+              ) : pendingSelectionId ? (
+                <div className="space-y-3">
+                  <PayAgencyFeeButton
+                    selectionId={pendingSelectionId}
+                    feeAmount={50000}
+                    candidateName={worker.category || "Candidate"}
+                    triggerText="Pay Agency Fee to Unlock Contact"
                     className="w-full"
                   />
                 </div>

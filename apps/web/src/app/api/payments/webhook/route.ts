@@ -224,7 +224,7 @@ export async function POST(req: Request) {
             .where(eq(errands.id, payment.errandId))
             .limit(1);
 
-          if (errandRecord && errandRecord.status !== "pending_payment" && errandRecord.status !== "open") {
+          if (errandRecord && errandRecord.status !== "pending_payment" && errandRecord.status !== "open" && errandRecord.status !== "claimed") {
             await db
               .update(payments)
               .set({
@@ -285,6 +285,7 @@ export async function POST(req: Request) {
 
               if (targetErrand) {
                 const now = new Date();
+                const nextStatus = targetErrand.claimedByWorkerId ? "in_progress" : "open";
                 const deadlineMs = targetErrand.deadline.getTime();
                 const windowExpiryMs = now.getTime() + 24 * 60 * 60 * 1000;
                 const unclaimedExpiresAt = new Date(Math.min(windowExpiryMs, deadlineMs));
@@ -292,9 +293,9 @@ export async function POST(req: Request) {
                 await tx
                   .update(errands)
                   .set({
-                    status: "open",
-                    openedAt: now,
-                    unclaimedExpiresAt,
+                    status: nextStatus,
+                    openedAt: targetErrand.openedAt || now,
+                    unclaimedExpiresAt: nextStatus === "open" ? unclaimedExpiresAt : targetErrand.unclaimedExpiresAt,
                     updatedAt: now,
                   })
                   .where(eq(errands.id, payment.errandId));
@@ -307,11 +308,34 @@ export async function POST(req: Request) {
                   .limit(1);
 
                 if (emp) {
+                  const isDispatched = !!targetErrand.claimedByWorkerId;
                   await tx.insert(notifications).values({
                     userId: emp.userId,
                     type: "ERRAND_OPENED",
-                    content: `Your errand "${targetErrand.title}" is funded and live! Matching verified runners can now claim it.`,
+                    title: isDispatched ? "Payment Confirmed · Runner Dispatched! 🚀" : "Errand Funded & Live! 🚀",
+                    content: isDispatched
+                      ? `Escrow payment confirmed for "${targetErrand.title}". Your runner has been dispatched to execute the task!`
+                      : `Your errand "${targetErrand.title}" is funded and live! Matching verified runners can now claim it.`,
+                    link: `/employer/errands/${payment.errandId}`,
                   });
+                }
+
+                if (targetErrand.claimedByWorkerId) {
+                  const [worker] = await tx
+                    .select({ userId: workerProfiles.userId })
+                    .from(workerProfiles)
+                    .where(eq(workerProfiles.id, targetErrand.claimedByWorkerId))
+                    .limit(1);
+
+                  if (worker) {
+                    await tx.insert(notifications).values({
+                      userId: worker.userId,
+                      type: "ERRAND_CLAIMED",
+                      title: "Escrow Funded! 🚀",
+                      content: `The creator has funded "${targetErrand.title}". You may now begin execution.`,
+                      link: "/dashboard/errands",
+                    });
+                  }
                 }
               }
             }

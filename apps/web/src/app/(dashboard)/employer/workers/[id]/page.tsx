@@ -28,6 +28,7 @@ export default async function WorkerProfilePage({ params }: { params: { id: stri
   let placementId: string | undefined;
   let pendingSelectionId: string | undefined;
   let isSelectionPaid = false;
+  let isCandidateAccepted = false;
 
   if (session && session.role === "EMPLOYER") {
     const [emp] = await db
@@ -37,56 +38,45 @@ export default async function WorkerProfilePage({ params }: { params: { id: stri
       .limit(1);
 
     if (emp) {
-      // Check confirmed selection (worker must have explicitly accepted offer)
-      const [conn] = await db
-        .select({ id: selections.id, termsAcceptedAt: selections.termsAcceptedAt })
+      const [sel] = await db
+        .select({
+          id: selections.id,
+          status: selections.status,
+          termsAcceptedAt: selections.termsAcceptedAt,
+          isPaid: sql<boolean>`EXISTS (
+            SELECT 1 FROM ${payments} 
+            WHERE ${payments.selectionId} = ${selections.id} 
+            AND ${payments.status} = 'VERIFIED'
+          )`,
+        })
         .from(selections)
         .where(
           and(
             eq(selections.employerProfileId, emp.id),
-            eq(selections.workerProfileId, profile.id),
-            eq(selections.status, "CONFIRMED")
+            eq(selections.workerProfileId, profile.id)
           )
         )
         .limit(1);
 
-      isConnected = !!conn && !!conn.termsAcceptedAt;
+      if (sel) {
+        const candidateAccepted = sel.status === "CONFIRMED" || !!sel.termsAcceptedAt;
+        const paid = Boolean(sel.isPaid);
 
-      if (conn) {
-        // Find placement
-        const [placement] = await db
-          .select({ id: placements.id })
-          .from(placements)
-          .where(eq(placements.selectionId, conn.id))
-          .limit(1);
+        if (candidateAccepted && paid) {
+          isConnected = true;
+          const [placement] = await db
+            .select({ id: placements.id })
+            .from(placements)
+            .where(eq(placements.selectionId, sel.id))
+            .limit(1);
 
-        if (placement) {
-          placementId = placement.id;
-        }
-      } else {
-        // Check if there is a pending selection awaiting fee payment or candidate acceptance
-        const [pendingSel] = await db
-          .select({
-            id: selections.id,
-            isPaid: sql<boolean>`EXISTS (
-              SELECT 1 FROM ${payments} 
-              WHERE ${payments.selectionId} = ${selections.id} 
-              AND ${payments.status} = 'VERIFIED'
-            )`,
-          })
-          .from(selections)
-          .where(
-            and(
-              eq(selections.employerProfileId, emp.id),
-              eq(selections.workerProfileId, profile.id),
-              eq(selections.status, "PENDING")
-            )
-          )
-          .limit(1);
-
-        if (pendingSel) {
-          pendingSelectionId = pendingSel.id;
-          isSelectionPaid = !!pendingSel.isPaid;
+          if (placement) {
+            placementId = placement.id;
+          }
+        } else {
+          pendingSelectionId = sel.id;
+          isSelectionPaid = paid;
+          isCandidateAccepted = candidateAccepted;
         }
       }
     }
@@ -107,6 +97,7 @@ export default async function WorkerProfilePage({ params }: { params: { id: stri
         placementId={placementId}
         pendingSelectionId={pendingSelectionId}
         isSelectionPaid={isSelectionPaid}
+        isCandidateAccepted={isCandidateAccepted}
       />
     </div>
   );

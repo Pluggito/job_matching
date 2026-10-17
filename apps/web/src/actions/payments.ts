@@ -50,7 +50,10 @@ function getAppBaseUrl(): string {
  * Initializes a Paystack checkout for a Job Selection's Handshake Agency Fee.
  * Enforces in-flight payment locking (30-minute lock via expiresAt).
  */
-export async function initializeSelectionPayment(selectionId: string) {
+export async function initializeSelectionPayment(
+  selectionId: string,
+  installmentMode: "full" | "half" = "full"
+) {
   const session = await getCurrentUser();
   if (!session || session.role !== "EMPLOYER") {
     throw new Error("Unauthorized: Only employers can initiate agency fee payments.");
@@ -84,7 +87,13 @@ export async function initializeSelectionPayment(selectionId: string) {
     throw new Error("Unauthorized: You do not own this selection.");
   }
 
-  if (sel.status === "CONFIRMED") {
+  const [existingVerifiedPayment] = await db
+    .select({ id: payments.id })
+    .from(payments)
+    .where(and(eq(payments.selectionId, selectionId), eq(payments.status, "VERIFIED")))
+    .limit(1);
+
+  if (existingVerifiedPayment) {
     return {
       success: true,
       alreadyPaid: true,
@@ -92,16 +101,15 @@ export async function initializeSelectionPayment(selectionId: string) {
     };
   }
 
-  const agencyFeeKobo = AGENCY_FEE_PER_WORKER * 100; // 5,000,000 kobo (₦50,000)
-  const paystackCalc = calculatePaystackFee(agencyFeeKobo); // 1.5% + ₦100 (₦850 fee -> ₦50,850 total)
+  const baseFeeNaira = installmentMode === "half" ? 25000 : 50000;
+  const agencyFeeKobo = baseFeeNaira * 100;
+  const paystackCalc = calculatePaystackFee(agencyFeeKobo);
 
-  // Ensure selection feeAmount is set to regulated agency fee if it previously stored candidate salary budget
-  if (sel.feeAmount !== AGENCY_FEE_PER_WORKER) {
-    await db
-      .update(selections)
-      .set({ feeAmount: AGENCY_FEE_PER_WORKER })
-      .where(eq(selections.id, selectionId));
-  }
+  // Update selection feeAmount with base fee for this transaction
+  await db
+    .update(selections)
+    .set({ feeAmount: baseFeeNaira })
+    .where(eq(selections.id, selectionId));
 
   // 2. Fetch or create Quote for this selection
   let [quote] = await db
@@ -236,6 +244,7 @@ export async function initializeSelectionPayment(selectionId: string) {
         hiringRequestId: sel.hiringRequestId,
         paymentId: paymentRecord.id,
         type: "agency_fee",
+        installmentMode,
       },
     }),
   });
@@ -415,18 +424,25 @@ export async function verifyPaymentReference(reference: string) {
 
       // 3b. Errand activation if errand payment
       if (payment.errandId) {
-        await tx
-          .update(errands)
-          .set({ status: "open", updatedAt: new Date() })
-          .where(and(eq(errands.id, payment.errandId), eq(errands.status, "pending_payment")));
-
         const [err] = await tx
-          .select({ title: errands.title, employerId: errands.employerId })
+          .select({
+            id: errands.id,
+            title: errands.title,
+            employerId: errands.employerId,
+            claimedByWorkerId: errands.claimedByWorkerId,
+            status: errands.status,
+          })
           .from(errands)
           .where(eq(errands.id, payment.errandId))
           .limit(1);
 
         if (err) {
+          const nextStatus = err.claimedByWorkerId ? "in_progress" : "open";
+          await tx
+            .update(errands)
+            .set({ status: nextStatus, updatedAt: new Date() })
+            .where(eq(errands.id, payment.errandId));
+
           const [emp] = await tx
             .select({ userId: employerProfiles.userId })
             .from(employerProfiles)
@@ -434,20 +450,50 @@ export async function verifyPaymentReference(reference: string) {
             .limit(1);
 
           if (emp) {
+            const isDispatched = !!err.claimedByWorkerId;
             await tx.insert(notifications).values({
               userId: emp.userId,
               type: "SELECTION_CONFIRMED",
-              title: "Errand Funded & Live! 🚀",
-              content: `Your errand "${err.title}" is funded and broadcast to nearby runners.`,
+              title: isDispatched ? "Payment Confirmed · Runner Dispatched! 🚀" : "Errand Funded & Live! 🚀",
+              content: isDispatched
+                ? `Escrow payment confirmed for "${err.title}". Your runner has been dispatched to execute the task!`
+                : `Your errand "${err.title}" is funded and broadcast to nearby runners.`,
               link: `/employer/errands/${payment.errandId}`,
             });
 
             sendPushToUser(emp.userId, {
-              title: "Errand Funded & Live! 🚀",
-              body: `Your errand "${err.title}" is funded and broadcast to nearby runners.`,
+              title: isDispatched ? "Payment Confirmed · Runner Dispatched! 🚀" : "Errand Funded & Live! 🚀",
+              body: isDispatched
+                ? `Escrow payment confirmed for "${err.title}". Your runner has been dispatched to execute the task!`
+                : `Your errand "${err.title}" is funded and broadcast to nearby runners.`,
               url: `/employer/errands/${payment.errandId}`,
               tag: `errand-${payment.errandId}`,
             }).catch(console.error);
+          }
+
+          if (err.claimedByWorkerId) {
+            const [worker] = await tx
+              .select({ userId: workerProfiles.userId })
+              .from(workerProfiles)
+              .where(eq(workerProfiles.id, err.claimedByWorkerId))
+              .limit(1);
+
+            if (worker) {
+              await tx.insert(notifications).values({
+                userId: worker.userId,
+                type: "ERRAND_CLAIMED",
+                title: "Escrow Funded! 🚀",
+                content: `The creator has funded "${err.title}". You may now begin execution.`,
+                link: "/dashboard/errands",
+              });
+
+              sendPushToUser(worker.userId, {
+                title: "Escrow Funded! 🚀",
+                body: `The creator has funded "${err.title}". You may now begin execution.`,
+                url: "/dashboard/errands",
+                tag: `errand-worker-${err.id}`,
+              }).catch(console.error);
+            }
           }
         }
       }
@@ -503,11 +549,27 @@ export async function initializeErrandPayment(errandId: string) {
     throw new Error("Unauthorized: You do not own this errand.");
   }
 
-  if (errand.status !== "pending_payment") {
+  // Check if errand has already been funded
+  const [existingVerifiedPayment] = await db
+    .select({ id: payments.id })
+    .from(payments)
+    .where(and(eq(payments.errandId, errandId), eq(payments.status, "VERIFIED")))
+    .limit(1);
+
+  if (existingVerifiedPayment) {
     return {
       success: true,
       alreadyPaid: true,
-      message: `Errand is already in ${errand.status} status.`,
+      message: "Errand has already been funded.",
+    };
+  }
+
+  // Allow payment when errand is claimed, pending_payment, or open
+  if (errand.status !== "claimed" && errand.status !== "pending_payment" && errand.status !== "open") {
+    return {
+      success: true,
+      alreadyPaid: true,
+      message: `Errand is in ${errand.status} status and cannot be funded.`,
     };
   }
 
