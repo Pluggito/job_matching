@@ -279,14 +279,14 @@ export default function AlabaruShowcase({
                   </svg>
                 </span>
               </h2>
-              <div className="relative shrink-0 w-11 h-11 sm:w-13 sm:h-13 xl:w-14 xl:h-14 pb-2">
+              <div className="relative shrink-0 w-16 h-16 sm:w-20 sm:h-20 xl:w-24 xl:h-24 pb-2">
                 <Image
-                  src="/logo 4.png"
+                  src="/Staff_guru_logo_no_bg.png"
                   alt="Alabaru emblem"
-                  width={56}
-                  height={56}
+                  width={96}
+                  height={96}
                   priority
-                  className="w-full h-full object-contain drop-shadow-sm"
+                  className="w-full h-full object-contain drop-shadow-md transition-transform duration-300 hover:scale-105"
                 />
               </div>
             </div>
