@@ -34,105 +34,126 @@ const SCENARIOS: Scenario[] = [
     id: "inspection",
     tabLabel: "Site Inspection",
     category: "Diaspora & Real Estate",
-    title: "Building Site & Property Verification",
-    punchline: "Inspect. Verify. Supervise from anywhere.",
+    title: "Building Site & Property Check",
+    punchline: "You dey abroad, but your eyes dey on the ground.",
     description:
-      "Wiring funds for building milestones from the UK, US, or across state lines? A vetted local runner arrives on site with GPS-stamped photo and video proof of foundations, blocks, and progress before you disburse contractor funds.",
+      "Sending money home for your building project? Before you release the next payment, a verified runner goes to site and sends you GPS-stamped photos and video of the foundation, blocks and work done so far. No more \"the work is moving, oga\" stories.",
     location: "The Eko Pearl · Victoria Island, Lagos",
     budget: 12000,
     turnaround: "3.5 hrs avg.",
     image: "/landing/alabaru/inspection.jpg",
-    badge: "GPS Timestamped Verification",
+    badge: "GPS-Stamped Proof",
     checklist: [
-      "Foundation & concrete milestone stage verification",
-      "GPS-watermarked 4-angle photo & 4K video walk-through",
-      "Architect blueprint alignment & material count check",
-      "Worker attendance & contractor supervisor check-in",
-      "Live WhatsApp or in-app stream directly to diaspora",
+      "Foundation and every stage of the work confirmed",
+      "GPS-stamped photos and video from all angles",
+      "Work compared with your plan, materials counted",
+      "Check on who is on site: workers and supervisor",
+      "Live updates on WhatsApp or inside the app",
     ],
   },
   {
     id: "market",
-    tabLabel: "Market Procurement",
+    tabLabel: "Market Runs",
     category: "Wholesale & Commerce",
-    title: "Balogun & Alaba Market Procurement",
-    punchline: "Source. Negotiate. Skip the 4-hour traffic.",
+    title: "Balogun & Alaba Market Runs",
+    punchline: "Market wahala? We go for you. No go-slow.",
     description:
-      "Need 10 yards of French lace, electronics spares, or market wholesale inventory? Your runner enters the market labyrinth, inspects goods quality on-site, bargains vendor prices, and sends live video proof before payment.",
+      "Need lace, electronics or wholesale stock but you can't face the traffic to Balogun or Alaba? Your runner goes into the market, checks the goods in person, bargains the price and sends you live video before any money moves.",
     location: "Balogun Market Shop B12 · Lagos Island",
     budget: 8000,
     turnaround: "2.2 hrs avg.",
     image: "/landing/alabaru/market.jpg",
-    badge: "Item Quality Checked On-Site",
+    badge: "Quality Checked in Person",
     checklist: [
-      "Fabric, lace & electronics tactile quality inspection",
-      "Direct vendor wholesale price negotiation",
-      "Live video confirmation before funds leave escrow",
-      "Original stamped physical merchant receipt collection",
-      "Secure handoff to dispatch or interstate waybill",
+      "Lace, fabric and gadgets checked by hand",
+      "Runner bargains for you, no \"oyinbo price\"",
+      "Live video before any money leaves",
+      "Original receipt collected from the seller",
+      "Goods handed to dispatch or sent by waybill",
     ],
   },
   {
     id: "delivery",
     tabLabel: "Secure Courier",
     category: "Corporate & High-Value",
-    title: "Sensitive Parcel & Contract Handover",
-    punchline: "Sealed custody. Cryptographic 6-digit PIN release.",
+    title: "Sensitive Parcel & Document Delivery",
+    punchline: "Sealed and tracked. No PIN, no package.",
     description:
-      "Court filings, original title deeds, bespoke couture, or sensitive business hardware. The handover is physically locked until the recipient provides the secret 6-digit delivery PIN generated at checkout.",
+      "Court papers, original title documents, bespoke outfits or valuable equipment. The runner cannot hand over until the receiver gives the 6-digit PIN you get at checkout. Nobody can just collect it and go.",
     location: "The Corporate Place · 20 Marina, Lagos",
     budget: 7500,
     turnaround: "1.8 hrs avg.",
     image: "/landing/alabaru/delivery.jpg",
-    badge: "6-Digit Delivery PIN Verified",
+    badge: "6-Digit PIN Verified",
     checklist: [
-      "Original court filings, deeds, or bespoke fashion handover",
-      "Tamper-evident custody seal with sequential tracking",
-      "Handover locked until recipient provides 6-digit PIN",
-      "Real-time GPS transit tracking between origin & destination",
-      "Instant photographic proof & signature acknowledgement",
+      "Court papers, title documents, native wear and more",
+      "Sealed packaging with tracking",
+      "Handover locked until receiver gives the 6-digit PIN",
+      "Live GPS tracking from pickup to drop-off",
+      "Photo proof and signature on delivery",
     ],
   },
   {
     id: "civic",
     tabLabel: "Civic & Registry",
     category: "Government & Legal Filing",
-    title: "CAC, Lands Registry & Embassy Filing",
-    punchline: "Skip 4 hours under the sun at government desks.",
+    title: "CAC, Lands Registry & Embassy Runs",
+    punchline: "No more sun, queues and \"come back tomorrow\".",
     description:
-      "Skip whole days queuing under the sun at CAC, lands registry, or embassies. A vetted runner holds your spot on line from 7:00 AM, submits paperwork, and retrieves certified true copy (CTC) stamps.",
+      "Why waste a whole day at CAC, the lands registry or an embassy? Your runner is on the queue from 7:00 AM, submits your documents and collects the stamped copies (CTC) for you. You keep your day.",
     location: "Federal Ministry of Justice · Central Registry",
     budget: 15000,
     turnaround: "4.0 hrs avg.",
     image: "/landing/alabaru/civic.jpg",
-    badge: "Stamped Filing Acknowledgement",
+    badge: "Stamped Acknowledgement",
     checklist: [
-      "Early 7:00 AM queue holding at registry & consular gates",
-      "Submission of Certified True Copy (CTC) legal documentation",
-      "Tracking paperwork across state & federal ministry desks",
-      "Official acknowledgement slip & receipt collection",
-      "Avoid losing an entire workday to traffic and queues",
+      "On the queue from 7:00 AM, rain or shine",
+      "Documents and CTC submissions handled for you",
+      "Your file followed from desk to desk",
+      "Stamped acknowledgement slip and receipt brought back",
+      "No sun, no stress, no lost workday",
     ],
   },
   {
     id: "automotive",
     tabLabel: "Car Inspection",
     category: "Automotive & Heavy Goods",
-    title: "Pre-Purchase Tokunbo & Car Inspection",
-    punchline: "OBD-II computer diagnostics before you pay the dealer.",
+    title: "Tokunbo & Used Car Inspection",
+    punchline: "Check the car before you pay. Don't buy wahala.",
     description:
-      "Buying a car in Lagos from another state? Don't fall for cleaned odometers. A trained inspector runs computer diagnostics, inspects engine bay, tests flood damage, and verifies customs duty documents.",
+      "Buying a car from another state? Don't let anybody sell you a clocked odometer. An inspector runs a computer diagnostic, checks the engine, looks for flood damage and confirms the customs papers before you pay the dealer.",
     location: "Berger Auto Market & Lekki Dealerships",
     budget: 10000,
     turnaround: "2.5 hrs avg.",
     image: "/landing/categories/automotive.jpg",
-    badge: "OBD-II Scan & Engine Bay Check",
+    badge: "OBD-II Scan & Engine Check",
     checklist: [
-      "Cold-start engine audio check & exhaust smoke inspection",
-      "Computerized OBD-II diagnostic fault code scan",
-      "Customs paper & VIN verification against FRSC records",
-      "Suspension, underbody rust & flood watermark inspection",
-      "Comprehensive 20-point digital buyer recommendation",
+      "Cold-start engine sound and exhaust smoke check",
+      "OBD-II computer scan for fault codes",
+      "Customs papers and VIN checked against FRSC records",
+      "Suspension, underbody rust and flood damage check",
+      "20-point report with a clear buy or don't-buy advice",
+    ],
+  },
+  {
+    id: "ship",
+    tabLabel: "Buy & Ship Abroad",
+    category: "Diaspora & Cargo",
+    title: "Buy in Nigeria, Ship Abroad",
+    punchline: "Missing home? We buy am here, we ship am to you.",
+    description:
+      "Want Ankara, lace, foodstuff, skincare, gadgets or gifts for family abroad? Your runner buys the item for you, checks it in person, packs it well and ships it by cargo to the UK, USA or anywhere in the world.",
+    location: "Balogun Market · Lagos → UK, USA & worldwide",
+    budget: 10000,
+    turnaround: "Shipped in days",
+    image: "/landing/alabaru/cargo.jpg",
+    badge: "Checked, Packed & Shipped",
+    checklist: [
+      "Runner buys the item and shows you live video first",
+      "Quality checked and price bargained, no \"oyinbo price\"",
+      "Packed properly, with the receipt sent to you",
+      "Shipped by cargo to the UK, USA and beyond",
+      "Tracking updates until it reaches your door",
     ],
   },
 ];
@@ -245,7 +266,7 @@ export default function AlabaruShowcase({
             {/* Pill Eyebrow */}
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-black/[0.06] shadow-xs text-xs sm:text-sm font-semibold text-[var(--ink)]">
               <Sparkles size={14} className="text-[var(--ng)] shrink-0" />
-              <span>For Nigerians at Home &amp; Diaspora</span>
+              <span>For Nigerians at Home &amp; Abroad</span>
             </div>
 
             {/* Main Headline */}
@@ -301,7 +322,7 @@ export default function AlabaruShowcase({
 
               {/* Fee Split / Escrow Explanation */}
               <div className="pt-3 border-t border-black/[0.06] text-xs sm:text-[12.5px] text-[var(--ink)]/65 leading-normal sm:leading-[1.4]">
-                Runners keep <strong className="text-[var(--ink)] font-bold">70% of all task earnings</strong> upon verified milestone completion. Staff Guru retains <strong className="text-[var(--ink)] font-bold">30%</strong> to cover platform hosting, escrow security, GPS timestamped verification, and 100% refund protection.
+                Runners take home <strong className="text-[var(--ink)] font-bold">70% of every errand</strong> once the work is confirmed. Staff Guru keeps <strong className="text-[var(--ink)] font-bold">30%</strong> to run the platform, secure payments, verify runners and handle disputes.
               </div>
             </div>
           </div>
@@ -431,7 +452,7 @@ export default function AlabaruShowcase({
             <div>
               {/* Eyebrow Label */}
               <p className="text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-[var(--ink)]/50 mb-2">
-                Everyday Tasks &amp; On-the-Ground Supervision
+                Errands &amp; On-the-Ground Help
               </p>
 
               {/* Dynamic Punchline Subhead for the Selected Errand */}
@@ -442,10 +463,10 @@ export default function AlabaruShowcase({
               {/* Narrative Paragraphs */}
               <div className="space-y-2.5 text-sm sm:text-[15px] text-[var(--ink)]/70 leading-normal sm:leading-[1.42] font-normal">
                 <p>
-                  Staff Guru is much more than a job-matching platform. Its Tasks &amp; Errands service connects Nigerians at home and in the diaspora with trusted people who can perform everyday tasks, business errands, inspections, deliveries and on-the-ground supervision.
+                  Staff Guru is more than a job platform. With Alabaru, you can get trusted people to run errands, inspect properties, make deliveries and represent you on the ground, whether you&apos;re in Lagos or abroad.
                 </p>
                 <p>
-                  The biggest opportunity is to help people who are busy, live far away, or cannot personally visit a location get things done through verified local workers.
+                  Too busy? Living abroad? Can&apos;t be in two places at once? Let a verified local runner handle it for you.
                 </p>
               </div>
             </div>
@@ -464,7 +485,7 @@ export default function AlabaruShowcase({
 
               {/* Price Floor & Trust Micro-Copy */}
               <p className="text-xs text-[var(--ink)]/50 mt-3 font-medium">
-                From ₦{totalEmployerDueNaira.toLocaleString()} · Escrow protected · 100% refund guarantee
+                From ₦{totalEmployerDueNaira.toLocaleString()} · Pay safely · Refund if no runner is found in 24 hours
               </p>
             </div>
           </div>
