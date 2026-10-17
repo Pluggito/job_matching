@@ -52,6 +52,27 @@ const SCENARIOS: Scenario[] = [
     ],
   },
   {
+    id: "ship",
+    tabLabel: "Buy & Ship Abroad",
+    category: "Diaspora & Cargo",
+    title: "Buy in Nigeria, Ship Abroad",
+    punchline: "Missing home? We buy am here, we ship am to you.",
+    description:
+      "Want Ankara, lace, foodstuff, skincare, gadgets or gifts for family abroad? Your runner buys the item for you, checks it in person, packs it well and ships it by cargo to the UK, USA or anywhere in the world.",
+    location: "Balogun Market · Lagos → UK, USA & worldwide",
+    budget: 10000,
+    turnaround: "Shipped in days",
+    image: "/landing/alabaru/cargo.jpg",
+    badge: "Checked, Packed & Shipped",
+    checklist: [
+      "Runner buys the item and shows you live video first",
+      "Quality checked and price bargained, no \"oyinbo price\"",
+      "Packed properly, with the receipt sent to you",
+      "Shipped by cargo to the UK, USA and beyond",
+      "Tracking updates until it reaches your door",
+    ],
+  },
+  {
     id: "market",
     tabLabel: "Market Runs",
     category: "Wholesale & Commerce",
@@ -94,27 +115,6 @@ const SCENARIOS: Scenario[] = [
     ],
   },
   {
-    id: "civic",
-    tabLabel: "Civic & Registry",
-    category: "Government & Legal Filing",
-    title: "CAC, Lands Registry & Embassy Runs",
-    punchline: "No more sun, queues and \"come back tomorrow\".",
-    description:
-      "Why waste a whole day at CAC, the lands registry or an embassy? Your runner is on the queue from 7:00 AM, submits your documents and collects the stamped copies (CTC) for you. You keep your day.",
-    location: "Federal Ministry of Justice · Central Registry",
-    budget: 15000,
-    turnaround: "4.0 hrs avg.",
-    image: "/landing/alabaru/civic.jpg",
-    badge: "Stamped Acknowledgement",
-    checklist: [
-      "On the queue from 7:00 AM, rain or shine",
-      "Documents and CTC submissions handled for you",
-      "Your file followed from desk to desk",
-      "Stamped acknowledgement slip and receipt brought back",
-      "No sun, no stress, no lost workday",
-    ],
-  },
-  {
     id: "automotive",
     tabLabel: "Car Inspection",
     category: "Automotive & Heavy Goods",
@@ -133,27 +133,6 @@ const SCENARIOS: Scenario[] = [
       "Customs papers and VIN checked against FRSC records",
       "Suspension, underbody rust and flood damage check",
       "20-point report with a clear buy or don't-buy advice",
-    ],
-  },
-  {
-    id: "ship",
-    tabLabel: "Buy & Ship Abroad",
-    category: "Diaspora & Cargo",
-    title: "Buy in Nigeria, Ship Abroad",
-    punchline: "Missing home? We buy am here, we ship am to you.",
-    description:
-      "Want Ankara, lace, foodstuff, skincare, gadgets or gifts for family abroad? Your runner buys the item for you, checks it in person, packs it well and ships it by cargo to the UK, USA or anywhere in the world.",
-    location: "Balogun Market · Lagos → UK, USA & worldwide",
-    budget: 10000,
-    turnaround: "Shipped in days",
-    image: "/landing/alabaru/cargo.jpg",
-    badge: "Checked, Packed & Shipped",
-    checklist: [
-      "Runner buys the item and shows you live video first",
-      "Quality checked and price bargained, no \"oyinbo price\"",
-      "Packed properly, with the receipt sent to you",
-      "Shipped by cargo to the UK, USA and beyond",
-      "Tracking updates until it reaches your door",
     ],
   },
 ];
@@ -256,13 +235,13 @@ export default function AlabaruShowcase({
       <div className="pointer-events-none absolute -right-40 bottom-20 h-96 w-96 rounded-full bg-[var(--lime)]/10 blur-3xl" />
 
       <div className="relative mx-auto max-w-7xl px-5 lg:px-8">
-        
+
         {/* ================= 3-COLUMN MASTER LAYOUT ================= */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 xl:gap-12 items-center">
-          
+
           {/* ================= LEFT COLUMN: Eyebrow + Dynamic Checklist Card ================= */}
           <div className="lg:col-span-4 space-y-6">
-            
+
             {/* Pill Eyebrow */}
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-black/[0.06] shadow-xs text-xs sm:text-sm font-semibold text-[var(--ink)]">
               <Sparkles size={14} className="text-[var(--ng)] shrink-0" />
@@ -293,7 +272,7 @@ export default function AlabaruShowcase({
 
             {/* Dynamic White Feature Card */}
             <div className="bg-white rounded-[28px] sm:rounded-[32px] p-6 sm:p-7 shadow-sm border border-black/[0.05] space-y-5 transition-all duration-300">
-              
+
               {/* Card Header with Active Category Tag & Budget */}
               <div className="flex items-center justify-between gap-3 pb-3 border-b border-black/[0.06]">
                 <div className="flex items-center gap-2 min-w-0">
@@ -329,7 +308,7 @@ export default function AlabaruShowcase({
 
           {/* ================= CENTER COLUMN: Tall Portrait Photo + "< >" Navigation Controls ================= */}
           <div className="lg:col-span-4 relative flex flex-col items-center">
-            
+
             {/* Top-Left Floating 3D Cross Accent */}
             <div className="absolute -top-6 -left-4 sm:-top-8 sm:-left-6 z-20 w-16 h-16 sm:w-20 sm:h-20 pointer-events-none transform -rotate-12 transition-transform duration-700 hover:rotate-6">
               <GlossyCross className="w-full h-full drop-shadow-xl" />
@@ -394,7 +373,7 @@ export default function AlabaruShowcase({
 
             {/* ================= "< >" CAROUSEL BUTTONS CONTROLLER ================= */}
             <div className="mt-5 w-full flex items-center justify-between gap-3 px-1">
-              
+
               {/* Previous "<" Button */}
               <button
                 onClick={handlePrev}
@@ -424,11 +403,10 @@ export default function AlabaruShowcase({
                       key={idx}
                       onClick={() => setCurrentIndex(idx)}
                       aria-label={`Jump to errand ${idx + 1}`}
-                      className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                        idx === currentIndex
+                      className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${idx === currentIndex
                           ? "w-6 bg-[var(--ng)]"
                           : "w-1.5 bg-black/15 hover:bg-black/30"
-                      }`}
+                        }`}
                     />
                   ))}
                 </div>
@@ -448,7 +426,7 @@ export default function AlabaruShowcase({
 
           {/* ================= RIGHT COLUMN: Editorial Narrative + Pill CTA ================= */}
           <div className="lg:col-span-4 space-y-5 lg:pl-2">
-            
+
             <div>
               {/* Eyebrow Label */}
               <p className="text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-[var(--ink)]/50 mb-2">
