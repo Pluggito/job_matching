@@ -191,12 +191,14 @@ export async function createErrand(input: CreateErrandInput) {
     requiredProof: input.requiredProof.trim(),
     itemDeclaration: input.itemDeclaration?.trim() || null,
     prohibitedItemsAcknowledged: true,
-    status: "pending_payment",
+    status: "open",
+    openedAt: new Date(),
     handoffHmac,
     handoffAttempts: 0,
   });
 
   revalidatePath("/employer/errands");
+  revalidatePath("/dashboard/errands");
   return {
     success: true,
     errandId,
@@ -338,20 +340,21 @@ export async function claimErrand(errandId: string) {
         });
       }
 
-      // Notify employer
+      // Notify employer that a runner accepted and payment is now due to activate task
       if (employer) {
+        const checkoutUrl = `/employer/errands/${errandId}/checkout`;
         await tx.insert(notifications).values({
           userId: employer.userId,
           type: "ERRAND_CLAIMED",
-          title: "Runner Claimed Your Errand! 🏃‍♂️",
-          content: `A verified local runner has claimed your errand "${lockedErrand.title}". Task is now in progress!`,
-          link: `/employer/errands/${errandId}`,
+          title: "Runner Accepted Your Errand! 🏃‍♂️",
+          content: `A verified runner has accepted your errand "${lockedErrand.title}". Please pay the task price and creation fee to activate dispatch.`,
+          link: checkoutUrl,
         });
 
         sendPushToUser(employer.userId, {
-          title: "Runner Claimed Your Errand! 🏃‍♂️",
-          body: `A verified runner claimed "${lockedErrand.title}". Task is now in progress.`,
-          url: `/employer/errands/${errandId}`,
+          title: "Runner Accepted Your Errand! 🏃‍♂️",
+          body: `A runner accepted "${lockedErrand.title}". Tap to pay and activate dispatch.`,
+          url: checkoutUrl,
           tag: `errand-${errandId}`,
         }).catch(console.error);
       }
@@ -368,7 +371,7 @@ export async function claimErrand(errandId: string) {
 }
 
 /**
- * Runner marks errand IN_PROGRESS.
+ * Runner marks errand IN_PROGRESS once escrow is funded.
  */
 export async function startErrandExecution(errandId: string) {
   const session = await getCurrentUser();
@@ -396,6 +399,20 @@ export async function startErrandExecution(errandId: string) {
 
   if (errand.status !== "claimed") {
     return { success: false, error: `Errand is already in ${errand.status} status.` };
+  }
+
+  // Ensure employer has funded escrow before execution can begin
+  const [verifiedPayment] = await db
+    .select({ id: payments.id })
+    .from(payments)
+    .where(and(eq(payments.errandId, errandId), eq(payments.status, "VERIFIED")))
+    .limit(1);
+
+  if (!verifiedPayment) {
+    return {
+      success: false,
+      error: "Waiting for creator escrow: The creator has been notified to fund the task price and outreach fee. Execution will unlock once payment is confirmed.",
+    };
   }
 
   await db
@@ -929,6 +946,39 @@ export async function reportErrandProblem(params: {
 
   revalidatePath(`/employer/errands/${errandId}`);
   revalidatePath(`/dashboard/errands/${errandId}`);
+  return { success: true };
+}
+
+/**
+ * Allows a worker who skipped 'open for errands' during onboarding to opt into Alabaru errands.
+ */
+export async function optInToErrands() {
+  const session = await getCurrentUser();
+  if (!session || session.role !== "WORKER") {
+    return { success: false, error: "Only registered workers can join Alabaru services." };
+  }
+
+  const [worker] = await db
+    .select({ id: workerProfiles.id })
+    .from(workerProfiles)
+    .where(eq(workerProfiles.userId, session.userId))
+    .limit(1);
+
+  if (!worker) {
+    return { success: false, error: "Worker profile not found." };
+  }
+
+  await db
+    .update(workerProfiles)
+    .set({
+      openToErrands: true,
+    })
+    .where(eq(workerProfiles.id, worker.id));
+
+  revalidatePath("/dashboard/errands");
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/profile");
+
   return { success: true };
 }
 

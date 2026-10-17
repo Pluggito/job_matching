@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { BundleCarrierMark } from "@repo/ui";
+import Image from "next/image";
 import {
   loginAdminAction,
   registerAdminAction,
@@ -127,8 +127,15 @@ export default function AdminAuthClient({ initialStatus }: AdminAuthClientProps)
         {/* Brand Header */}
         <div className="text-center space-y-3">
           <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-white border border-black/[0.06] shadow-sm">
-            <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-[var(--ng)] text-white shadow-sm p-1">
-              <BundleCarrierMark className="w-5 h-5 text-white" />
+            <span className="relative flex items-center justify-center w-8 h-8 rounded-full overflow-hidden shrink-0 shadow-sm">
+              <Image
+                src="/logo.png"
+                alt="Staff Guru logo"
+                width={32}
+                height={32}
+                priority
+                className="w-full h-full object-contain"
+              />
             </span>
             <div className="font-heading text-lg font-bold tracking-tight text-[var(--ink)] flex items-center">
               staff<span className="text-[var(--ng)]">guru</span>

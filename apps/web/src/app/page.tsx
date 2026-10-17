@@ -88,11 +88,11 @@ export default async function LandingPage() {
               </h1>
 
               <p className="lp-fade-up lp-d2 mt-6 max-w-xl text-base leading-normal sm:leading-[1.45] text-[var(--ink)] opacity-50 sm:text-lg [font-family:var(--font-dm-sans)]">
-                Staff Guru connects employers with verified artisans, electricians, and developers. Get matched, get it done, and get on with your day.
+                Staff Guru connects skilled artisans and professionals to employers online and on-site.
               </p>
 
               {/* Asymmetrical CTA */}
-              <div className="lp-fade-up lp-d3 mt-10 flex flex-col items-center gap-6 sm:flex-row">
+              <div className="lp-fade-up lp-d3 mt-10 flex flex-col items-center gap-4 sm:flex-row">
                 <Link
                   href={dashboardLink ?? "/signup?role=EMPLOYER"}
                   className="group flex h-14 w-full items-center justify-center gap-2 rounded-full bg-[var(--ng)] px-8 text-base font-bold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg sm:w-auto"
@@ -102,7 +102,7 @@ export default async function LandingPage() {
                 </Link>
                 <Link
                   href={dashboardLink ?? "/signup?role=WORKER"}
-                  className="group flex items-center gap-2 text-base font-bold text-[var(--ink)] opacity-50 transition-colors hover:text-[var(--ng)]"
+                  className="group flex h-14 w-full items-center justify-center gap-2 rounded-full bg-[#E5A93C] hover:bg-[#d4962b] px-8 text-base font-bold text-neutral-950 transition-all hover:-translate-y-0.5 hover:shadow-lg sm:w-auto shadow-sm"
                 >
                   Find work <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
                 </Link>
@@ -315,7 +315,7 @@ export default async function LandingPage() {
                   <div className="mt-8">
                     <Link
                       href={dashboardLink ?? "/signup?role=WORKER"}
-                      className="inline-flex h-14 items-center gap-2 rounded-full bg-white px-8 text-sm font-bold text-[var(--ink)] border border-black/5 transition-all hover:scale-[1.02] hover:bg-[var(--ng)] hover:text-white hover:border-transparent shadow-sm"
+                      className="inline-flex h-14 items-center gap-2 rounded-full bg-[#E5A93C] hover:bg-[#d4962b] px-8 text-sm font-bold text-neutral-950 transition-all hover:scale-[1.02] shadow-sm"
                     >
                       Find work
                       <ArrowRight size={16} />
@@ -651,7 +651,7 @@ export default async function LandingPage() {
                   {!session && (
                     <Link
                       href="/signup?role=WORKER"
-                      className="group inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-white px-8 text-base font-bold text-[var(--ink)] transition-all hover:-translate-y-0.5 hover:shadow-2xl sm:w-auto"
+                      className="group inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-[#E5A93C] hover:bg-[#d4962b] px-8 text-base font-bold text-neutral-950 transition-all hover:-translate-y-0.5 hover:shadow-2xl sm:w-auto"
                     >
                       Find work
                       <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />

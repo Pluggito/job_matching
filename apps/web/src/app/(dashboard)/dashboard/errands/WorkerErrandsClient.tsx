@@ -25,6 +25,7 @@ import {
   startErrandExecution,
   verifyErrandDeliveryPin,
   submitErrandProof,
+  optInToErrands,
 } from "@/actions/errands";
 
 export interface ErrandFeedItem {
@@ -58,6 +59,7 @@ export interface MyErrandItem {
   proofSubmittedAt: string | null;
   completedAt: string | null;
   handoffAttempts: number;
+  isPaid?: boolean;
 }
 
 interface Props {
@@ -94,6 +96,28 @@ export default function WorkerErrandsClient({
   const [proofNotes, setProofNotes] = useState("");
   const [isSubmittingProof, setIsSubmittingProof] = useState(false);
   const [proofError, setProofError] = useState<string | null>(null);
+
+  // Alabaru Opt-In State
+  const [openToErrandsState, setOpenToErrandsState] = useState(isOpenToErrands);
+  const [isOptingIn, setIsOptingIn] = useState(false);
+  const [optInError, setOptInError] = useState<string | null>(null);
+
+  const handleOptIn = async () => {
+    setIsOptingIn(true);
+    setOptInError(null);
+    try {
+      const res = await optInToErrands();
+      if (res.success) {
+        setOpenToErrandsState(true);
+      } else {
+        setOptInError(res.error || "Failed to join Alabaru services.");
+      }
+    } catch (err: any) {
+      setOptInError(err?.message || "Failed to join Alabaru services.");
+    } finally {
+      setIsOptingIn(false);
+    }
+  };
 
   const handleConfirmClaim = async () => {
     if (!claimingErrand) return;
@@ -189,8 +213,50 @@ export default function WorkerErrandsClient({
         </div>
       </div>
 
+      {/* Welcome to Alabaru Services Banner (Re-Opt-In) */}
+      {!openToErrandsState && (
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-900 via-emerald-800 to-teal-900 text-white p-6 sm:p-8 shadow-xl">
+          <div className="absolute top-0 right-0 -mt-10 -mr-10 w-48 h-48 bg-white/5 rounded-full blur-2xl pointer-events-none" />
+          <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div className="space-y-2 max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-emerald-200 text-xs font-bold uppercase tracking-wider backdrop-blur-md">
+                <Bike size={14} /> Alabaru On-Demand Network
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold font-heading text-white tracking-tight">
+                Welcome to Alabaru Services! Would you like to join?
+              </h2>
+              <p className="text-sm text-emerald-100/80 leading-relaxed">
+                You didn’t opt into errands during onboarding, but you can join right now. As an Alabaru runner, you can earn daily payouts completing local pick-ups, deliveries, inspections, and tasks in your area during your downtime.
+              </p>
+              {optInError && (
+                <p className="text-xs font-semibold text-rose-300 bg-rose-950/40 p-2 rounded-lg border border-rose-500/30">
+                  {optInError}
+                </p>
+              )}
+            </div>
+            <button
+              onClick={handleOptIn}
+              disabled={isOptingIn}
+              className="shrink-0 h-12 px-6 rounded-2xl bg-[#E5A93C] hover:bg-[#d4962b] text-neutral-950 font-bold text-sm transition-all hover:scale-[1.02] shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            >
+              {isOptingIn ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  <span>Joining Alabaru...</span>
+                </>
+              ) : (
+                <>
+                  <Bike size={18} />
+                  <span>Join Alabaru Services</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Eligibility Checklist Banner if Not Fully Qualified */}
-      {!isEligible && (
+      {(!openToErrandsState || !isNinVerified || !hasBank) && (
         <div className="rounded-2xl border border-amber-300 bg-amber-50 p-5 text-amber-900 shadow-xs space-y-3">
           <div className="flex items-center gap-2.5 font-bold text-base">
             <AlertCircle size={20} className="text-amber-600 shrink-0" />
@@ -200,9 +266,19 @@ export default function WorkerErrandsClient({
             To ensure trust and safe execution on the Alabaru network, all runners must satisfy three verification standards:
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-            <div className={`p-3 rounded-xl border text-xs font-semibold flex items-center justify-between ${isOpenToErrands ? "bg-green-100/60 border-green-300 text-green-900" : "bg-white border-amber-200 text-amber-800"}`}>
+            <div className={`p-3 rounded-xl border text-xs font-semibold flex items-center justify-between ${openToErrandsState ? "bg-green-100/60 border-green-300 text-green-900" : "bg-white border-amber-200 text-amber-800"}`}>
               <span>1. Opted into Errands</span>
-              {isOpenToErrands ? <CheckCircle2 size={16} className="text-green-600" /> : <AlertCircle size={16} className="text-amber-500" />}
+              {openToErrandsState ? (
+                <CheckCircle2 size={16} className="text-green-600" />
+              ) : (
+                <button
+                  onClick={handleOptIn}
+                  disabled={isOptingIn}
+                  className="text-amber-700 underline font-bold cursor-pointer"
+                >
+                  Join Now
+                </button>
+              )}
             </div>
             <div className={`p-3 rounded-xl border text-xs font-semibold flex items-center justify-between ${isNinVerified ? "bg-green-100/60 border-green-300 text-green-900" : "bg-white border-amber-200 text-amber-800"}`}>
               <span>2. NIN Verified</span>
@@ -371,14 +447,21 @@ export default function WorkerErrandsClient({
                         Workspace & Chat
                       </Link>
 
-                      {errand.status === "claimed" && (
-                      <button
-                        onClick={() => handleStartTask(errand.id)}
-                        className="py-2 px-4 rounded-xl bg-[var(--ng)] text-white text-xs font-bold hover:opacity-95 shadow-xs transition-all cursor-pointer"
-                      >
-                        Start Execution (In Progress)
-                      </button>
-                    )}
+                      {errand.status === "claimed" && !errand.isPaid && (
+                        <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold shadow-xs">
+                          <Clock size={13} className="text-amber-600 animate-spin" />
+                          <span>Accepted · Awaiting Creator Escrow Payment</span>
+                        </div>
+                      )}
+
+                      {errand.status === "claimed" && errand.isPaid && (
+                        <button
+                          onClick={() => handleStartTask(errand.id)}
+                          className="py-2 px-4 rounded-xl bg-[var(--ng)] text-white text-xs font-bold hover:opacity-95 shadow-xs transition-all cursor-pointer"
+                        >
+                          Start Execution (In Progress)
+                        </button>
+                      )}
 
                     {errand.type === "pickup_delivery" && errand.status === "in_progress" && (
                       <button

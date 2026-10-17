@@ -113,7 +113,7 @@ export default function NewErrandForm({ pricing }: Props) {
       });
 
       if (res.success && res.errandId) {
-        router.push(`/employer/errands/${res.errandId}/checkout`);
+        router.push(`/employer/errands/${res.errandId}?broadcasted=true`);
       } else {
         setError(res.error || "Failed to create errand");
       }
@@ -377,18 +377,23 @@ export default function NewErrandForm({ pricing }: Props) {
           </div>
         )}
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full py-3 px-6 rounded-xl bg-[var(--ng)] hover:opacity-95 text-white font-bold text-sm transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
-        >
-          {isSubmitting ? (
-            <Loader2 size={16} className="animate-spin" />
-          ) : (
-            <Bike size={16} />
-          )}
-          Proceed to Errand Checkout &rarr;
-        </button>
+        <div className="space-y-2">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full py-3.5 px-6 rounded-xl bg-[var(--ng)] hover:opacity-95 text-white font-bold text-sm transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+          >
+            {isSubmitting ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              <Bike size={16} />
+            )}
+            Broadcast Errand (Pay When Runner Accepts) &rarr;
+          </button>
+          <p className="text-[11px] text-center text-neutral-500">
+            Zero upfront fee. Errand is broadcast immediately. You pay the task price + outreach fee only after a runner accepts.
+          </p>
+        </div>
       </form>
     </div>
   );

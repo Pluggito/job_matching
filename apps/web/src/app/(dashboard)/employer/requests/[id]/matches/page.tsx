@@ -172,7 +172,34 @@ export default async function MatchesPage({
                         14-day SLA active
                       </span>
                     </div>
-                  ) : sel.isPaid && sel.hiredAt ? (
+                  ) : (sel.status === "CONFIRMED" || sel.termsAcceptedAt) ? (
+                    <div className="flex flex-col gap-1.5">
+                      <div className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 justify-center">
+                        <CheckCircle2 size={12} className="text-emerald-600" />
+                        <span>Candidate Accepted! 🎉</span>
+                      </div>
+                      <PayAgencyFeeButton
+                        selectionId={sel.id}
+                        feeAmount={50000}
+                        candidateName={match.preview.category}
+                        jobTitle={request.title}
+                        triggerText="Unlock Credentials"
+                        compact
+                      />
+                      <span className="text-[10px] text-center text-neutral-500 font-medium">
+                        Staff Guru holds credentials until fee payment
+                      </span>
+                    </div>
+                  ) : sel.status === "CANCELLED" ? (
+                    <div className="flex flex-col gap-1.5 text-center">
+                      <div className="h-10 px-4 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 font-semibold text-xs flex items-center justify-center gap-2">
+                        <span>Offer Declined</span>
+                      </div>
+                      <span className="text-[11px] text-neutral-500 font-medium text-center">
+                        Select another candidate
+                      </span>
+                    </div>
+                  ) : (
                     <div className="flex flex-col gap-1.5 text-center">
                       <div className="h-10 px-4 rounded-xl bg-neutral-100 text-neutral-800 border border-neutral-200 font-semibold text-xs flex items-center justify-center gap-2">
                         <Clock size={14} className="text-neutral-500" />
@@ -180,39 +207,6 @@ export default async function MatchesPage({
                       </div>
                       <span className="text-[11px] text-neutral-500 font-medium text-center">
                         Waiting for candidate response
-                      </span>
-                    </div>
-                  ) : sel.isPaid ? (
-                    <HireButton
-                      selectionId={sel.id}
-                      candidateName={match.preview.category}
-                    />
-                  ) : sel.isPendingPayment ? (
-                    <div className="flex flex-col gap-1.5 text-center">
-                      <button
-                        type="button"
-                        disabled
-                        className="h-10 px-4 rounded-xl bg-neutral-100 text-neutral-600 border border-neutral-200 font-semibold text-xs flex items-center justify-center gap-2 cursor-not-allowed"
-                      >
-                        <Clock size={14} className="text-neutral-400 animate-spin" />
-                        <span>Payment Pending</span>
-                      </button>
-                      <span className="text-[11px] text-center text-neutral-500 font-medium">
-                        Awaiting Staff Guru confirmation
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col gap-1.5">
-                      <PayAgencyFeeButton
-                        selectionId={sel.id}
-                        feeAmount={50000}
-                        candidateName={match.preview.category}
-                        jobTitle={request.title}
-                        triggerText="Pay Agency Fee"
-                        compact
-                      />
-                      <span className="text-[11px] text-center text-[var(--ink-soft)] font-medium">
-                        ₦50,000 handshake fee required
                       </span>
                     </div>
                   )}

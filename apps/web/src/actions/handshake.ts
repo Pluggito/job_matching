@@ -141,7 +141,7 @@ export async function respondToHandshake(selectionId: string, accept: boolean) {
 
   if (empProfile) {
     const notifyContent = accept
-      ? "Candidate accepted your job placement offer! Direct contact details are now unlocked."
+      ? "Candidate accepted your job offer! 🎉 Staff Guru is holding candidate credentials. Pay the agency fee (in full or 2 installments) to unlock direct phone and email."
       : "Candidate declined the job offer. You may review other candidates in your matches.";
     const targetLink = selection.hiringRequestId
       ? `/employer/requests/${selection.hiringRequestId}/matches`
@@ -150,17 +150,35 @@ export async function respondToHandshake(selectionId: string, accept: boolean) {
     await db.insert(notifications).values({
       userId: empProfile.userId,
       type: accept ? "HANDSHAKE_ACCEPTED" : "HANDSHAKE_DECLINED",
-      title: accept ? "Job Offer Accepted! 🎉" : "Job Offer Declined",
+      title: accept ? "Candidate Accepted Offer! 🎉" : "Job Offer Declined",
       content: notifyContent,
       link: targetLink,
     });
 
     sendPushToUser(empProfile.userId, {
-      title: accept ? "Job Offer Accepted! 🎉" : "Job Offer Declined",
+      title: accept ? "Candidate Accepted Offer! 🎉" : "Job Offer Declined",
       body: notifyContent,
       url: targetLink,
       tag: "handshake-response",
     }).catch(console.error);
+  }
+
+  // Notify Staff Guru administrative team
+  if (accept) {
+    const adminUsers = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.role, "ADMIN"));
+
+    for (const adm of adminUsers) {
+      await db.insert(notifications).values({
+        userId: adm.id,
+        type: "HANDSHAKE_ACCEPTED",
+        title: "Candidate Accepted Offer · Credentials Held",
+        content: `Candidate accepted job offer. Staff Guru is holding contact credentials until employer completes placement payment.`,
+        link: "/requests",
+      }).catch(console.error);
+    }
   }
 
   revalidatePath("/dashboard");
