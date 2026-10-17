@@ -61,7 +61,7 @@ export function AppSidebar({
           <Link href="/" className={`flex items-center gap-2 text-black font-bold tracking-tight overflow-hidden transition-all duration-200 ${state === 'collapsed' ? 'w-8 h-8' : 'w-full px-2 text-xl'}`}>
             <span className="relative flex items-center justify-center w-8 h-8 min-w-8 rounded-full overflow-hidden shrink-0 shadow-sm p-0.5">
               <Image
-                src="/logo.png"
+                src="/logo 4.png"
                 alt="Staff Guru logo"
                 width={32}
                 height={32}
