@@ -38,8 +38,10 @@ export default function PayAgencyFeeButton({
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [paymentPlan, setPaymentPlan] = useState<"full" | "half">("full");
 
-  const paystackCalc = calculatePaystackFee(feeAmount * 100);
+  const effectiveFeeAmount = paymentPlan === "full" ? feeAmount : Math.round(feeAmount / 2);
+  const paystackCalc = calculatePaystackFee(effectiveFeeAmount * 100);
 
   // Close modal on escape key and prevent body background scroll
   useEffect(() => {
@@ -66,7 +68,7 @@ export default function PayAgencyFeeButton({
     setError(null);
 
     try {
-      const result = await initializeSelectionPayment(selectionId);
+      const result = await initializeSelectionPayment(selectionId, paymentPlan);
 
       if (result.alreadyPaid) {
         window.location.reload();
@@ -140,12 +142,62 @@ export default function PayAgencyFeeButton({
               StaffGuru operates a transparent, one-time placement model. Rather than cutting into worker salaries each month, our single fee protects both you and your candidate.
             </p>
 
+            {/* Payment Option Selector (Option to pay in full or not) */}
+            <div className="mt-4 space-y-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-600">
+                Payment Option
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setPaymentPlan("full")}
+                  className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                    paymentPlan === "full"
+                      ? "border-[#008751] bg-emerald-50/70 ring-2 ring-[#008751]/20 shadow-xs"
+                      : "border-neutral-200 hover:border-neutral-300 bg-white"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs text-neutral-900">Pay in Full</span>
+                    <span className="w-4 h-4 rounded-full border flex items-center justify-center border-neutral-400">
+                      {paymentPlan === "full" && <span className="w-2.5 h-2.5 rounded-full bg-[#008751]" />}
+                    </span>
+                  </div>
+                  <div className="mt-2">
+                    <span className="font-mono font-extrabold text-base text-neutral-900">₦{feeAmount.toLocaleString()}</span>
+                    <p className="text-[10px] text-neutral-500 mt-0.5">Complete upfront placement</p>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPaymentPlan("half")}
+                  className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                    paymentPlan === "half"
+                      ? "border-[#008751] bg-emerald-50/70 ring-2 ring-[#008751]/20 shadow-xs"
+                      : "border-neutral-200 hover:border-neutral-300 bg-white"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs text-neutral-900">2 Installments (50%)</span>
+                    <span className="w-4 h-4 rounded-full border flex items-center justify-center border-neutral-400">
+                      {paymentPlan === "half" && <span className="w-2.5 h-2.5 rounded-full bg-[#008751]" />}
+                    </span>
+                  </div>
+                  <div className="mt-2">
+                    <span className="font-mono font-extrabold text-base text-neutral-900">₦{Math.round(feeAmount / 2).toLocaleString()} now</span>
+                    <p className="text-[10px] text-neutral-500 mt-0.5">Balance on worker resumption</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+
             {/* Price Banner Card with Paystack breakdown */}
-            <div className="mt-4 p-4 rounded-2xl bg-neutral-50 border border-neutral-200/80 space-y-2.5">
+            <div className="mt-3.5 p-4 rounded-2xl bg-neutral-50 border border-neutral-200/80 space-y-2.5">
               <div className="flex items-center justify-between text-xs text-neutral-600">
-                <span>{candidateName ? `${candidateName} Placement` : "Agency Placement & 14-Day SLA"}</span>
+                <span>{candidateName ? `${candidateName} Placement (${paymentPlan === "full" ? "Full" : "Initial Installment"})` : "Placement Fee"}</span>
                 <span className="font-mono font-bold text-neutral-900">
-                  ₦{feeAmount.toLocaleString()}
+                  ₦{effectiveFeeAmount.toLocaleString()}
                 </span>
               </div>
               <div className="flex items-center justify-between text-xs text-neutral-500">
@@ -163,7 +215,7 @@ export default function PayAgencyFeeButton({
               <div className="pt-2 border-t border-neutral-200 flex items-baseline justify-between">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
-                    Total Due
+                    Total Due Now
                   </p>
                   <span className="text-2xl sm:text-3xl font-extrabold text-neutral-900 font-mono tracking-tight">
                     ₦{paystackCalc.totalNaira.toLocaleString()}

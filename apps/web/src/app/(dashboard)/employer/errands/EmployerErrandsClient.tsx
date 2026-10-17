@@ -132,12 +132,12 @@ export default function EmployerErrandsClient({ errands }: Props) {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3 shrink-0 self-end md:self-auto">
-                  {errand.status === "pending_payment" && (
+                  {(errand.status === "claimed" || errand.status === "pending_payment") && (
                     <Link
                       href={`/employer/errands/${errand.id}/checkout`}
-                      className="py-2 px-4 rounded-xl bg-[var(--ng)] text-white text-xs font-bold hover:opacity-95 shadow-xs"
+                      className="py-2 px-4 rounded-xl bg-[var(--ng)] hover:bg-[#007043] text-white text-xs font-bold shadow-xs flex items-center gap-1.5"
                     >
-                      Fund Errand &rarr;
+                      <span>Pay & Activate Task &rarr;</span>
                     </Link>
                   )}
 

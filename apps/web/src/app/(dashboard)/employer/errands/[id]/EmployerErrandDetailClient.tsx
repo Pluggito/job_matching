@@ -18,6 +18,7 @@ import {
   RotateCcw,
   AlertTriangle,
   ChevronLeft,
+  Bike,
 } from "lucide-react";
 import { formatNaira } from "@repo/shared";
 import {
@@ -252,6 +253,45 @@ export default function EmployerErrandDetailClient({
           </span>
         </div>
       </div>
+
+      {/* Runner Accepted & Escrow Payment Required Banner */}
+      {(errand.status === "claimed" || errand.status === "pending_payment") && (
+        <div className="bg-emerald-50 rounded-2xl border border-emerald-300 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[var(--ng)] text-white flex items-center justify-center shrink-0">
+              <Bike size={20} />
+            </div>
+            <div>
+              <h4 className="font-bold text-sm text-emerald-950">Runner Accepted Your Errand! 🏃‍♂️</h4>
+              <p className="text-xs text-emerald-800">
+                A verified runner has accepted your task. Complete escrow funding (Task Price + Outreach Fee) to activate dispatch.
+              </p>
+            </div>
+          </div>
+          <Link
+            href={`/employer/errands/${errand.id}/checkout`}
+            className="h-11 px-5 rounded-xl bg-[var(--ng)] hover:bg-[#007043] text-white font-bold text-xs flex items-center gap-2 shadow-sm shrink-0"
+          >
+            <ShieldCheck size={16} />
+            <span>Pay & Activate Task &rarr;</span>
+          </Link>
+        </div>
+      )}
+
+      {/* Errand Live in Feed Banner (When Open and Not Yet Claimed) */}
+      {errand.status === "open" && !runner && (
+        <div className="bg-blue-50 rounded-2xl border border-blue-200 p-5 flex items-start gap-3 text-blue-900 shadow-xs">
+          <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0">
+            <Bike size={20} />
+          </div>
+          <div className="space-y-1">
+            <h4 className="font-bold text-sm text-blue-950">Errand Live & Broadcasted 📡</h4>
+            <p className="text-xs text-blue-800 leading-relaxed">
+              Your task is live on the Alabaru network for runners in {errand.locationArea}, {errand.locationState}. You will be prompted to fund the task price and creation fee only when a runner accepts.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Disputed Alert Banner */}
       {errand.status === "disputed" && (
