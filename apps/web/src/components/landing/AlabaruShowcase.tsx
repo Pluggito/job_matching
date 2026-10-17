@@ -249,14 +249,26 @@ export default function AlabaruShowcase({
             </div>
 
             {/* Main Headline */}
-            <h2 className="text-4xl sm:text-5xl xl:text-[54px] font-bold tracking-tight leading-[1.05] [font-family:var(--font-bricolage)]">
-              <span className="relative inline-block text-[var(--ng)] pb-2">
-                ALABARU
-                <svg className="absolute -bottom-1 left-0 w-full" viewBox="0 0 200 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M2 9.5C45.5 -1.5 155.5 -1.5 198 9.5" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
-                </svg>
-              </span>
-            </h2>
+            <div className="flex items-center gap-3 sm:gap-4">
+              <h2 className="text-4xl sm:text-5xl xl:text-[54px] font-bold tracking-tight leading-[1.05] [font-family:var(--font-bricolage)]">
+                <span className="relative inline-block text-[var(--ng)] pb-2">
+                  ALABARU
+                  <svg className="absolute -bottom-1 left-0 w-full" viewBox="0 0 200 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2 9.5C45.5 -1.5 155.5 -1.5 198 9.5" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
+                  </svg>
+                </span>
+              </h2>
+              <div className="relative shrink-0 w-11 h-11 sm:w-13 sm:h-13 xl:w-14 xl:h-14 pb-2">
+                <Image
+                  src="/logo 4.png"
+                  alt="Alabaru emblem"
+                  width={56}
+                  height={56}
+                  priority
+                  className="w-full h-full object-contain drop-shadow-sm"
+                />
+              </div>
+            </div>
 
             {/* Dynamic White Feature Card */}
             <div className="bg-white rounded-[28px] sm:rounded-[32px] p-6 sm:p-7 shadow-sm border border-black/[0.05] space-y-5 transition-all duration-300">

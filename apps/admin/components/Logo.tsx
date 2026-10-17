@@ -37,7 +37,7 @@ export function Logo({
         style={{ width: currentSize.dimension, height: currentSize.dimension }}
       >
         <Image
-          src="/logo.png"
+          src="/logo 4.png"
           alt="Staff Guru logo"
           width={currentSize.dimension * 2}
           height={currentSize.dimension * 2}

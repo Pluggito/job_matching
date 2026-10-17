@@ -11,7 +11,7 @@ export default function GlobalLoading() {
           {/* Official Emblem */}
           <div className="relative w-24 h-24 sm:w-28 sm:h-28 drop-shadow-2xl animate-in fade-in duration-300">
             <Image
-              src="/logo.png"
+              src="/logo 4.png"
               alt="Staff Guru"
               fill
               priority
