@@ -41,7 +41,7 @@ const SCENARIOS: Scenario[] = [
     location: "The Eko Pearl · Victoria Island, Lagos",
     budget: 12000,
     turnaround: "3.5 hrs avg.",
-    image: "/landing/alabaru/inspection.jpg",
+    image: "/site_inspection compressed.png",
     badge: "GPS-Stamped Proof",
     checklist: [
       "Foundation and every stage of the work confirmed",
@@ -83,7 +83,7 @@ const SCENARIOS: Scenario[] = [
     location: "Balogun Market Shop B12 · Lagos Island",
     budget: 8000,
     turnaround: "2.2 hrs avg.",
-    image: "/landing/alabaru/market.jpg",
+    image: "/market_runs_png.png",
     badge: "Quality Checked in Person",
     checklist: [
       "Lace, fabric and gadgets checked by hand",
@@ -104,7 +104,7 @@ const SCENARIOS: Scenario[] = [
     location: "The Corporate Place · 20 Marina, Lagos",
     budget: 7500,
     turnaround: "1.8 hrs avg.",
-    image: "/landing/alabaru/delivery.jpg",
+    image: "/secure_carrier.png",
     badge: "6-Digit PIN Verified",
     checklist: [
       "Court papers, title documents, native wear and more",
@@ -125,7 +125,7 @@ const SCENARIOS: Scenario[] = [
     location: "Berger Auto Market & Lekki Dealerships",
     budget: 10000,
     turnaround: "2.5 hrs avg.",
-    image: "/landing/categories/automotive.jpg",
+    image: "/vehicle_inspection.png",
     badge: "OBD-II Scan & Engine Check",
     checklist: [
       "Cold-start engine sound and exhaust smoke check",
