@@ -418,6 +418,10 @@ export const errandMessages = pgTable("errand_messages", {
   threadId: uuid("thread_id").references(() => errandThreads.id).notNull(),
   senderId: uuid("sender_id").references(() => users.id).notNull(),
   content: text("content").notNull(),
+  attachmentUrl: text("attachment_url"),
+  status: text("status").default("sent").notNull(),
+  deliveredAt: timestamp("delivered_at"),
+  readAt: timestamp("read_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

@@ -27,7 +27,7 @@ import {
   requestErrandChanges,
   reportErrandProblem,
 } from "@/actions/errands";
-import { sendErrandMessage } from "@/actions/errandMessages";
+import { useErrandChat } from "@/hooks/useErrandChat";
 
 interface Props {
   errand: {
@@ -64,6 +64,10 @@ interface Props {
     id: string;
     senderId: string;
     content: string;
+    attachmentUrl?: string | null;
+    status?: string;
+    deliveredAt?: string | null;
+    readAt?: string | null;
     createdAt: string;
   }>;
   currentUserId: string;
@@ -76,7 +80,18 @@ export default function EmployerErrandDetailClient({
   initialMessages,
   currentUserId,
 }: Props) {
-  const [messages, setMessages] = useState(initialMessages);
+  const {
+    messages,
+    sendMessage,
+    sendTyping,
+    isCounterpartTyping,
+    isConnected,
+  } = useErrandChat({
+    errandId: errand.id,
+    initialMessages,
+    currentUserId,
+  });
+
   const [newMessage, setNewMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
@@ -97,32 +112,17 @@ export default function EmployerErrandDetailClient({
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || isSending) return;
 
     setIsSending(true);
     const content = newMessage.trim();
     setNewMessage("");
-
-    // Optimistic message
-    const tempId = `temp_${Date.now()}`;
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: tempId,
-        senderId: currentUserId,
-        content,
-        createdAt: new Date().toISOString(),
-      },
-    ]);
+    sendTyping(false);
 
     try {
-      const res = await sendErrandMessage({
-        errandId: errand.id,
-        content,
-      });
-
+      const res = await sendMessage(content);
       if (!res.success) {
-        alert(('error' in res ? (res.error as string) : null) || "Failed to send message.");
+        alert(res.error || "Failed to send message.");
       }
     } catch (err) {
       console.error("Chat error:", err);
@@ -441,9 +441,12 @@ export default function EmployerErrandDetailClient({
               <MessageSquare size={16} className="text-neutral-500" />
               <h3 className="font-semibold text-sm text-neutral-900">Errand Coordination Chat</h3>
             </div>
-            <span className="text-[10px] bg-neutral-100 text-neutral-600 px-2.5 py-0.5 rounded-md font-semibold border border-neutral-200/60">
-              Protected
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className={`w-2 h-2 rounded-full ${isConnected ? "bg-emerald-500 animate-pulse" : "bg-neutral-300"}`} />
+              <span className="text-[10px] bg-neutral-100 text-neutral-600 px-2.5 py-0.5 rounded-md font-semibold border border-neutral-200/60">
+                {isConnected ? "Live Chat" : "Protected"}
+              </span>
+            </div>
           </div>
 
           <p className="text-[11px] text-neutral-500 mb-3 bg-neutral-50 p-2 rounded-lg border border-neutral-200/50">
@@ -473,11 +476,18 @@ export default function EmployerErrandDetailClient({
                     >
                       {m.content}
                     </div>
-                    <span className="text-[10px] text-neutral-400 mt-1 px-1">
-                      {new Date(m.createdAt).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                    <span className="flex items-center gap-1 text-[10px] text-neutral-400 mt-1 px-1">
+                      <span>
+                        {new Date(m.createdAt).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                      {isMe && (
+                        <span className={`text-[11px] font-bold ${m.status === "read" ? "text-emerald-300" : "opacity-75"}`}>
+                          {m.status === "sending" ? "🕒" : m.status === "read" ? "✓✓" : "✓"}
+                        </span>
+                      )}
                     </span>
                   </div>
                 );
@@ -485,12 +495,28 @@ export default function EmployerErrandDetailClient({
             )}
           </div>
 
+          {/* Typing Indicator */}
+          {isCounterpartTyping && (
+            <div className="text-[11px] text-neutral-500 italic flex items-center gap-1.5 px-2 py-1 mb-1 animate-in fade-in">
+              <span className="inline-flex gap-1">
+                <span className="w-1.5 h-1.5 bg-neutral-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                <span className="w-1.5 h-1.5 bg-neutral-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                <span className="w-1.5 h-1.5 bg-neutral-400 rounded-full animate-bounce" />
+              </span>
+              <span>Runner is typing...</span>
+            </div>
+          )}
+
           {/* Chat Input */}
           <form onSubmit={handleSendMessage} className="pt-3 border-t border-neutral-200/70 flex items-center gap-2">
             <input
               type="text"
               value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
+              onChange={(e) => {
+                setNewMessage(e.target.value);
+                sendTyping(e.target.value.length > 0);
+              }}
+              onBlur={() => sendTyping(false)}
               placeholder="Type message to runner..."
               className="flex-1 px-3.5 py-2 text-xs rounded-xl border border-neutral-300 focus:outline-none focus:border-neutral-500 focus:ring-1 focus:ring-neutral-400 transition-colors"
             />

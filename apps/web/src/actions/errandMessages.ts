@@ -1,6 +1,6 @@
 "use server";
 
-import { db, errandThreads, errandMessages, errands, users, workerProfiles, notifications, eq, and, desc } from "@repo/db";
+import { db, errandThreads, errandMessages, errands, users, workerProfiles, notifications, eq, and, desc, sql } from "@repo/db";
 import { getCurrentUser } from "./auth";
 import { revalidatePath } from "next/cache";
 import { sendPushToUser } from "@/server/services/pushNotifications";
@@ -152,11 +152,50 @@ export async function getErrandMessages(errandId: string) {
       id: errandMessages.id,
       senderId: errandMessages.senderId,
       content: errandMessages.content,
+      attachmentUrl: errandMessages.attachmentUrl,
+      status: errandMessages.status,
+      deliveredAt: errandMessages.deliveredAt,
+      readAt: errandMessages.readAt,
       createdAt: errandMessages.createdAt,
     })
     .from(errandMessages)
     .where(eq(errandMessages.threadId, thread.id))
     .orderBy(errandMessages.createdAt);
 
-  return msgs;
+  return msgs.map((m) => ({
+    ...m,
+    deliveredAt: m.deliveredAt ? m.deliveredAt.toISOString() : null,
+    readAt: m.readAt ? m.readAt.toISOString() : null,
+    createdAt: m.createdAt.toISOString(),
+  }));
+}
+
+export async function markErrandMessagesAsRead(errandId: string) {
+  const session = await getCurrentUser();
+  if (!session) return { success: false, error: "Unauthorized" };
+
+  const [thread] = await db
+    .select()
+    .from(errandThreads)
+    .where(eq(errandThreads.errandId, errandId))
+    .limit(1);
+
+  if (!thread) return { success: false, error: "Thread not found" };
+
+  // Mark all unread messages sent by the counterparty as read
+  await db
+    .update(errandMessages)
+    .set({
+      status: "read",
+      readAt: new Date(),
+    })
+    .where(
+      and(
+        eq(errandMessages.threadId, thread.id),
+        sql`${errandMessages.senderId} != ${session.userId}`,
+        sql`${errandMessages.readAt} IS NULL`
+      )
+    );
+
+  return { success: true };
 }

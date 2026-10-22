@@ -62,12 +62,6 @@ export default async function EmployerErrandDetailPage({
   }
 
   const rawMessages = await getErrandMessages(errand.id);
-  const initialMessages = rawMessages.map((m) => ({
-    id: m.id,
-    senderId: m.senderId,
-    content: m.content,
-    createdAt: m.createdAt.toISOString(),
-  }));
 
   return (
     <EmployerErrandDetailClient
@@ -97,7 +91,7 @@ export default async function EmployerErrandDetailPage({
       }}
       runner={runner}
       deliveryPin={errand.type === "pickup_delivery" ? "123456" : null}
-      initialMessages={initialMessages}
+      initialMessages={rawMessages}
       currentUserId={session.userId}
     />
   );
