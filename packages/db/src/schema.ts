@@ -87,6 +87,7 @@ export const hiringRequests = pgTable("hiring_requests", {
   locationState: text("location_state").notNull(),
   locationArea: text("location_area").notNull(),
   engagementType: engagementTypeEnum("engagement_type").notNull(),
+  contractType: text("contract_type").default("PERMANENT"),
   startDate: timestamp("start_date").notNull(),
   budgetMin: doublePrecision("budget_min").notNull(),
   budgetMax: doublePrecision("budget_max").notNull(),
@@ -118,6 +119,9 @@ export const selections = pgTable("selections", {
   termsVersion: text("terms_version").notNull(),
   termsAcceptedAt: timestamp("terms_accepted_at"),
   hiredAt: timestamp("hired_at"),
+  interviewDate: timestamp("interview_date"),
+  interviewType: text("interview_type"),
+  interviewNotes: text("interview_notes"),
 });
 
 // ==========================================

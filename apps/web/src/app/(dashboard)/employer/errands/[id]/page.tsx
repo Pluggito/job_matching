@@ -1,4 +1,4 @@
-import { db, errands, employerProfiles, workerProfiles, eq, and } from "@repo/db";
+import { db, errands, employerProfiles, workerProfiles, ratings, eq, and } from "@repo/db";
 import { getCurrentUser } from "@/actions/auth";
 import { getErrandMessages } from "@/actions/errandMessages";
 import EmployerErrandDetailClient from "./EmployerErrandDetailClient";
@@ -61,10 +61,22 @@ export default async function EmployerErrandDetailPage({
     }
   }
 
+  const [existingRating] = await db
+    .select({
+      id: ratings.id,
+      score: ratings.score,
+      feedback: ratings.feedback,
+      moderated: ratings.moderated,
+    })
+    .from(ratings)
+    .where(eq(ratings.errandId, errand.id))
+    .limit(1);
+
   const rawMessages = await getErrandMessages(errand.id);
 
   return (
     <EmployerErrandDetailClient
+      initialRating={existingRating || null}
       errand={{
         id: errand.id,
         title: errand.title,

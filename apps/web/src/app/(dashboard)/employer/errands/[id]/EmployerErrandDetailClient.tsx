@@ -19,6 +19,7 @@ import {
   AlertTriangle,
   ChevronLeft,
   Bike,
+  Star,
 } from "lucide-react";
 import { formatNaira } from "@repo/shared";
 import {
@@ -28,6 +29,7 @@ import {
   reportErrandProblem,
 } from "@/actions/errands";
 import { useErrandChat } from "@/hooks/useErrandChat";
+import SubmitRatingModal from "@/components/ratings/SubmitRatingModal";
 
 interface Props {
   errand: {
@@ -60,6 +62,11 @@ interface Props {
     locationState: string;
   } | null;
   deliveryPin?: string | null;
+  initialRating?: {
+    id?: string;
+    score: number;
+    feedback?: string | null;
+  } | null;
   initialMessages: Array<{
     id: string;
     senderId: string;
@@ -77,9 +84,13 @@ export default function EmployerErrandDetailClient({
   errand,
   runner,
   deliveryPin,
+  initialRating,
   initialMessages,
   currentUserId,
 }: Props) {
+  const [currentRating, setCurrentRating] = useState(initialRating || null);
+  const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
+
   const {
     messages,
     sendMessage,
@@ -336,6 +347,56 @@ export default function EmployerErrandDetailClient({
           <div className="font-mono font-bold text-2xl tracking-widest text-amber-900 bg-white px-5 py-2.5 rounded-xl border border-amber-300 shrink-0 text-center">
             {deliveryPin}
           </div>
+        </div>
+      )}
+
+      {/* Errand Completed & Rating Banner */}
+      {errand.status === "completed" && (
+        <div className="bg-gradient-to-r from-emerald-50 via-green-50 to-emerald-50/70 rounded-2xl border border-emerald-300 p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-start sm:items-center gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-[var(--ng)] text-white flex items-center justify-center shrink-0 shadow-xs">
+              <CheckCircle2 size={22} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="font-bold text-sm sm:text-base text-emerald-950 font-heading">
+                  Errand Completed & Funds Released
+                </h4>
+                <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  Verified
+                </span>
+              </div>
+              {currentRating ? (
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  <div className="flex items-center text-amber-400">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star
+                        key={s}
+                        size={15}
+                        className={s <= currentRating.score ? "fill-amber-400 text-amber-400" : "fill-neutral-200 text-neutral-200"}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-xs text-neutral-700 font-medium">
+                    Rated {currentRating.score} / 5 stars
+                    {currentRating.feedback ? ` · "${currentRating.feedback}"` : ""}
+                  </span>
+                </div>
+              ) : (
+                <p className="text-xs text-emerald-800 mt-0.5">
+                  How was your runner's communication, speed, and execution quality? Leave a review to help the community.
+                </p>
+              )}
+            </div>
+          </div>
+
+          <button
+            onClick={() => setIsRatingModalOpen(true)}
+            className="h-11 px-5 rounded-xl bg-white hover:bg-neutral-50 border border-emerald-300 text-emerald-900 font-bold text-xs flex items-center gap-2 shadow-xs shrink-0 cursor-pointer transition-all hover:scale-[1.02] active:scale-95"
+          >
+            <Star size={15} className="fill-amber-400 text-amber-400" />
+            <span>{currentRating ? "Edit Review" : "Rate & Review Runner"}</span>
+          </button>
         </div>
       )}
 
@@ -647,6 +708,19 @@ export default function EmployerErrandDetailClient({
           </div>
         </div>
       )}
+
+      {/* Submit Rating Modal */}
+      <SubmitRatingModal
+        isOpen={isRatingModalOpen}
+        onClose={() => setIsRatingModalOpen(false)}
+        targetTitle={errand.title}
+        targetSubtitle="Errand Runner Review"
+        errandId={errand.id}
+        existingRating={currentRating}
+        onSuccess={(newRating) => {
+          setCurrentRating(newRating);
+        }}
+      />
     </div>
   );
 }
