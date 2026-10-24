@@ -10,6 +10,7 @@ import {
   removalNotices,
   ratings,
   messages,
+  threads,
   notifications,
   platformSettings,
   errands,
@@ -492,6 +493,22 @@ export async function sendAdminReply(params: {
       senderId: admin.id,
       content: content.trim(),
     });
+
+    const [thread] = await tx
+      .select({ employerId: threads.employerId })
+      .from(threads)
+      .where(eq(threads.id, threadId))
+      .limit(1);
+
+    if (thread) {
+      await tx.insert(notifications).values({
+        userId: thread.employerId,
+        type: "ADMIN_REPLY",
+        title: "Staff Guru Support Response",
+        content: content.trim().slice(0, 100),
+        link: "/employer/messages",
+      });
+    }
 
     await insertAuditLog(tx, {
       adminId: admin.id,

@@ -5,6 +5,7 @@ import {
   selections,
   placements,
   payments,
+  ratings,
   eq,
   and,
   sql,
@@ -29,6 +30,7 @@ export default async function WorkerProfilePage({ params }: { params: { id: stri
   let pendingSelectionId: string | undefined;
   let isSelectionPaid = false;
   let isCandidateAccepted = false;
+  let existingRating: { id: string; score: number; feedback: string | null } | null = null;
 
   if (session && session.role === "EMPLOYER") {
     const [emp] = await db
@@ -72,6 +74,17 @@ export default async function WorkerProfilePage({ params }: { params: { id: stri
 
           if (placement) {
             placementId = placement.id;
+
+            const [r] = await db
+              .select({
+                id: ratings.id,
+                score: ratings.score,
+                feedback: ratings.feedback,
+              })
+              .from(ratings)
+              .where(eq(ratings.placementId, placement.id))
+              .limit(1);
+            if (r) existingRating = r;
           }
         } else {
           pendingSelectionId = sel.id;
@@ -95,6 +108,7 @@ export default async function WorkerProfilePage({ params }: { params: { id: stri
         worker={safeProfile}
         isConnected={isConnected}
         placementId={placementId}
+        initialRating={existingRating}
         pendingSelectionId={pendingSelectionId}
         isSelectionPaid={isSelectionPaid}
         isCandidateAccepted={isCandidateAccepted}

@@ -11,6 +11,7 @@ export function getNavItems(role: Role): NavItem[] {
   if (role === "EMPLOYER") {
     return [
       { name: "Overview", href: "/employer", icon: Home },
+      { name: "Find Talent", href: "/employer/talent", icon: Search },
       { name: "My Hires", href: "/employer/workers", icon: Users },
       { name: "Errands (Alabaru)", href: "/employer/errands", icon: Package },
       { name: "Messages", href: "/employer/messages", icon: MessageSquare },

@@ -1,4 +1,4 @@
-import { db, errands, employerProfiles, workerProfiles, eq, and } from "@repo/db";
+import { db, errands, employerProfiles, workerProfiles, ratings, eq, and } from "@repo/db";
 import { getCurrentUser } from "@/actions/auth";
 import { getErrandMessages } from "@/actions/errandMessages";
 import EmployerErrandDetailClient from "./EmployerErrandDetailClient";
@@ -61,16 +61,22 @@ export default async function EmployerErrandDetailPage({
     }
   }
 
+  const [existingRating] = await db
+    .select({
+      id: ratings.id,
+      score: ratings.score,
+      feedback: ratings.feedback,
+      moderated: ratings.moderated,
+    })
+    .from(ratings)
+    .where(eq(ratings.errandId, errand.id))
+    .limit(1);
+
   const rawMessages = await getErrandMessages(errand.id);
-  const initialMessages = rawMessages.map((m) => ({
-    id: m.id,
-    senderId: m.senderId,
-    content: m.content,
-    createdAt: m.createdAt.toISOString(),
-  }));
 
   return (
     <EmployerErrandDetailClient
+      initialRating={existingRating || null}
       errand={{
         id: errand.id,
         title: errand.title,
@@ -97,7 +103,7 @@ export default async function EmployerErrandDetailPage({
       }}
       runner={runner}
       deliveryPin={errand.type === "pickup_delivery" ? "123456" : null}
-      initialMessages={initialMessages}
+      initialMessages={rawMessages}
       currentUserId={session.userId}
     />
   );

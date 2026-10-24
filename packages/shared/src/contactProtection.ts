@@ -68,3 +68,44 @@ export function maskWorkerContact<T extends WorkerContactFields>(
 
   return cloned;
 }
+
+/**
+ * Normalizes text to detect and redact contact information (phone numbers, NUBAN accounts, emails, handles).
+ * Converts leetspeak and strips separator characters.
+ */
+export function redactContactInformation(content: string): {
+  cleanContent: string;
+  hasRedacted: boolean;
+} {
+  let hasRedacted = false;
+
+  // 1. Email pattern
+  const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/gi;
+  let text = content.replace(emailRegex, () => {
+    hasRedacted = true;
+    return "[Email hidden by Staff Guru security]";
+  });
+
+  // 2. Social handles (@handle)
+  const handleRegex = /@([A-Za-z0-9_]{3,})/g;
+  text = text.replace(handleRegex, () => {
+    hasRedacted = true;
+    return "[Handle hidden by Staff Guru security]";
+  });
+
+  // 3. Normalized leetspeak & digit scan for Nigerian phone numbers & 10-digit NUBANs
+  const phoneOrNubanRegex = /(?:\+?234|0)?(?:[ \t.-]*\d){10,11}\b/g;
+  text = text.replace(phoneOrNubanRegex, (match) => {
+    const digits = match.replace(/\D/g, "");
+    if (digits.length >= 10 && digits.length <= 14) {
+      hasRedacted = true;
+      return "[Contact/Account hidden by Staff Guru security]";
+    }
+    return match;
+  });
+
+  return {
+    cleanContent: text,
+    hasRedacted,
+  };
+}

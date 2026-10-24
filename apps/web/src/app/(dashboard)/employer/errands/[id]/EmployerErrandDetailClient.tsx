@@ -19,6 +19,7 @@ import {
   AlertTriangle,
   ChevronLeft,
   Bike,
+  Star,
 } from "lucide-react";
 import { formatNaira } from "@repo/shared";
 import {
@@ -27,7 +28,8 @@ import {
   requestErrandChanges,
   reportErrandProblem,
 } from "@/actions/errands";
-import { sendErrandMessage } from "@/actions/errandMessages";
+import { useErrandChat } from "@/hooks/useErrandChat";
+import SubmitRatingModal from "@/components/ratings/SubmitRatingModal";
 
 interface Props {
   errand: {
@@ -60,10 +62,19 @@ interface Props {
     locationState: string;
   } | null;
   deliveryPin?: string | null;
+  initialRating?: {
+    id?: string;
+    score: number;
+    feedback?: string | null;
+  } | null;
   initialMessages: Array<{
     id: string;
     senderId: string;
     content: string;
+    attachmentUrl?: string | null;
+    status?: string;
+    deliveredAt?: string | null;
+    readAt?: string | null;
     createdAt: string;
   }>;
   currentUserId: string;
@@ -73,10 +84,25 @@ export default function EmployerErrandDetailClient({
   errand,
   runner,
   deliveryPin,
+  initialRating,
   initialMessages,
   currentUserId,
 }: Props) {
-  const [messages, setMessages] = useState(initialMessages);
+  const [currentRating, setCurrentRating] = useState(initialRating || null);
+  const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
+
+  const {
+    messages,
+    sendMessage,
+    sendTyping,
+    isCounterpartTyping,
+    isConnected,
+  } = useErrandChat({
+    errandId: errand.id,
+    initialMessages,
+    currentUserId,
+  });
+
   const [newMessage, setNewMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
@@ -97,32 +123,17 @@ export default function EmployerErrandDetailClient({
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || isSending) return;
 
     setIsSending(true);
     const content = newMessage.trim();
     setNewMessage("");
-
-    // Optimistic message
-    const tempId = `temp_${Date.now()}`;
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: tempId,
-        senderId: currentUserId,
-        content,
-        createdAt: new Date().toISOString(),
-      },
-    ]);
+    sendTyping(false);
 
     try {
-      const res = await sendErrandMessage({
-        errandId: errand.id,
-        content,
-      });
-
+      const res = await sendMessage(content);
       if (!res.success) {
-        alert(('error' in res ? (res.error as string) : null) || "Failed to send message.");
+        alert(res.error || "Failed to send message.");
       }
     } catch (err) {
       console.error("Chat error:", err);
@@ -339,6 +350,56 @@ export default function EmployerErrandDetailClient({
         </div>
       )}
 
+      {/* Errand Completed & Rating Banner */}
+      {errand.status === "completed" && (
+        <div className="bg-gradient-to-r from-emerald-50 via-green-50 to-emerald-50/70 rounded-2xl border border-emerald-300 p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-start sm:items-center gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-[var(--ng)] text-white flex items-center justify-center shrink-0 shadow-xs">
+              <CheckCircle2 size={22} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="font-bold text-sm sm:text-base text-emerald-950 font-heading">
+                  Errand Completed & Funds Released
+                </h4>
+                <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  Verified
+                </span>
+              </div>
+              {currentRating ? (
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  <div className="flex items-center text-amber-400">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star
+                        key={s}
+                        size={15}
+                        className={s <= currentRating.score ? "fill-amber-400 text-amber-400" : "fill-neutral-200 text-neutral-200"}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-xs text-neutral-700 font-medium">
+                    Rated {currentRating.score} / 5 stars
+                    {currentRating.feedback ? ` · "${currentRating.feedback}"` : ""}
+                  </span>
+                </div>
+              ) : (
+                <p className="text-xs text-emerald-800 mt-0.5">
+                  How was your runner's communication, speed, and execution quality? Leave a review to help the community.
+                </p>
+              )}
+            </div>
+          </div>
+
+          <button
+            onClick={() => setIsRatingModalOpen(true)}
+            className="h-11 px-5 rounded-xl bg-white hover:bg-neutral-50 border border-emerald-300 text-emerald-900 font-bold text-xs flex items-center gap-2 shadow-xs shrink-0 cursor-pointer transition-all hover:scale-[1.02] active:scale-95"
+          >
+            <Star size={15} className="fill-amber-400 text-amber-400" />
+            <span>{currentRating ? "Edit Review" : "Rate & Review Runner"}</span>
+          </button>
+        </div>
+      )}
+
       {/* Main Details Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Details & Proof */}
@@ -441,9 +502,12 @@ export default function EmployerErrandDetailClient({
               <MessageSquare size={16} className="text-neutral-500" />
               <h3 className="font-semibold text-sm text-neutral-900">Errand Coordination Chat</h3>
             </div>
-            <span className="text-[10px] bg-neutral-100 text-neutral-600 px-2.5 py-0.5 rounded-md font-semibold border border-neutral-200/60">
-              Protected
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className={`w-2 h-2 rounded-full ${isConnected ? "bg-emerald-500 animate-pulse" : "bg-neutral-300"}`} />
+              <span className="text-[10px] bg-neutral-100 text-neutral-600 px-2.5 py-0.5 rounded-md font-semibold border border-neutral-200/60">
+                {isConnected ? "Live Chat" : "Protected"}
+              </span>
+            </div>
           </div>
 
           <p className="text-[11px] text-neutral-500 mb-3 bg-neutral-50 p-2 rounded-lg border border-neutral-200/50">
@@ -473,11 +537,18 @@ export default function EmployerErrandDetailClient({
                     >
                       {m.content}
                     </div>
-                    <span className="text-[10px] text-neutral-400 mt-1 px-1">
-                      {new Date(m.createdAt).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                    <span className="flex items-center gap-1 text-[10px] text-neutral-400 mt-1 px-1">
+                      <span>
+                        {new Date(m.createdAt).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                      {isMe && (
+                        <span className={`text-[11px] font-bold ${m.status === "read" ? "text-emerald-300" : "opacity-75"}`}>
+                          {m.status === "sending" ? "🕒" : m.status === "read" ? "✓✓" : "✓"}
+                        </span>
+                      )}
                     </span>
                   </div>
                 );
@@ -485,12 +556,28 @@ export default function EmployerErrandDetailClient({
             )}
           </div>
 
+          {/* Typing Indicator */}
+          {isCounterpartTyping && (
+            <div className="text-[11px] text-neutral-500 italic flex items-center gap-1.5 px-2 py-1 mb-1 animate-in fade-in">
+              <span className="inline-flex gap-1">
+                <span className="w-1.5 h-1.5 bg-neutral-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                <span className="w-1.5 h-1.5 bg-neutral-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                <span className="w-1.5 h-1.5 bg-neutral-400 rounded-full animate-bounce" />
+              </span>
+              <span>Runner is typing...</span>
+            </div>
+          )}
+
           {/* Chat Input */}
           <form onSubmit={handleSendMessage} className="pt-3 border-t border-neutral-200/70 flex items-center gap-2">
             <input
               type="text"
               value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
+              onChange={(e) => {
+                setNewMessage(e.target.value);
+                sendTyping(e.target.value.length > 0);
+              }}
+              onBlur={() => sendTyping(false)}
               placeholder="Type message to runner..."
               className="flex-1 px-3.5 py-2 text-xs rounded-xl border border-neutral-300 focus:outline-none focus:border-neutral-500 focus:ring-1 focus:ring-neutral-400 transition-colors"
             />
@@ -621,6 +708,19 @@ export default function EmployerErrandDetailClient({
           </div>
         </div>
       )}
+
+      {/* Submit Rating Modal */}
+      <SubmitRatingModal
+        isOpen={isRatingModalOpen}
+        onClose={() => setIsRatingModalOpen(false)}
+        targetTitle={errand.title}
+        targetSubtitle="Errand Runner Review"
+        errandId={errand.id}
+        existingRating={currentRating}
+        onSuccess={(newRating) => {
+          setCurrentRating(newRating);
+        }}
+      />
     </div>
   );
 }

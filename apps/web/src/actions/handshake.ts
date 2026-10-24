@@ -255,3 +255,142 @@ export async function confirmEmployerHire(selectionId: string) {
 
   return { success: true };
 }
+
+/**
+ * Schedule or update an in-app interview proposal for a candidate on a hiring request.
+ */
+export async function scheduleInterviewAction({
+  workerProfileId,
+  hiringRequestId,
+  interviewDate,
+  interviewType,
+  interviewNotes,
+}: {
+  workerProfileId: string;
+  hiringRequestId: string;
+  interviewDate: string;
+  interviewType: "PHONE" | "VIDEO" | "ONSITE";
+  interviewNotes?: string;
+}) {
+  const session = await getCurrentUser();
+  if (!session || session.role !== "EMPLOYER") {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  const [request] = await db
+    .select()
+    .from(hiringRequests)
+    .where(eq(hiringRequests.id, hiringRequestId))
+    .limit(1);
+
+  if (!request) {
+    return { success: false, error: "Hiring request not found" };
+  }
+
+  const [employerProfile] = await db
+    .select()
+    .from(employerProfiles)
+    .where(eq(employerProfiles.userId, session.userId))
+    .limit(1);
+
+  if (!employerProfile || request.employerId !== employerProfile.id) {
+    return { success: false, error: "Unauthorized access to this hiring request" };
+  }
+
+  const parsedDate = new Date(interviewDate);
+  if (isNaN(parsedDate.getTime()) || parsedDate < new Date()) {
+    return { success: false, error: "Please select a valid future date and time for the interview." };
+  }
+
+  // Check if a selection already exists
+  const [existingSelection] = await db
+    .select()
+    .from(selections)
+    .where(
+      and(
+        eq(selections.workerProfileId, workerProfileId),
+        eq(selections.hiringRequestId, hiringRequestId)
+      )
+    )
+    .limit(1);
+
+  let selectionId = existingSelection?.id;
+
+  if (existingSelection) {
+    await db
+      .update(selections)
+      .set({
+        interviewDate: parsedDate,
+        interviewType,
+        interviewNotes: interviewNotes?.trim() || null,
+      })
+      .where(eq(selections.id, existingSelection.id));
+  } else {
+    const [newSelection] = await db
+      .insert(selections)
+      .values({
+        employerProfileId: employerProfile.id,
+        workerProfileId,
+        hiringRequestId,
+        status: "PENDING",
+        feeAmount: AGENCY_FEE_PER_WORKER,
+        termsVersion: "v1.0",
+        interviewDate: parsedDate,
+        interviewType,
+        interviewNotes: interviewNotes?.trim() || null,
+      })
+      .returning();
+    if (newSelection) {
+      selectionId = newSelection.id;
+    }
+  }
+
+  // Notify worker
+  const [worker] = await db
+    .select({ userId: workerProfiles.userId })
+    .from(workerProfiles)
+    .where(eq(workerProfiles.id, workerProfileId))
+    .limit(1);
+
+  if (worker) {
+    const typeLabel =
+      interviewType === "PHONE"
+        ? "Phone Call"
+        : interviewType === "VIDEO"
+        ? "Video Call"
+        : "Onsite Trade Assessment";
+
+    const dateStr = parsedDate.toLocaleString("en-NG", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    const content = `${employerProfile.businessName} invited you to an interview (${typeLabel}) on ${dateStr} for "${request.title}".${
+      interviewNotes ? ` Note: "${interviewNotes}"` : ""
+    }`;
+
+    await db.insert(notifications).values({
+      userId: worker.userId,
+      type: "INTERVIEW_INVITATION",
+      title: "Interview Invitation 📅",
+      content,
+      link: "/dashboard",
+    });
+
+    sendPushToUser(worker.userId, {
+      title: "Interview Invitation 📅",
+      body: `${employerProfile.businessName} wants to interview you on ${dateStr}.`,
+      url: "/dashboard",
+      tag: "interview-invitation",
+    }).catch(console.error);
+  }
+
+  revalidatePath(`/employer/requests/${hiringRequestId}/matches`);
+  revalidatePath(`/dashboard`);
+  revalidatePath(`/employer/workers/${workerProfileId}`);
+
+  return { success: true, selectionId };
+}
