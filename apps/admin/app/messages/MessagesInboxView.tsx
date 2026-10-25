@@ -8,9 +8,11 @@ import {
   User,
   Clock,
   CheckCircle2,
+  RefreshCw,
+  Radio,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { sendAdminReply } from "@/lib/actions";
+import { sendAdminReply, getAdminThreadsAction } from "@/lib/actions";
 
 export interface MessageItem {
   id: string;
@@ -45,11 +47,56 @@ export default function MessagesInboxView({
   );
   const [replyText, setReplyText] = React.useState("");
   const [isSending, setIsSending] = React.useState(false);
+  const [isSyncing, setIsSyncing] = React.useState(false);
+  const [lastSyncedAt, setLastSyncedAt] = React.useState<Date>(new Date());
   const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
+
+  const messagesEndRef = React.useRef<HTMLDivElement | null>(null);
 
   const activeThread = React.useMemo(() => {
     return threads.find((t) => t.id === activeThreadId) || null;
   }, [threads, activeThreadId]);
+
+  const scrollToBottom = React.useCallback((smooth = true) => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: smooth ? "smooth" : "auto",
+    });
+  }, []);
+
+  // Scroll on active thread change
+  React.useEffect(() => {
+    scrollToBottom(false);
+  }, [activeThreadId, scrollToBottom]);
+
+  // Scroll when new messages arrive in active thread
+  React.useEffect(() => {
+    scrollToBottom(true);
+  }, [activeThread?.messages.length, scrollToBottom]);
+
+  // Fetch latest threads from server
+  const syncThreads = React.useCallback(async (showLoading = false) => {
+    if (showLoading) setIsSyncing(true);
+    try {
+      const res = await getAdminThreadsAction();
+      if (res.success && res.threads) {
+        setThreads(res.threads);
+        setLastSyncedAt(new Date());
+      }
+    } catch (err) {
+      // Silently ignore background polling errors
+    } finally {
+      if (showLoading) setIsSyncing(false);
+    }
+  }, []);
+
+  // Periodic polling: sync threads every 3.5 seconds
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      syncThreads(false);
+    }, 3500);
+
+    return () => clearInterval(interval);
+  }, [syncThreads]);
 
   const handleSendReply = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,18 +105,21 @@ export default function MessagesInboxView({
     setIsSending(true);
     setErrorMsg(null);
 
+    const textToSend = replyText.trim();
+    setReplyText("");
+
     try {
       await sendAdminReply({
         threadId: activeThreadId,
-        content: replyText.trim(),
+        content: textToSend,
       });
 
-      // Update locally
+      // Optimistic update locally
       const newMsg: MessageItem = {
         id: `msg-${Date.now()}`,
         senderId: adminUserId,
         senderEmail: "Admin",
-        content: replyText.trim(),
+        content: textToSend,
         createdAt: new Date().toISOString(),
       };
 
@@ -78,7 +128,7 @@ export default function MessagesInboxView({
           t.id === activeThreadId
             ? {
                 ...t,
-                lastMessageSnippet: replyText.trim(),
+                lastMessageSnippet: textToSend,
                 lastMessageAt: new Date().toISOString(),
                 messages: [...t.messages, newMsg],
               }
@@ -86,9 +136,11 @@ export default function MessagesInboxView({
         )
       );
 
-      setReplyText("");
+      // Confirm with server
+      syncThreads(false);
     } catch (err: any) {
       setErrorMsg(err.message || "Failed to send reply.");
+      setReplyText(textToSend); // Restore unsent draft
     } finally {
       setIsSending(false);
     }
@@ -97,23 +149,50 @@ export default function MessagesInboxView({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-neutral-900 font-heading">
-          Employer Messages
-        </h1>
-        <p className="text-sm text-neutral-500 mt-1">
-          Direct communication channel with employers inquiring about candidate staffing and dispute resolution.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-neutral-900 font-heading">
+            Employer Messages
+          </h1>
+          <p className="text-sm text-neutral-500 mt-1">
+            Direct communication channel with employers inquiring about candidate staffing and dispute resolution.
+          </p>
+        </div>
+
+        {/* Live sync badge & manual refresh */}
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/60 text-emerald-700 text-xs font-medium">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            Live Sync
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => syncThreads(true)}
+            disabled={isSyncing}
+            className="text-xs h-8 gap-1.5 border-black/10 text-neutral-600 hover:text-neutral-900"
+            title={`Last synced: ${lastSyncedAt.toLocaleTimeString()}`}
+          >
+            <RefreshCw size={13} className={isSyncing ? "animate-spin text-[#008751]" : ""} />
+            <span>Refresh</span>
+          </Button>
+        </div>
       </div>
 
       {/* Main Inbox Box */}
       <div className="bg-white rounded-2xl border border-black/10 shadow-sm overflow-hidden grid grid-cols-1 md:grid-cols-[340px_1fr] min-h-[580px]">
         {/* Left Thread List */}
         <div className="border-r border-black/10 flex flex-col bg-neutral-50/50">
-          <div className="p-4 border-b border-black/10">
+          <div className="p-4 border-b border-black/10 flex items-center justify-between">
             <h2 className="text-xs font-bold text-neutral-500 uppercase tracking-wider">
               Conversations ({threads.length})
             </h2>
+            <span className="text-[10px] text-neutral-400 font-mono">
+              Auto-sync: 3s
+            </span>
           </div>
 
           <div className="flex-1 overflow-y-auto divide-y divide-black/5">
@@ -171,10 +250,14 @@ export default function MessagesInboxView({
                     {activeThread.employerEmail}
                   </p>
                 </div>
+                <div className="flex items-center gap-1.5 text-[11px] text-neutral-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#008751]"></span>
+                  Active Thread
+                </div>
               </div>
 
               {/* Message History */}
-              <div className="flex-1 p-5 overflow-y-auto space-y-4">
+              <div className="flex-1 p-5 overflow-y-auto space-y-4 max-h-[460px]">
                 {activeThread.messages.length === 0 ? (
                   <p className="text-center text-xs text-neutral-400 italic py-12">
                     No messages in this thread yet. Send a message below to start the conversation.
@@ -208,6 +291,8 @@ export default function MessagesInboxView({
                     );
                   })
                 )}
+                {/* Scroll anchor */}
+                <div ref={messagesEndRef} />
               </div>
 
               {/* Error message */}
@@ -251,3 +336,4 @@ export default function MessagesInboxView({
     </div>
   );
 }
+
