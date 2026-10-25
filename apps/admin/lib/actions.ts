@@ -21,6 +21,7 @@ import {
   eq,
   and,
   inArray,
+  asc,
 } from "@repo/db";
 import {
   assertValidTransition,
@@ -525,6 +526,75 @@ export async function sendAdminReply(params: {
   revalidatePath("/messages");
   return { success: true };
 }
+
+export async function getAdminThreadsAction() {
+  const admin = await getAdminUser();
+
+  // Query threads with employer details
+  const threadRows = await db
+    .select({
+      id: threads.id,
+      employerId: threads.employerId,
+      employerEmail: users.email,
+      businessName: employerProfiles.businessName,
+    })
+    .from(threads)
+    .innerJoin(users, eq(threads.employerId, users.id))
+    .leftJoin(employerProfiles, eq(users.id, employerProfiles.userId));
+
+  // Query all messages ordered chronologically
+  const allMessages = await db
+    .select({
+      id: messages.id,
+      threadId: messages.threadId,
+      senderId: messages.senderId,
+      content: messages.content,
+      createdAt: messages.createdAt,
+    })
+    .from(messages)
+    .orderBy(asc(messages.createdAt));
+
+  // Group messages by threadId
+  const msgsByThread = new Map<
+    string,
+    Array<{
+      id: string;
+      senderId: string;
+      senderEmail: string;
+      content: string;
+      createdAt: string;
+    }>
+  >();
+
+  for (const m of allMessages) {
+    const list = msgsByThread.get(m.threadId) || [];
+    list.push({
+      id: m.id,
+      senderId: m.senderId,
+      senderEmail: m.senderId === admin.id ? admin.email : "Employer",
+      content: m.content,
+      createdAt: m.createdAt.toISOString(),
+    });
+    msgsByThread.set(m.threadId, list);
+  }
+
+  const formattedThreads = threadRows.map((t) => {
+    const threadMsgs = msgsByThread.get(t.id) || [];
+    const lastMsg = threadMsgs[threadMsgs.length - 1];
+    return {
+      id: t.id,
+      employerId: t.employerId,
+      employerEmail: t.employerEmail,
+      businessName: t.businessName || (t.employerEmail.split("@")[0] ?? "Employer"),
+      lastMessageSnippet: lastMsg ? lastMsg.content : "No messages yet",
+      lastMessageAt: lastMsg ? lastMsg.createdAt : "",
+      messages: threadMsgs,
+    };
+  });
+
+  return { success: true, threads: formattedThreads };
+}
+
 
 // ==========================================
 // Phase 4: Alabaru Errand Pricing Settings
