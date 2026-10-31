@@ -632,7 +632,7 @@ export async function getErrandPricingSettings(): Promise<ErrandPricingSettingsD
   const commissionBps = typeof commissionObj?.basisPoints === "number" ? commissionObj.basisPoints : 3000;
 
   const minObj = map.get("errand_price_min_kobo") as { kobo?: number } | undefined;
-  const minPriceKobo = typeof minObj?.kobo === "number" ? minObj.kobo : 500_000;
+  const minPriceKobo = typeof minObj?.kobo === "number" && minObj.kobo !== 500_000 ? minObj.kobo : 2_000_000;
 
   const maxObj = map.get("errand_price_max_kobo") as { kobo?: number } | undefined;
   const maxPriceKobo = typeof maxObj?.kobo === "number" ? maxObj.kobo : 100_000_000;

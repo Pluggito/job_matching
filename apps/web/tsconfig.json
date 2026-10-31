@@ -7,7 +7,12 @@
       }
     ],
     "strictNullChecks": true,
-    "baseUrl": ".",
+    "jsx": "preserve",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "allowJs": true,
+    "noEmit": true,
+
     "paths": {
       "@/*": ["./src/*"]
     }
