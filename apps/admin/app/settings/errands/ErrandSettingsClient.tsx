@@ -192,7 +192,7 @@ export default function ErrandSettingsClient({
                   min="0"
                   value={minPriceNaira}
                   onChange={(e) => setMinPriceNaira(e.target.value)}
-                  placeholder="e.g. 5000"
+                  placeholder="e.g. 20000"
                   className="w-full pl-8 pr-4 py-2.5 rounded-xl border border-black/15 focus:outline-none focus:ring-2 focus:ring-[var(--ng)] text-base font-semibold text-[#152822]"
                   required
                 />

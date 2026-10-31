@@ -115,8 +115,8 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
     title: payload.title,
     body: payload.body,
     url: payload.url || "/dashboard",
-    icon: payload.icon || "/icons/icon-192x192.png",
-    badge: payload.badge || "/icons/icon-192x192.png",
+    icon: payload.icon || "/icon-192x192.png",
+    badge: payload.badge || "/icon-192x192.png",
     tag: payload.tag || "staff-guru-notice",
   });
 

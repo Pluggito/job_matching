@@ -39,7 +39,7 @@ const SCENARIOS: Scenario[] = [
     description:
       "Sending money home for your building project? Before you release the next payment, a verified runner goes to site and sends you GPS-stamped photos and video of the foundation, blocks and work done so far. No more \"the work is moving, oga\" stories.",
     location: "The Eko Pearl · Victoria Island, Lagos",
-    budget: 12000,
+    budget: 20000,
     turnaround: "3.5 hrs avg.",
     image: "/site_inspection compressed.png",
     badge: "GPS-Stamped Proof",
@@ -60,7 +60,7 @@ const SCENARIOS: Scenario[] = [
     description:
       "Want Ankara, lace, foodstuff, skincare, gadgets or gifts for family abroad? Your runner buys the item for you, checks it in person, packs it well and ships it by cargo to the UK, USA or anywhere in the world.",
     location: "Balogun Market · Lagos → UK, USA & worldwide",
-    budget: 10000,
+    budget: 20000,
     turnaround: "Shipped in days",
     image: "/landing/alabaru/cargo.jpg",
     badge: "Checked, Packed & Shipped",
@@ -81,7 +81,7 @@ const SCENARIOS: Scenario[] = [
     description:
       "Need lace, electronics or wholesale stock but you can't face the traffic to Balogun or Alaba? Your runner goes into the market, checks the goods in person, bargains the price and sends you live video before any money moves.",
     location: "Balogun Market Shop B12 · Lagos Island",
-    budget: 8000,
+    budget: 20000,
     turnaround: "2.2 hrs avg.",
     image: "/market_runs_png.png",
     badge: "Quality Checked in Person",
@@ -102,7 +102,7 @@ const SCENARIOS: Scenario[] = [
     description:
       "Court papers, original title documents, bespoke outfits or valuable equipment. The runner cannot hand over until the receiver gives the 6-digit PIN you get at checkout. Nobody can just collect it and go.",
     location: "The Corporate Place · 20 Marina, Lagos",
-    budget: 7500,
+    budget: 20000,
     turnaround: "1.8 hrs avg.",
     image: "/secure_carrier.png",
     badge: "6-Digit PIN Verified",
@@ -123,7 +123,7 @@ const SCENARIOS: Scenario[] = [
     description:
       "Buying a car from another state? Don't let anybody sell you a clocked odometer. An inspector runs a computer diagnostic, checks the engine, looks for flood damage and confirms the customs papers before you pay the dealer.",
     location: "Berger Auto Market & Lekki Dealerships",
-    budget: 10000,
+    budget: 20000,
     turnaround: "2.5 hrs avg.",
     image: "/vehicle_inspection.png",
     badge: "OBD-II Scan & Engine Check",
@@ -210,7 +210,7 @@ function GlossyStar({ className = "" }: { className?: string }) {
 export default function AlabaruShowcase({
   creationFeeKobo = 100000,
   commissionBps = 3000,
-  minPriceKobo = 500000,
+  minPriceKobo = 2000000,
 }: AlabaruShowcaseProps) {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
 
@@ -225,7 +225,7 @@ export default function AlabaruShowcase({
   };
 
   const creationFeeNaira = Math.round(creationFeeKobo / 100);
-  const minFloorNaira = Math.round(minPriceKobo / 100);
+  const minFloorNaira = Math.max(20000, Math.round(minPriceKobo / 100));
   const totalEmployerDueNaira = minFloorNaira + creationFeeNaira;
 
   return (
@@ -270,11 +270,30 @@ export default function AlabaruShowcase({
               </div>
             </div>
 
-            {/* Dynamic White Feature Card */}
-            <div className="bg-white rounded-[28px] sm:rounded-[32px] p-6 sm:p-7 shadow-sm border border-black/[0.05] space-y-5 transition-all duration-300">
+
+            {/* Editorial Narrative (Mobile Only - moved above photo) */}
+            <div className="block lg:hidden">
+              <p className="text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-[var(--ink)]/50 mb-2">
+                Errands &amp; On-the-Ground Help
+              </p>
+              <h3 className="text-xl sm:text-2xl font-bold text-[var(--ink)] tracking-tight leading-snug sm:leading-[1.25] [font-family:var(--font-plus-jakarta)] mb-2.5 transition-all duration-200">
+                {activeScenario.punchline}
+              </h3>
+              <div className="space-y-2.5 text-sm sm:text-[15px] text-[var(--ink)]/70 leading-normal sm:leading-[1.42] font-normal">
+                <p>
+                  Staff Guru is more than a job platform. With Alabaru, you can get trusted people to run errands, inspect properties, make deliveries and represent you on the ground, whether you&apos;re in Lagos or abroad.
+                </p>
+                <p>
+                  Too busy? Living abroad? Can&apos;t be in two places at once? Let a verified local runner handle it for you.
+                </p>
+              </div>
+            </div>
+
+
+            <div className="bg-white rounded-[24px] sm:rounded-[32px] p-5 sm:p-7 shadow-sm border border-black/[0.05] lg:space-y-5 transition-all duration-300">
 
               {/* Card Header with Active Category Tag & Budget */}
-              <div className="flex items-center justify-between gap-3 pb-3 border-b border-black/[0.06]">
+              <div className="hidden lg:flex items-center justify-between gap-3 pb-3 border-b border-black/[0.06]">
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--ng)] bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-500/15 truncate">
                     {activeScenario.category}
@@ -288,7 +307,7 @@ export default function AlabaruShowcase({
               </div>
 
               {/* Dynamic Checklist for Selected Errand */}
-              <ul className="space-y-2.5 text-sm sm:text-[14px] font-medium text-[var(--ink)]/85 min-h-[155px]">
+              <ul className="hidden lg:block space-y-2.5 text-sm sm:text-[14px] font-medium text-[var(--ink)]/85 min-h-[155px]">
                 {activeScenario.checklist.map((item, idx) => (
                   <li key={`${activeScenario.id}-${idx}`} className="flex items-start gap-3 animate-in fade-in duration-300">
                     <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[var(--ng)] text-white shrink-0 mt-0.5 shadow-xs">
@@ -300,7 +319,7 @@ export default function AlabaruShowcase({
               </ul>
 
               {/* Fee Split / Escrow Explanation */}
-              <div className="pt-3 border-t border-black/[0.06] text-xs sm:text-[12.5px] text-[var(--ink)]/65 leading-normal sm:leading-[1.4]">
+              <div className="lg:pt-3 lg:border-t lg:border-black/[0.06] text-xs sm:text-[12.5px] text-[var(--ink)]/65 leading-normal sm:leading-[1.4]">
                 Runners take home <strong className="text-[var(--ink)] font-bold">70% of every errand</strong> once the work is confirmed. Staff Guru keeps <strong className="text-[var(--ink)] font-bold">30%</strong> to run the platform, secure payments, verify runners and handle disputes.
               </div>
             </div>
@@ -427,7 +446,8 @@ export default function AlabaruShowcase({
           {/* ================= RIGHT COLUMN: Editorial Narrative + Pill CTA ================= */}
           <div className="lg:col-span-4 space-y-5 lg:pl-2">
 
-            <div>
+
+            <div className="hidden lg:block">
               {/* Eyebrow Label */}
               <p className="text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-[var(--ink)]/50 mb-2">
                 Errands &amp; On-the-Ground Help
