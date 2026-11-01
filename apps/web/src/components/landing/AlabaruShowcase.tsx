@@ -21,12 +21,14 @@ interface Scenario {
   title: string;
   punchline: string;
   description: string;
+  howItWorks: string;
+  keyHighlights: string[];
   location: string;
   budget: number;
   turnaround: string;
   image: string;
   badge: string;
-  checklist: string[];
+  checklist?: string[];
 }
 
 const SCENARIOS: Scenario[] = [
@@ -38,18 +40,18 @@ const SCENARIOS: Scenario[] = [
     punchline: "You dey abroad, but your eyes dey on the ground.",
     description:
       "Sending money home for your building project? Before you release the next payment, a verified runner goes to site and sends you GPS-stamped photos and video of the foundation, blocks and work done so far. No more \"the work is moving, oga\" stories.",
+    howItWorks:
+      "Sending money home for a building project? Don't rely on phone calls or second-hand updates. A verified runner visits your site in person, takes 360° walk-through videos with live GPS timestamps, counts physical materials, and confirms who is actively working on-site before you release funds.",
+    keyHighlights: [
+      "GPS-Stamped Media",
+      "Material Count Verification",
+      "Live WhatsApp Updates",
+    ],
     location: "The Eko Pearl · Victoria Island, Lagos",
     budget: 20000,
     turnaround: "3.5 hrs avg.",
     image: "/site_inspection compressed.png",
     badge: "GPS-Stamped Proof",
-    checklist: [
-      "Foundation and every stage of the work confirmed",
-      "GPS-stamped photos and video from all angles",
-      "Work compared with your plan, materials counted",
-      "Check on who is on site: workers and supervisor",
-      "Live updates on WhatsApp or inside the app",
-    ],
   },
   {
     id: "ship",
@@ -59,18 +61,18 @@ const SCENARIOS: Scenario[] = [
     punchline: "Missing home? We buy am here, we ship am to you.",
     description:
       "Want Ankara, lace, foodstuff, skincare, gadgets or gifts for family abroad? Your runner buys the item for you, checks it in person, packs it well and ships it by cargo to the UK, USA or anywhere in the world.",
+    howItWorks:
+      "Craving authentic foodstuffs, bespoke lace, Ankara fabrics, or local gifts for family overseas? Your runner goes into the market, video-calls you to inspect items before purchase, bargains local prices without diaspora markups, packs everything securely with receipts, and handles international cargo handover.",
+    keyHighlights: [
+      "Live Video Inspection",
+      "Local Market Bargaining",
+      "Worldwide Cargo Tracking",
+    ],
     location: "Balogun Market · Lagos → UK, USA & worldwide",
     budget: 20000,
     turnaround: "Shipped in days",
     image: "/landing/alabaru/cargo.jpg",
     badge: "Checked, Packed & Shipped",
-    checklist: [
-      "Runner buys the item and shows you live video first",
-      "Quality checked and price bargained, no \"oyinbo price\"",
-      "Packed properly, with the receipt sent to you",
-      "Shipped by cargo to the UK, USA and beyond",
-      "Tracking updates until it reaches your door",
-    ],
   },
   {
     id: "market",
@@ -80,18 +82,18 @@ const SCENARIOS: Scenario[] = [
     punchline: "Market wahala? We go for you. No go-slow.",
     description:
       "Need lace, electronics or wholesale stock but you can't face the traffic to Balogun or Alaba? Your runner goes into the market, checks the goods in person, bargains the price and sends you live video before any money moves.",
+    howItWorks:
+      "Need wholesale fabrics, electronics, or business inventory without losing your entire day to gridlock traffic? Your runner navigates Balogun or Alaba for you. They inspect goods by hand, test electronics, bargain the best vendor rates, send you video confirmation on the spot, and securely hand packages to verified dispatch riders or waybill services.",
+    keyHighlights: [
+      "In-Person Quality Inspection",
+      "Real-Time Video Check",
+      "Dispatch & Waybill Handover",
+    ],
     location: "Balogun Market Shop B12 · Lagos Island",
     budget: 20000,
     turnaround: "2.2 hrs avg.",
     image: "/market_runs_png.png",
     badge: "Quality Checked in Person",
-    checklist: [
-      "Lace, fabric and gadgets checked by hand",
-      "Runner bargains for you, no \"oyinbo price\"",
-      "Live video before any money leaves",
-      "Original receipt collected from the seller",
-      "Goods handed to dispatch or sent by waybill",
-    ],
   },
   {
     id: "delivery",
@@ -101,18 +103,18 @@ const SCENARIOS: Scenario[] = [
     punchline: "Sealed and tracked. No PIN, no package.",
     description:
       "Court papers, original title documents, bespoke outfits or valuable equipment. The runner cannot hand over until the receiver gives the 6-digit PIN you get at checkout. Nobody can just collect it and go.",
+    howItWorks:
+      "Moving land title deeds, court filings, custom couture, or valuable devices across the city? Every high-value delivery is protected by a tamper-evident protocol and a 6-digit handoff PIN generated on your dashboard. The courier is locked from releasing the parcel until the intended recipient supplies the exact PIN, completely eliminating lost items and unauthorized handoffs.",
+    keyHighlights: [
+      "6-Digit Handoff PIN Security",
+      "Tamper-Evident Tracking",
+      "Guaranteed Direct Delivery",
+    ],
     location: "The Corporate Place · 20 Marina, Lagos",
     budget: 20000,
     turnaround: "1.8 hrs avg.",
     image: "/secure_carrier.png",
     badge: "6-Digit PIN Verified",
-    checklist: [
-      "Court papers, title documents, native wear and more",
-      "Sealed packaging with tracking",
-      "Handover locked until receiver gives the 6-digit PIN",
-      "Live GPS tracking from pickup to drop-off",
-      "Photo proof and signature on delivery",
-    ],
   },
   {
     id: "automotive",
@@ -122,18 +124,18 @@ const SCENARIOS: Scenario[] = [
     punchline: "Check the car before you pay. Don't buy wahala.",
     description:
       "Buying a car from another state? Don't let anybody sell you a clocked odometer. An inspector runs a computer diagnostic, checks the engine, looks for flood damage and confirms the customs papers before you pay the dealer.",
+    howItWorks:
+      "Buying a used or tokunbo car in another state? Don't wire deposits without professional eyes on the ground. A vetted automotive inspector checks cold-start engine sound, runs an OBD-II diagnostic computer scan for cleared trouble codes, inspects the underbody for flood or chassis damage, and cross-checks customs papers and VIN against official records so you never buy someone else's headache.",
+    keyHighlights: [
+      "OBD-II Diagnostic Scan",
+      "Engine & Flood Damage Check",
+      "VIN & Customs Verification",
+    ],
     location: "Berger Auto Market & Lekki Dealerships",
     budget: 20000,
     turnaround: "2.5 hrs avg.",
     image: "/vehicle_inspection.png",
     badge: "OBD-II Scan & Engine Check",
-    checklist: [
-      "Cold-start engine sound and exhaust smoke check",
-      "OBD-II computer scan for fault codes",
-      "Customs papers and VIN checked against FRSC records",
-      "Suspension, underbody rust and flood damage check",
-      "20-point report with a clear buy or don't-buy advice",
-    ],
   },
 ];
 
@@ -239,7 +241,7 @@ export default function AlabaruShowcase({
         {/* ================= 3-COLUMN MASTER LAYOUT ================= */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 xl:gap-12 items-center">
 
-          {/* ================= LEFT COLUMN: Eyebrow + Dynamic Checklist Card ================= */}
+          {/* ================= LEFT COLUMN: Eyebrow + Dynamic Errand Explainer Card ================= */}
           <div className="lg:col-span-4 space-y-6">
 
             {/* Pill Eyebrow */}
@@ -270,7 +272,6 @@ export default function AlabaruShowcase({
               </div>
             </div>
 
-
             {/* Editorial Narrative (Mobile Only - moved above photo) */}
             <div className="block lg:hidden">
               <p className="text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-[var(--ink)]/50 mb-2">
@@ -289,37 +290,50 @@ export default function AlabaruShowcase({
               </div>
             </div>
 
-
-            <div className="bg-white rounded-[24px] sm:rounded-[32px] p-5 sm:p-7 shadow-sm border border-black/[0.05] lg:space-y-5 transition-all duration-300">
+            {/* The Errand Explainer Card (replaces the sterile checklist with engaging write-up) */}
+            <div className="bg-white rounded-[24px] sm:rounded-[32px] p-5 sm:p-7 shadow-sm border border-black/[0.05] space-y-4 sm:space-y-4.5 transition-all duration-300">
 
               {/* Card Header with Active Category Tag & Budget */}
-              <div className="hidden lg:flex items-center justify-between gap-3 pb-3 border-b border-black/[0.06]">
+              <div className="flex items-center justify-between gap-3 pb-3 border-b border-black/[0.06]">
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--ng)] bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-500/15 truncate">
                     {activeScenario.category}
                   </span>
                 </div>
                 <div className="text-right shrink-0">
-                  <span className="text-xs font-bold text-[var(--ink)] [font-family:var(--font-bricolage)]">
+                  <span className="text-xs sm:text-sm font-bold text-[var(--ink)] [font-family:var(--font-bricolage)]">
                     From ₦{activeScenario.budget.toLocaleString()}
                   </span>
                 </div>
               </div>
 
-              {/* Dynamic Checklist for Selected Errand */}
-              <ul className="hidden lg:block space-y-2.5 text-sm sm:text-[14px] font-medium text-[var(--ink)]/85 min-h-[155px]">
-                {activeScenario.checklist.map((item, idx) => (
-                  <li key={`${activeScenario.id}-${idx}`} className="flex items-start gap-3 animate-in fade-in duration-300">
-                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[var(--ng)] text-white shrink-0 mt-0.5 shadow-xs">
-                      <Check size={12} strokeWidth={3} />
-                    </span>
-                    <span className="leading-snug">{item}</span>
-                  </li>
+              {/* Errand Task Title */}
+              <div className="pt-0.5">
+                <h4 className="text-base sm:text-lg font-bold text-[var(--ink)] tracking-tight leading-snug [font-family:var(--font-plus-jakarta)]">
+                  {activeScenario.title}
+                </h4>
+              </div>
+
+              {/* Conversational & Engaging Task Write-up */}
+              <div className="text-xs sm:text-[13.5px] text-[var(--ink)]/75 leading-relaxed font-normal min-h-[95px] animate-in fade-in duration-300">
+                <p>{activeScenario.howItWorks}</p>
+              </div>
+
+              {/* Key Highlights / Feature Chips */}
+              <div className="flex flex-wrap gap-1.5 sm:gap-2 pt-0.5 pb-1">
+                {activeScenario.keyHighlights.map((highlight, idx) => (
+                  <span
+                    key={`${activeScenario.id}-badge-${idx}`}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#f4f7f5] text-[11px] sm:text-xs font-semibold text-[var(--ink)]/80 border border-black/[0.04] transition-all"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--ng)] shrink-0" />
+                    <span>{highlight}</span>
+                  </span>
                 ))}
-              </ul>
+              </div>
 
               {/* Fee Split / Escrow Explanation */}
-              <div className="lg:pt-3 lg:border-t lg:border-black/[0.06] text-xs sm:text-[12.5px] text-[var(--ink)]/65 leading-normal sm:leading-[1.4]">
+              <div className="pt-3 border-t border-black/[0.06] text-xs sm:text-[12px] text-[var(--ink)]/65 leading-relaxed">
                 Runners take home <strong className="text-[var(--ink)] font-bold">70% of every errand</strong> once the work is confirmed. Staff Guru keeps <strong className="text-[var(--ink)] font-bold">30%</strong> to run the platform, secure payments, verify runners and handle disputes.
               </div>
             </div>
@@ -422,10 +436,11 @@ export default function AlabaruShowcase({
                       key={idx}
                       onClick={() => setCurrentIndex(idx)}
                       aria-label={`Jump to errand ${idx + 1}`}
-                      className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${idx === currentIndex
+                      className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                        idx === currentIndex
                           ? "w-6 bg-[var(--ng)]"
                           : "w-1.5 bg-black/15 hover:bg-black/30"
-                        }`}
+                      }`}
                     />
                   ))}
                 </div>
@@ -445,7 +460,6 @@ export default function AlabaruShowcase({
 
           {/* ================= RIGHT COLUMN: Editorial Narrative + Pill CTA ================= */}
           <div className="lg:col-span-4 space-y-5 lg:pl-2">
-
 
             <div className="hidden lg:block">
               {/* Eyebrow Label */}

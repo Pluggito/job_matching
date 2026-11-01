@@ -16,7 +16,7 @@ import {
   SlidersHorizontal,
   X,
 } from "lucide-react";
-import { formatNaira, JOB_CATEGORIES } from "@repo/shared";
+import { JOB_CATEGORIES } from "@repo/shared";
 
 export interface WorkerCardData {
   id: string;
@@ -283,12 +283,12 @@ export default function TalentDirectoryClient({ initialWorkers }: Props) {
             return (
               <div
                 key={worker.id}
-                className="bg-white rounded-3xl border border-[var(--line)] p-6 shadow-2xs hover:shadow-md transition-all duration-200 flex flex-col justify-between space-y-5 group"
+                className="bg-white rounded-3xl border border-[var(--line)] p-6 shadow-2xs hover:shadow-md transition-all duration-200 flex flex-col justify-between h-full group"
               >
                 <div className="space-y-4">
                   {/* Top Row: Avatar & Badges */}
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-between gap-3 min-h-[48px]">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
                       {worker.avatar ? (
                         <img
                           src={worker.avatar}
@@ -300,12 +300,10 @@ export default function TalentDirectoryClient({ initialWorkers }: Props) {
                           {initials}
                         </div>
                       )}
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <h3 className="font-bold text-base text-neutral-900 truncate">
-                            {worker.category}
-                          </h3>
-                        </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-bold text-base text-neutral-900 truncate" title={worker.category}>
+                          {worker.category}
+                        </h3>
                         <p className="text-xs text-neutral-500 font-medium truncate">
                           {worker.fullName}
                         </p>
@@ -353,11 +351,12 @@ export default function TalentDirectoryClient({ initialWorkers }: Props) {
                     <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
                       Top Verified Skills
                     </p>
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className="flex flex-wrap gap-1.5 min-h-[52px] max-h-[52px] overflow-hidden content-start">
                       {worker.skills.slice(0, 3).map((skill, sIdx) => (
                         <span
                           key={sIdx}
-                          className="bg-white border border-neutral-200 text-neutral-700 px-2 py-0.5 rounded-md text-[11px] font-medium"
+                          className="bg-white border border-neutral-200 text-neutral-700 px-2 py-0.5 rounded-md text-[11px] font-medium truncate max-w-[170px]"
+                          title={skill}
                         >
                           {skill}
                         </span>
@@ -372,20 +371,20 @@ export default function TalentDirectoryClient({ initialWorkers }: Props) {
                 </div>
 
                 {/* Footer: Expected Pay & View Profile */}
-                <div className="pt-3 border-t border-neutral-100 flex items-center justify-between gap-3">
+                <div className="pt-4 mt-4 border-t border-neutral-100 flex items-center justify-between gap-3">
                   <div>
                     <span className="text-[10px] uppercase font-bold text-neutral-400 block tracking-wider">
                       Expected Pay
                     </span>
                     <span className="text-sm font-bold text-neutral-900 font-mono">
-                      {formatNaira(worker.expectedPay)}
+                      ₦{Number(worker.expectedPay).toLocaleString()}
                     </span>
                     <span className="text-[10px] text-neutral-400"> /mo</span>
                   </div>
 
                   <Link
                     href={`/employer/workers/${worker.id}`}
-                    className="h-9 px-4 rounded-xl bg-[var(--ink)] hover:bg-neutral-800 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-xs group-hover:bg-[var(--ng)]"
+                    className="h-9 px-4 rounded-xl bg-[var(--ink)] hover:bg-neutral-800 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-xs group-hover:bg-[var(--ng)] shrink-0"
                   >
                     <span>View Profile</span>
                     <ArrowRight size={13} />

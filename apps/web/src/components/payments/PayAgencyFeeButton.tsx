@@ -14,7 +14,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { initializeSelectionPayment } from "@/actions/payments";
-import { calculatePaystackFee } from "@repo/shared";
+import { calculateMonnifyFee } from "@repo/shared";
 
 interface PayAgencyFeeButtonProps {
   selectionId: string;
@@ -41,7 +41,7 @@ export default function PayAgencyFeeButton({
   const [paymentPlan, setPaymentPlan] = useState<"full" | "half">("full");
 
   const effectiveFeeAmount = paymentPlan === "full" ? feeAmount : Math.round(feeAmount / 2);
-  const paystackCalc = calculatePaystackFee(effectiveFeeAmount * 100);
+  const feeCalc = calculateMonnifyFee(effectiveFeeAmount * 100);
 
   // Close modal on escape key and prevent body background scroll
   useEffect(() => {
@@ -76,7 +76,7 @@ export default function PayAgencyFeeButton({
       }
 
       if (result.authorizationUrl) {
-        // Redirect directly to Paystack secure checkout
+        // Redirect directly to Monnify secure checkout
         window.location.href = result.authorizationUrl;
       } else {
         throw new Error("Unable to obtain checkout authorization URL.");
@@ -202,14 +202,14 @@ export default function PayAgencyFeeButton({
               </div>
               <div className="flex items-center justify-between text-xs text-neutral-500">
                 <span className="flex items-center gap-1">
-                  Paystack Processing Fee
+                  Monnify Processing Fee
                   <span className="text-[10px] text-neutral-400 font-normal">
-                    ({paystackCalc.isFlatFeeWaived ? "1.5%" : "1.5% + ₦100"}
-                    {paystackCalc.isCapped ? ", capped at ₦2,000" : ""})
+                    (1.5%{feeCalc.isCapped ? ", capped at ₦2,000" : ""})
+
                   </span>
                 </span>
                 <span className="font-mono font-bold text-neutral-700">
-                  ₦{paystackCalc.feeNaira.toLocaleString()}
+                  ₦{feeCalc.feeNaira.toLocaleString()}
                 </span>
               </div>
               <div className="pt-2 border-t border-neutral-200 flex items-baseline justify-between">
@@ -218,7 +218,7 @@ export default function PayAgencyFeeButton({
                     Total Due Now
                   </p>
                   <span className="text-2xl sm:text-3xl font-extrabold text-neutral-900 font-mono tracking-tight">
-                    ₦{paystackCalc.totalNaira.toLocaleString()}
+                    ₦{feeCalc.totalNaira.toLocaleString()}
                   </span>
                 </div>
                 <span className="inline-flex items-center gap-1.5 text-xs font-medium text-neutral-700 bg-white px-2.5 py-1 rounded-md border border-neutral-200/80 shadow-xs">
@@ -308,19 +308,19 @@ export default function PayAgencyFeeButton({
                 {loading ? (
                   <>
                     <Loader2 size={18} className="animate-spin" />
-                    <span>Connecting Paystack...</span>
+                    <span>Connecting Monnify...</span>
                   </>
                 ) : (
                   <>
                     <CreditCard size={18} strokeWidth={2.2} />
-                    <span>Pay ₦{paystackCalc.totalNaira.toLocaleString()} & Unlock Contact</span>
+                    <span>Pay ₦{feeCalc.totalNaira.toLocaleString()} & Unlock Contact</span>
                   </>
                 )}
               </button>
 
               <div className="flex items-center justify-center gap-1.5 text-[11px] text-gray-500">
                 <Lock size={12} className="text-[var(--ng)]" />
-                <span>Secured by Paystack · 256-bit SSL encryption</span>
+                <span>Secured by Monnify · 256-bit SSL encryption</span>
               </div>
 
               <button

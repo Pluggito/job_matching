@@ -20,18 +20,12 @@ import {
 import { getCurrentUser } from "./auth";
 import crypto from "crypto";
 import { revalidatePath } from "next/cache";
-import { AGENCY_FEE_PER_WORKER, calculatePaystackFee } from "@repo/shared";
+import { AGENCY_FEE_PER_WORKER, calculateMonnifyFee, calculatePaystackFee } from "@repo/shared";
+import {
+  initializeMonnifyTransaction,
+  verifyMonnifyTransaction,
+} from "@/server/services/monnify";
 import { sendPushToUser } from "@/server/services/pushNotifications";
-
-function getPaystackSecretKey(): string {
-  const key =
-    process.env.PAYSTACK_SECRET_KEY ||
-    process.env.PAYSTACK_TEST_SECRET_KEY;
-  if (!key) {
-    throw new Error("Paystack secret key is not configured in environment variables.");
-  }
-  return key;
-}
 
 function getAppBaseUrl(): string {
   if (process.env.NEXT_PUBLIC_APP_URL) {
@@ -47,7 +41,7 @@ function getAppBaseUrl(): string {
 }
 
 /**
- * Initializes a Paystack checkout for a Job Selection's Handshake Agency Fee.
+ * Initializes a Monnify checkout for a Job Selection's Handshake Agency Fee.
  * Enforces in-flight payment locking (30-minute lock via expiresAt).
  */
 export async function initializeSelectionPayment(
@@ -103,7 +97,7 @@ export async function initializeSelectionPayment(
 
   const baseFeeNaira = installmentMode === "half" ? 25000 : 50000;
   const agencyFeeKobo = baseFeeNaira * 100;
-  const paystackCalc = calculatePaystackFee(agencyFeeKobo);
+  const monnifyCalc = calculateMonnifyFee(agencyFeeKobo);
 
   // Update selection feeAmount with base fee for this transaction
   await db
@@ -127,7 +121,7 @@ export async function initializeSelectionPayment(
         type: "agency_fee",
         workerPayoutKobo: 0, // Worker salary is paid directly by employer to worker
         commissionKobo: agencyFeeKobo,
-        totalKobo: paystackCalc.totalKobo, // includes Paystack gateway charge (₦50,850)
+        totalKobo: monnifyCalc.totalKobo, // includes Monnify gateway charge (1.5% capped at ₦2,000)
         commissionMode: "fixed_override",
         status: "sent",
         currency: "NGN",
@@ -136,13 +130,13 @@ export async function initializeSelectionPayment(
       })
       .returning();
     quote = newQuote;
-  } else if (quote.status !== "paid" && quote.totalKobo !== paystackCalc.totalKobo) {
-    // Automatically correct existing quote if it had an erroneous amount
+  } else if (quote.status !== "paid" && quote.totalKobo !== monnifyCalc.totalKobo) {
+    // Automatically correct existing quote if it had an outdated fee calculation
     const [updatedQuote] = await db
       .update(quotes)
       .set({
         commissionKobo: agencyFeeKobo,
-        totalKobo: paystackCalc.totalKobo,
+        totalKobo: monnifyCalc.totalKobo,
       })
       .where(eq(quotes.id, quote.id))
       .returning();
@@ -176,24 +170,23 @@ export async function initializeSelectionPayment(
     .limit(1);
 
   // If previous active payment has incorrect amount, invalidate it
-  if (activePayment && activePayment.totalKobo !== paystackCalc.totalKobo) {
+  if (activePayment && activePayment.totalKobo !== monnifyCalc.totalKobo) {
     await db
       .update(payments)
       .set({
         status: "FAILED",
-        manualReason: "Superseded by updated quote with Paystack fee",
+        manualReason: "Superseded by updated quote with Monnify fee",
       })
       .where(eq(payments.id, activePayment.id));
   }
 
   const canReuseActivePayment =
-    activePayment && activePayment.totalKobo === paystackCalc.totalKobo;
+    activePayment && activePayment.totalKobo === monnifyCalc.totalKobo;
 
   // 4. Generate or reuse transaction reference and 30-minute expiry
   const reference = canReuseActivePayment
     ? activePayment.paystackReference
     : `SG_TXN_${Date.now()}_${crypto.randomBytes(4).toString("hex")}`;
-  const secretKey = getPaystackSecretKey();
 
   let paymentRecord = canReuseActivePayment ? activePayment : undefined;
 
@@ -209,9 +202,9 @@ export async function initializeSelectionPayment(
         commissionKobo: quote.commissionKobo,
         workerPayoutKobo: quote.workerPayoutKobo,
         currency: "NGN",
-        provider: "paystack",
+        provider: "monnify",
         paystackReference: reference,
-        mode: process.env.PAYSTACK_MODE || "test",
+        mode: process.env.NODE_ENV === "production" ? "live" : "test",
         status: "PENDING",
         expiresAt,
       })
@@ -223,55 +216,40 @@ export async function initializeSelectionPayment(
     throw new Error("Failed to create pending payment record.");
   }
 
-  // 5. Call Paystack API to initialize transaction
+  // 5. Initialize transaction with Monnify gateway
   const host = getAppBaseUrl();
   const callbackUrl = `${host}/employer/requests/${sel.hiringRequestId}/matches?payment_ref=${reference}`;
 
-  const paystackRes = await fetch("https://api.paystack.co/transaction/initialize", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${secretKey}`,
-      "Content-Type": "application/json",
+  const monnifyRes = await initializeMonnifyTransaction({
+    amountNaira: quote.totalKobo / 100,
+    customerName: employer.businessName || session.email || "Staff Guru Employer",
+    customerEmail: session.email,
+    paymentReference: reference,
+    paymentDescription: `StaffGuru Handshake Fee - ${installmentMode === "half" ? "50% Initial Installment" : "Full Placement"}`,
+    redirectUrl: callbackUrl,
+    metaData: {
+      quoteId: quote.id,
+      selectionId: sel.id,
+      hiringRequestId: sel.hiringRequestId,
+      paymentId: paymentRecord.id,
+      type: "agency_fee",
+      installmentMode,
     },
-    body: JSON.stringify({
-      email: session.email,
-      amount: quote.totalKobo, // Paystack requires amount in kobo
-      reference,
-      callback_url: callbackUrl,
-      metadata: {
-        quoteId: quote.id,
-        selectionId: sel.id,
-        hiringRequestId: sel.hiringRequestId,
-        paymentId: paymentRecord.id,
-        type: "agency_fee",
-        installmentMode,
-      },
-    }),
   });
-
-  const paystackData = await paystackRes.json();
-
-  if (!paystackRes.ok || !paystackData.status) {
-    throw new Error(
-      paystackData.message || "Failed to initialize payment with Paystack gateway."
-    );
-  }
 
   return {
     success: true,
-    authorizationUrl: paystackData.data.authorization_url,
-    accessCode: paystackData.data.access_code,
+    authorizationUrl: monnifyRes.checkoutUrl,
+    checkoutUrl: monnifyRes.checkoutUrl,
     reference,
   };
 }
 
 /**
- * Verifies transaction reference directly with Paystack API.
+ * Verifies transaction reference directly with Monnify API.
  * Provides instant feedback when employer returns to callback URL before webhook lands.
  */
 export async function verifyPaymentReference(reference: string) {
-  const secretKey = getPaystackSecretKey();
-
   // Find payment by reference
   const [payment] = await db
     .select()
@@ -287,20 +265,10 @@ export async function verifyPaymentReference(reference: string) {
     return { success: true, verified: true, message: "Payment already verified." };
   }
 
-  // Call Paystack verify endpoint
-  const res = await fetch(`https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`, {
-    headers: {
-      Authorization: `Bearer ${secretKey}`,
-    },
-    cache: "no-store",
-  });
+  // Call Monnify query endpoint
+  const queryResult = await verifyMonnifyTransaction(reference);
 
-  const data = await res.json();
-  if (!res.ok || !data.status) {
-    return { success: false, message: data.message || "Could not verify payment with gateway." };
-  }
-
-  if (data.data.status === "success") {
+  if (queryResult.paid) {
     await db.transaction(async (tx) => {
       // 1. Mark payment VERIFIED
       await tx
@@ -308,8 +276,8 @@ export async function verifyPaymentReference(reference: string) {
         .set({
           status: "VERIFIED",
           verifiedAt: new Date(),
-          providerReference: String(data.data.id),
-          providerStatus: data.data.status,
+          providerReference: queryResult.transactionReference || reference,
+          providerStatus: queryResult.status,
         })
         .where(eq(payments.id, payment.id));
 
@@ -384,7 +352,7 @@ export async function verifyPaymentReference(reference: string) {
               title: "Agency Fee Verified! 💼",
               content: isAccepted
                 ? "Handshake agency fee confirmed! Candidate direct contact details are now unlocked with our 14-day SLA guarantee."
-                : "Payment of ₦50,850 verified! Your offer is pending candidate acceptance.",
+                : "Payment verified via Monnify! Your offer is pending candidate acceptance.",
               link: empLink,
             });
 
@@ -505,7 +473,8 @@ export async function verifyPaymentReference(reference: string) {
         amountKobo: payment.totalKobo || Math.round(payment.amount * 100),
         actorType: "SYSTEM",
         metadata: {
-          paystackReference: reference,
+          reference,
+          monnifyTransactionReference: queryResult.transactionReference,
           verifiedVia: "verify_endpoint",
         },
       });
@@ -515,12 +484,12 @@ export async function verifyPaymentReference(reference: string) {
     return { success: true, verified: true };
   }
 
-  return { success: false, status: data.data.status, message: "Payment has not yet succeeded." };
+  return { success: false, status: queryResult.status, message: "Payment has not yet succeeded." };
 }
 
 /**
- * Initializes a Paystack checkout for an Alabaru Errand.
- * Charges Total Amount = Task Price + Flat Creation & Outreach Fee.
+ * Initializes a Monnify checkout for an Alabaru Errand.
+ * Charges Total Amount = Task Price + Flat Creation & Outreach Fee + Monnify fee (1.5% capped at ₦2,000).
  * Enforces in-flight payment locking (30-minute lock via expiresAt).
  */
 export async function initializeErrandPayment(errandId: string) {
@@ -574,8 +543,8 @@ export async function initializeErrandPayment(errandId: string) {
   }
 
   const subtotalKobo = (errand.creationFeeKobo || 0) + (errand.taskPriceKobo || errand.budgetKobo);
-  const paystackCalc = calculatePaystackFee(subtotalKobo);
-  const totalKobo = paystackCalc.totalKobo;
+  const monnifyCalc = calculateMonnifyFee(subtotalKobo);
+  const totalKobo = monnifyCalc.totalKobo;
   const now = new Date();
 
   // In-flight payment lock: check active pending payment created in the last 30 minutes
@@ -593,46 +562,37 @@ export async function initializeErrandPayment(errandId: string) {
 
   const reference = activePayment
     ? activePayment.paystackReference
-    : `errand_${errandId.slice(0, 8)}_${Date.now()}`;
+    : `SG_ERRAND_${errandId.slice(0, 8)}_${Date.now()}`;
 
-  const secretKey = getPaystackSecretKey();
   const baseUrl = getAppBaseUrl();
   const callbackUrl = `${baseUrl}/employer/errands/${errandId}?payment_ref=${reference}`;
 
-  const res = await fetch("https://api.paystack.co/transaction/initialize", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${secretKey}`,
-      "Content-Type": "application/json",
+  const monnifyRes = await initializeMonnifyTransaction({
+    amountNaira: totalKobo / 100,
+    customerName: employer.businessName || session.email || "Staff Guru Employer",
+    customerEmail: session.email,
+    paymentReference: reference,
+    paymentDescription: `StaffGuru Alabaru Errand Escrow: ${errand.title.slice(0, 50)}`,
+    redirectUrl: callbackUrl,
+    metaData: {
+      errandId,
+      employerId: employer.id,
+      type: "errand",
     },
-    body: JSON.stringify({
-      email: session.email,
-      amount: totalKobo, // Paystack requires integer kobo
-      reference,
-      callback_url: callbackUrl,
-      metadata: {
-        errandId,
-        employerId: employer.id,
-        type: "errand",
-      },
-    }),
   });
-
-  const data = await res.json();
-  if (!data.status) {
-    throw new Error(`Paystack initialization failed: ${data.message || "Unknown error"}`);
-  }
 
   if (!activePayment) {
     const expiresAt = new Date(now.getTime() + 30 * 60 * 1000); // 30 min lock
     await db.insert(payments).values({
       errandId,
+      provider: "monnify",
       paystackReference: reference,
       amount: totalKobo / 100,
       totalKobo,
       workerPayoutKobo: errand.workerPayoutKobo,
       commissionKobo: totalKobo - (errand.workerPayoutKobo || 0),
       currency: "NGN",
+      mode: process.env.NODE_ENV === "production" ? "live" : "test",
       status: "PENDING",
       expiresAt,
     });
@@ -640,7 +600,8 @@ export async function initializeErrandPayment(errandId: string) {
 
   return {
     success: true,
-    authorizationUrl: data.data.authorization_url,
+    authorizationUrl: monnifyRes.checkoutUrl,
+    checkoutUrl: monnifyRes.checkoutUrl,
     reference,
     totalKobo,
   };
