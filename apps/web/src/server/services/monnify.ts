@@ -9,11 +9,11 @@ interface MonnifyConfig {
 }
 
 export function getMonnifyConfig(): MonnifyConfig {
-  const apiKey = process.env.MONNIFY_API_KEY || "";
-  const secretKey = process.env.MONNIFY_SECRET_KEY || "";
-  const contractCode = process.env.MONNIFY_CONTRACT_CODE || "";
-  const baseUrl = (process.env.MONNIFY_BASE_URL || "https://sandbox.monnify.com").replace(/\/+$/, "");
-  const walletAccountNumber = process.env.MONNIFY_WALLET_ACCOUNT_NUMBER || "";
+  const apiKey = (process.env.MONNIFY_API_KEY || "").trim();
+  const secretKey = (process.env.MONNIFY_SECRET_KEY || "").trim();
+  const contractCode = (process.env.MONNIFY_CONTRACT_CODE || "").trim();
+  const baseUrl = (process.env.MONNIFY_BASE_URL || "https://sandbox.monnify.com").trim().replace(/\/+$/, "");
+  const walletAccountNumber = (process.env.MONNIFY_WALLET_ACCOUNT_NUMBER || "").trim();
 
   return {
     apiKey,
