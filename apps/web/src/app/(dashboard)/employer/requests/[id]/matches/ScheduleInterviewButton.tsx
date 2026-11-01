@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { formatDateTimeDDMMYYYY } from "@repo/shared";
 import { Calendar, RefreshCw } from "lucide-react";
 import ScheduleInterviewModal from "@/components/interviews/ScheduleInterviewModal";
 import { useRouter } from "next/navigation";
@@ -30,12 +31,7 @@ export default function ScheduleInterviewButton({
   const isScheduled = Boolean(existingInterview?.interviewDate);
 
   const formattedDate = existingInterview?.interviewDate
-    ? new Date(existingInterview.interviewDate).toLocaleDateString("en-NG", {
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
+    ? formatDateTimeDDMMYYYY(existingInterview.interviewDate)
     : null;
 
   return (

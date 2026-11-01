@@ -20,7 +20,7 @@ import {
   User,
   ExternalLink,
 } from "lucide-react";
-import { formatNaira } from "@repo/shared";
+import {  formatNaira , formatDateTimeDDMMYYYY } from "@repo/shared";
 import {
   startErrandExecution,
   verifyErrandDeliveryPin,
@@ -244,7 +244,7 @@ export default function WorkerErrandDetailClient({
                   "{errand.revisionNotes}"
                 </p>
                 <p className="text-[11px] text-blue-600 pt-1">
-                  Please update and re-submit proof before {errand.revisionGraceExpiresAt ? new Date(errand.revisionGraceExpiresAt).toLocaleString() : "the deadline"}.
+                  Please update and re-submit proof before {errand.revisionGraceExpiresAt ? formatDateTimeDDMMYYYY(errand.revisionGraceExpiresAt) : "the deadline"}.
                 </p>
               </div>
             )}
@@ -286,7 +286,7 @@ export default function WorkerErrandDetailClient({
                   <Clock size={14} className="text-neutral-400" /> Completion Deadline
                 </span>
                 <p className="font-bold text-[var(--ink)]">
-                  {new Date(errand.deadline).toLocaleString()}
+                  {formatDateTimeDDMMYYYY(errand.deadline)}
                 </p>
                 <p className="text-neutral-500 mt-2 font-semibold">Required Proof:</p>
                 <p className="text-neutral-700">{errand.requiredProof}</p>
@@ -407,10 +407,7 @@ export default function WorkerErrandDetailClient({
                       </div>
                       <span className="flex items-center gap-1 text-[10px] text-neutral-400 mt-1 px-1">
                         <span>
-                          {new Date(m.createdAt).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
+                          {formatDateTimeDDMMYYYY(m.createdAt)}
                         </span>
                         {isMe && (
                           <span className={`text-[11px] font-bold ${m.status === "read" ? "text-emerald-300" : "opacity-75"}`}>

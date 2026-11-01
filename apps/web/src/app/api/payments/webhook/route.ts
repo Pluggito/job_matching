@@ -42,7 +42,7 @@ export async function POST(req: Request) {
       Boolean(parsedPayload.eventData?.transactionReference);
 
     if (isMonnifyWebhook) {
-      const monnifySecret = process.env.MONNIFY_SECRET_KEY;
+      const monnifySecret = (process.env.MONNIFY_SECRET_KEY || "").trim();
       if (!monnifySecret) {
         console.error("[Monnify Webhook] Missing MONNIFY_SECRET_KEY in environment");
         return new Response("Webhook secret misconfigured", { status: 500 });

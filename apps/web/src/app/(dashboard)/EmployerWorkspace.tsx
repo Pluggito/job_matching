@@ -1,4 +1,4 @@
-import { formatNaira } from "@repo/shared";
+import { formatNaira, formatDateDDMMYYYY, formatDateTimeDDMMYYYY } from "@repo/shared";
 import { getCurrentUser } from "../../actions/auth";
 import { getEmployerRequests } from "../../server/services/hiringRequests";
 import Link from "next/link";
@@ -292,7 +292,7 @@ export default async function EmployerWorkspace() {
                     <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-900 border border-emerald-200 text-[11px] font-semibold">
                       <Calendar size={12} className="text-[var(--ng)]" />
                       <span>
-                        Interview: {new Date(cand.interviewDate).toLocaleDateString()} (
+                        Interview: {formatDateTimeDDMMYYYY(cand.interviewDate)} (
                         {cand.interviewType || "Call"})
                       </span>
                     </div>

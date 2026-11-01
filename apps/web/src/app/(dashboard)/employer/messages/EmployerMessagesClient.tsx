@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { formatDateTimeDDMMYYYY } from "@repo/shared";
 import {
   MessageSquare,
   Send,
@@ -265,10 +266,7 @@ export default function EmployerMessagesClient({
                       {m.senderName}
                     </span>
                     <span className="text-[10px] text-neutral-400">
-                      {new Date(m.createdAt).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {formatDateTimeDDMMYYYY(m.createdAt)}
                     </span>
                   </div>
 

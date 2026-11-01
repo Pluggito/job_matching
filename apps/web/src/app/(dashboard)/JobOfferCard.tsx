@@ -16,6 +16,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { respondToHandshake } from "../../actions/handshake";
+import { formatDateDDMMYYYY } from "@repo/shared";
 
 export interface JobOfferData {
   id: string; // selectionId
@@ -107,7 +108,7 @@ export default function JobOfferCard({ offer }: { offer: JobOfferData }) {
                 </span>
                 <span className="flex items-center gap-1">
                   <Clock size={14} /> Received{" "}
-                  {new Date(offer.createdAt).toLocaleDateString()}
+                  {formatDateDDMMYYYY(offer.createdAt)}
                 </span>
               </div>
             </div>
@@ -118,7 +119,7 @@ export default function JobOfferCard({ offer }: { offer: JobOfferData }) {
             <div className="flex flex-wrap items-center gap-1.5 sm:justify-end">
               {offer.interviewDate && (
                 <span className="flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-800 border border-amber-200/80 rounded-md text-[10px] font-semibold">
-                  <Calendar size={12} className="text-amber-600" /> Interview Scheduled
+                  <Calendar size={12} className="text-amber-600" /> Interview: {formatDateDDMMYYYY(offer.interviewDate)}
                 </span>
               )}
               {isConfirmed ? (

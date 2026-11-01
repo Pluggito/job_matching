@@ -360,7 +360,7 @@ export default function PublicWorkerProfileClient({
                     <span>Candidate Accepted Offer! 🎉</span>
                   </div>
                   <p className="text-xs text-neutral-600 leading-relaxed">
-                    The candidate has accepted your job offer. Pay the agency fee (in full or 2 installments) to immediately unlock their direct phone number and email address.
+                    The candidate has accepted your job offer. Pay the agency fee (in full or 70%/30% installments) to immediately unlock their direct phone number and email address.
                   </p>
                   <PayAgencyFeeButton
                     selectionId={pendingSelectionId}
