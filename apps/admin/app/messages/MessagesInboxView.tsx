@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { formatDateDDMMYYYY, formatDateTimeDDMMYYYY } from "@repo/shared";
 import {
   MessageSquare,
   Send,
@@ -174,7 +175,7 @@ export default function MessagesInboxView({
             onClick={() => syncThreads(true)}
             disabled={isSyncing}
             className="text-xs h-8 gap-1.5 border-black/10 text-neutral-600 hover:text-neutral-900"
-            title={`Last synced: ${lastSyncedAt.toLocaleTimeString()}`}
+            title={`Last synced: ${formatDateTimeDDMMYYYY(lastSyncedAt)}`}
           >
             <RefreshCw size={13} className={isSyncing ? "animate-spin text-[#008751]" : ""} />
             <span>Refresh</span>
@@ -219,7 +220,7 @@ export default function MessagesInboxView({
                       </p>
                       <span className="text-[10px] text-neutral-400 font-mono">
                         {t.lastMessageAt
-                          ? new Date(t.lastMessageAt).toLocaleDateString()
+                          ? formatDateDDMMYYYY(t.lastMessageAt)
                           : ""}
                       </span>
                     </div>
@@ -282,10 +283,7 @@ export default function MessagesInboxView({
                           <p>{m.content}</p>
                         </div>
                         <span className="text-[10px] text-neutral-400 mt-1 px-1 font-mono">
-                          {new Date(m.createdAt).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
+                        {formatDateTimeDDMMYYYY(m.createdAt)}
                         </span>
                       </div>
                     );

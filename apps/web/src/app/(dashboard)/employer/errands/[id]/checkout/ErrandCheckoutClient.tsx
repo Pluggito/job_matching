@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { formatNaira, calculateMonnifyFee } from "@repo/shared";
+import { formatNaira, calculateMonnifyFee , formatDateTimeDDMMYYYY } from "@repo/shared";
 import { initializeErrandPayment } from "@/actions/payments";
 import {
   ShieldCheck,
@@ -81,7 +81,7 @@ export default function ErrandCheckoutClient({ errand }: Props) {
             <MapPin size={13} /> {errand.locationArea}, {errand.locationState}
           </span>
           <span className="flex items-center gap-1">
-            <Clock size={13} /> Due: {new Date(errand.deadline).toLocaleString()}
+            <Clock size={13} /> Due: {formatDateTimeDDMMYYYY(errand.deadline)}
           </span>
         </div>
       </div>

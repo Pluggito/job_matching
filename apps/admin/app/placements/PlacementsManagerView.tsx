@@ -16,6 +16,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { formatDateDDMMYYYY } from "@repo/shared";
 import {
   recordPlacementRemovalNotice,
   recordReplacementRequest,
@@ -79,12 +80,7 @@ export default function PlacementsManagerView({
     if (!noticeDate) return "";
     const d = new Date(noticeDate);
     d.setDate(d.getDate() + 3);
-    return d.toLocaleDateString("en-NG", {
-      weekday: "short",
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+    return formatDateDDMMYYYY(d);
   }, [noticeDate]);
 
   // Handle 3-Day Notice Submission
@@ -327,7 +323,7 @@ export default function PlacementsManagerView({
                       </td>
 
                       <td className="px-6 py-4 text-neutral-600 text-xs font-mono">
-                        {new Date(p.startDate).toLocaleDateString()}
+                        {formatDateDDMMYYYY(p.startDate)}
                       </td>
 
                       {/* Policy notices & Replacement countdown */}
@@ -336,7 +332,7 @@ export default function PlacementsManagerView({
                           {hasNotices && latestNotice && (
                             <div className="text-[11px] bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-md inline-block">
                               <span className="font-semibold">3-Day Notice Given:</span>{" "}
-                              {new Date(latestNotice.noticeDate).toLocaleDateString()}
+                              {formatDateDDMMYYYY(latestNotice.noticeDate)}
                             </div>
                           )}
 

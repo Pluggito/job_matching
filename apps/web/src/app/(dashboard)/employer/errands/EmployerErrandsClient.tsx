@@ -14,7 +14,7 @@ import {
   ShieldCheck,
   ChevronRight,
 } from "lucide-react";
-import { formatNaira } from "@repo/shared";
+import {  formatNaira , formatDateTimeDDMMYYYY } from "@repo/shared";
 import { cancelOpenErrandEmployer } from "@/actions/errands";
 
 export interface EmployerErrandListItem {
@@ -123,7 +123,7 @@ export default function EmployerErrandsClient({ errands }: Props) {
                       <MapPin size={13} /> {errand.locationArea}, {errand.locationState}
                     </span>
                     <span className="flex items-center gap-1">
-                      <Clock size={13} /> Due: {new Date(errand.deadline).toLocaleString()}
+                      <Clock size={13} /> Due: {formatDateTimeDDMMYYYY(errand.deadline)}
                     </span>
                     <span className="font-mono font-semibold text-neutral-700">
                       Total: {formatNaira(totalCharged)}

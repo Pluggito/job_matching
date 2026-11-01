@@ -21,7 +21,7 @@ import {
   Bike,
   Star,
 } from "lucide-react";
-import { formatNaira } from "@repo/shared";
+import {  formatNaira , formatDateTimeDDMMYYYY } from "@repo/shared";
 import {
   approveErrandCompletion,
   cancelOpenErrandEmployer,
@@ -324,7 +324,7 @@ export default function EmployerErrandDetailClient({
           <div className="space-y-1">
             <h4 className="font-bold text-sm">Revisions in Progress</h4>
             <p className="text-xs text-blue-800 leading-relaxed">
-              You requested changes: <strong>"{errand.revisionNotes}"</strong>. The runner has been given a grace window to re-submit proof before {errand.revisionGraceExpiresAt ? new Date(errand.revisionGraceExpiresAt).toLocaleString() : "the deadline"}.
+              You requested changes: <strong>"{errand.revisionNotes}"</strong>. The runner has been given a grace window to re-submit proof before {errand.revisionGraceExpiresAt ? formatDateTimeDDMMYYYY(errand.revisionGraceExpiresAt) : "the deadline"}.
             </p>
           </div>
         </div>
@@ -423,7 +423,7 @@ export default function EmployerErrandDetailClient({
               )}
               <div className="flex items-center gap-2">
                 <Clock size={14} className="text-neutral-400" />
-                <span><strong className="text-neutral-800">Deadline:</strong> {new Date(errand.deadline).toLocaleString()}</span>
+                <span><strong className="text-neutral-800">Deadline:</strong> {formatDateTimeDDMMYYYY(errand.deadline)}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Camera size={14} className="text-neutral-400" />
@@ -539,10 +539,7 @@ export default function EmployerErrandDetailClient({
                     </div>
                     <span className="flex items-center gap-1 text-[10px] text-neutral-400 mt-1 px-1">
                       <span>
-                        {new Date(m.createdAt).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {formatDateTimeDDMMYYYY(m.createdAt)}
                       </span>
                       {isMe && (
                         <span className={`text-[11px] font-bold ${m.status === "read" ? "text-emerald-300" : "opacity-75"}`}>

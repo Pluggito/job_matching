@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CheckCircle2, Clock, ExternalLink, Loader2, FileText, AlertCircle } from "lucide-react";
 import { confirmDirectPaymentProof } from "@/actions/proofs";
+import { formatDateDDMMYYYY } from "@repo/shared";
 
 interface PaymentProofItem {
   id: string;
@@ -98,7 +99,7 @@ export default function WorkerPaymentProofConfirmation({
               <div className="flex flex-wrap items-center gap-x-3 text-xs text-[var(--ink-soft)]">
                 {proof.reference && <span>Ref: {proof.reference}</span>}
                 <span>
-                  Date: {new Date(proof.createdAt).toLocaleDateString()}
+                  Date: {formatDateDDMMYYYY(proof.createdAt)}
                 </span>
                 <a
                   href={proof.receiptUrl}

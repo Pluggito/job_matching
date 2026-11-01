@@ -40,7 +40,7 @@ export default function PayAgencyFeeButton({
   const [error, setError] = useState<string | null>(null);
   const [paymentPlan, setPaymentPlan] = useState<"full" | "half">("full");
 
-  const effectiveFeeAmount = paymentPlan === "full" ? feeAmount : Math.round(feeAmount / 2);
+  const effectiveFeeAmount = paymentPlan === "full" ? feeAmount : Math.round(feeAmount * 0.7);
   const feeCalc = calculateMonnifyFee(effectiveFeeAmount * 100);
 
   // Close modal on escape key and prevent body background scroll
@@ -179,14 +179,14 @@ export default function PayAgencyFeeButton({
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-xs text-neutral-900">2 Installments (50%)</span>
+                    <span className="font-bold text-xs text-neutral-900">2 Installments (70%)</span>
                     <span className="w-4 h-4 rounded-full border flex items-center justify-center border-neutral-400">
                       {paymentPlan === "half" && <span className="w-2.5 h-2.5 rounded-full bg-[#008751]" />}
                     </span>
                   </div>
                   <div className="mt-2">
-                    <span className="font-mono font-extrabold text-base text-neutral-900">₦{Math.round(feeAmount / 2).toLocaleString()} now</span>
-                    <p className="text-[10px] text-neutral-500 mt-0.5">Balance on worker resumption</p>
+                    <span className="font-mono font-extrabold text-base text-neutral-900">₦{Math.round(feeAmount * 0.7).toLocaleString()} now</span>
+                    <p className="text-[10px] text-neutral-500 mt-0.5">30% balance (₦{Math.round(feeAmount * 0.3).toLocaleString()}) on worker resumption</p>
                   </div>
                 </button>
               </div>
@@ -195,7 +195,7 @@ export default function PayAgencyFeeButton({
             {/* Price Banner Card with Paystack breakdown */}
             <div className="mt-3.5 p-4 rounded-2xl bg-neutral-50 border border-neutral-200/80 space-y-2.5">
               <div className="flex items-center justify-between text-xs text-neutral-600">
-                <span>{candidateName ? `${candidateName} Placement (${paymentPlan === "full" ? "Full" : "Initial Installment"})` : "Placement Fee"}</span>
+                <span>{candidateName ? `${candidateName} Placement (${paymentPlan === "full" ? "Full" : "Initial Installment (70%)"})` : "Placement Fee"}</span>
                 <span className="font-mono font-bold text-neutral-900">
                   ₦{effectiveFeeAmount.toLocaleString()}
                 </span>
