@@ -1,7 +1,8 @@
 "use client";
 
-import { MapPin, Check, Building, Hash, User, Copy, PhoneCall, Mail, Loader2, ShieldCheck, Clock, CheckCircle2, Star } from "lucide-react";
+import { MapPin, Check, Building, Hash, User, Copy, PhoneCall, Mail, Loader2, ShieldCheck, Clock, CheckCircle2, Star, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import PayAgencyFeeButton from "@/components/payments/PayAgencyFeeButton";
 import { revealWorkerPhone } from "@/actions/contact";
@@ -28,6 +29,7 @@ export default function PublicWorkerProfileClient({
   isSelectionPaid?: boolean;
   isCandidateAccepted?: boolean;
 }) {
+  const router = useRouter();
   const [copiedAcc, setCopiedAcc] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [revealedPhone, setRevealedPhone] = useState<string | null>(null);
@@ -93,9 +95,14 @@ export default function PublicWorkerProfileClient({
 
   return (
     <div className="mx-auto w-full max-w-[1100px] pb-12">
-      <Link href="javascript:history.back()" className="inline-flex items-center text-sm font-bold text-[var(--ink-soft)] hover:text-[var(--ink)] mb-6 transition-colors">
-        &larr; Back to Matches
-      </Link>
+      <button
+        type="button"
+        onClick={() => router.back()}
+        className="inline-flex items-center gap-2 text-sm font-bold text-[var(--ink-soft)] hover:text-[var(--ink)] mb-6 transition-colors cursor-pointer group"
+      >
+        <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" />
+        <span>Back</span>
+      </button>
       
       <div className="overflow-hidden rounded-[24px] border border-black/10 bg-white">
         {/* Header */}

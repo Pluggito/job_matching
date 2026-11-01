@@ -12,249 +12,187 @@ import {
   notifications,
   eq,
 } from "@repo/db";
+import {
+  computeMonnifyTransactionHash,
+  verifyMonnifyWebhookSignature,
+} from "@repo/shared";
 import crypto from "crypto";
+
+export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   try {
     const rawBody = await req.text();
-    const signature = req.headers.get("x-paystack-signature");
-    const secret =
-      process.env.PAYSTACK_SECRET_KEY ||
-      process.env.PAYSTACK_TEST_SECRET_KEY;
+    const monnifySignature = req.headers.get("monnify-signature");
+    const paystackSignature = req.headers.get("x-paystack-signature");
 
-    if (!secret) {
-      console.error("[Paystack Webhook] Missing PAYSTACK_SECRET_KEY in environment");
-      return new Response("Webhook secret misconfigured", { status: 500 });
+    let parsedPayload: any = {};
+    try {
+      parsedPayload = JSON.parse(rawBody);
+    } catch {
+      return new Response("Invalid JSON payload", { status: 400 });
     }
 
-    if (!signature) {
-      console.warn("[Paystack Webhook] Missing x-paystack-signature header");
-      return new Response("Missing signature", { status: 401 });
-    }
+    // ==========================================
+    // 1. MONNIFY WEBHOOK HANDLING
+    // ==========================================
+    const isMonnifyWebhook =
+      Boolean(monnifySignature) ||
+      parsedPayload.eventType === "SUCCESSFUL_TRANSACTION" ||
+      Boolean(parsedPayload.eventData?.transactionReference);
 
-    // Verify HMAC-SHA512 signature using timingSafeEqual
-    const computedHash = crypto
-      .createHmac("sha512", secret)
-      .update(rawBody)
-      .digest("hex");
+    if (isMonnifyWebhook) {
+      const monnifySecret = process.env.MONNIFY_SECRET_KEY;
+      if (!monnifySecret) {
+        console.error("[Monnify Webhook] Missing MONNIFY_SECRET_KEY in environment");
+        return new Response("Webhook secret misconfigured", { status: 500 });
+      }
 
-    const hashBuffer = Buffer.from(computedHash);
-    const signatureBuffer = Buffer.from(signature);
+      const eventType = parsedPayload.eventType;
+      const eventData = parsedPayload.eventData || {};
+      const {
+        paymentReference,
+        transactionReference,
+        amountPaid,
+        paidOn,
+        paymentStatus,
+        transactionHash,
+      } = eventData;
 
-    if (
-      hashBuffer.length !== signatureBuffer.length ||
-      !crypto.timingSafeEqual(hashBuffer, signatureBuffer)
-    ) {
-      console.warn("[Paystack Webhook] Invalid HMAC-SHA512 signature");
-      return new Response("Invalid signature", { status: 400 });
-    }
+      // Verify signature or transaction hash
+      let isValid = false;
+      if (monnifySignature) {
+        isValid = verifyMonnifyWebhookSignature({
+          rawBody,
+          signatureHeader: monnifySignature,
+          secretKey: monnifySecret,
+        });
+      }
 
-    const event = JSON.parse(rawBody);
-    const eventType = event.event;
-    const data = event.data || {};
-    const reference = data.reference;
+      if (!isValid && transactionHash && paymentReference && amountPaid && paidOn && transactionReference) {
+        const computed = computeMonnifyTransactionHash({
+          clientSecret: monnifySecret,
+          paymentReference,
+          amountPaid,
+          paidOn,
+          transactionReference,
+        });
+        isValid = verifyMonnifyWebhookSignature({
+          transactionHash,
+          computedHash: computed,
+          secretKey: monnifySecret,
+        });
+      }
 
-    // Idempotency: Unique event identifier
-    const eventId = `paystack_${eventType}_${data.id || reference || Date.now()}`;
+      if (!isValid) {
+        console.warn("[Monnify Webhook] Invalid signature or transaction hash verification failed");
+        return new Response("Invalid signature", { status: 400 });
+      }
 
-    // Check if event has already been processed
-    const [existingEvent] = await db
-      .select()
-      .from(webhookEvents)
-      .where(eq(webhookEvents.eventId, eventId))
-      .limit(1);
-
-    if (existingEvent && existingEvent.status === "processed") {
-      return Response.json({ received: true, duplicate: true }, { status: 200 });
-    }
-
-    // Record webhook event in ledger
-    if (!existingEvent) {
-      await db
-        .insert(webhookEvents)
-        .values({
-          eventId,
-          eventType,
-          provider: "paystack",
-          payload: event,
-          status: "pending",
-        })
-        .onConflictDoNothing();
-    }
-
-    // Process charge.success
-    if (eventType === "charge.success" && reference) {
-      const [payment] = await db
+      // Idempotency check via webhookEvents
+      const eventId = `monnify_${eventType}_${transactionReference || paymentReference || Date.now()}`;
+      const [existingEvent] = await db
         .select()
-        .from(payments)
-        .where(eq(payments.paystackReference, reference))
+        .from(webhookEvents)
+        .where(eq(webhookEvents.eventId, eventId))
         .limit(1);
 
-      if (payment) {
-        // Idempotency check: already verified
-        if (payment.status === "VERIFIED") {
-          return Response.json({ received: true, alreadyVerified: true }, { status: 200 });
-        }
+      if (existingEvent && existingEvent.status === "processed") {
+        return Response.json({ received: true, duplicate: true }, { status: 200 });
+      }
 
-        const isLatePayment = payment.expiresAt && payment.expiresAt < new Date();
+      if (!existingEvent) {
+        await db
+          .insert(webhookEvents)
+          .values({
+            eventId,
+            eventType: eventType || "SUCCESSFUL_TRANSACTION",
+            provider: "monnify",
+            payload: parsedPayload,
+            status: "pending",
+          })
+          .onConflictDoNothing();
+      }
 
-        // Verify amount stored on payment row, not current settings
-        const expectedAmountKobo = payment.totalKobo ?? Math.round(payment.amount * 100);
-        if (typeof data.amount === "number" && data.amount !== expectedAmountKobo) {
-          await db
-            .update(payments)
-            .set({
-              status: "FAILED",
-              refundStatus: "PENDING",
-              refundAmountKobo: data.amount,
-              refundReason: `Amount mismatch: expected ${expectedAmountKobo} kobo, received ${data.amount} kobo`,
-              manualReason: `Amount mismatch: expected ${expectedAmountKobo} kobo, received ${data.amount} kobo`,
-              providerReference: String(data.id),
-              providerStatus: data.status,
-            })
-            .where(eq(payments.id, payment.id));
+      // Process successful payment
+      if (eventType === "SUCCESSFUL_TRANSACTION" && paymentReference) {
+        const [payment] = await db
+          .select()
+          .from(payments)
+          .where(eq(payments.paystackReference, paymentReference))
+          .limit(1);
 
-          await db.insert(paymentEvents).values({
-            paymentId: payment.id,
-            eventType: "REFUNDED_TO_EMPLOYER",
-            amountKobo: data.amount,
-            actorType: "SYSTEM",
-            metadata: {
-              reason: "Amount mismatch against payment record",
-              expectedKobo: expectedAmountKobo,
-              receivedKobo: data.amount,
-            },
-          });
+        if (payment) {
+          if (payment.status === "VERIFIED") {
+            return Response.json({ received: true, alreadyVerified: true }, { status: 200 });
+          }
 
-          await db
-            .update(webhookEvents)
-            .set({
-              status: "processed",
-              processedAt: new Date(),
-              error: `Amount mismatch: expected ${expectedAmountKobo}, received ${data.amount}`,
-            })
-            .where(eq(webhookEvents.eventId, eventId));
+          const expectedAmountKobo = payment.totalKobo ?? Math.round(payment.amount * 100);
+          const receivedAmountKobo = Math.round(Number(amountPaid) * 100);
 
-          return Response.json({ received: true, error: "Amount mismatch; flagged for refund" }, { status: 200 });
-        }
-
-        // Check superseded or cancelled quotes
-        if (payment.quoteId) {
-          const [quote] = await db
-            .select({ id: quotes.id, status: quotes.status })
-            .from(quotes)
-            .where(eq(quotes.id, payment.quoteId))
-            .limit(1);
-
-          if (!quote || quote.status === "superseded" || quote.status === "cancelled" || quote.status === "paid") {
+          if (receivedAmountKobo !== expectedAmountKobo) {
             await db
               .update(payments)
               .set({
                 status: "FAILED",
                 refundStatus: "PENDING",
-                refundAmountKobo: data.amount,
-                refundReason: !quote ? "Quote not found" : `Quote is ${quote.status}; flagged for refund`,
-                manualReason: `Quote is '${quote?.status ?? "missing"}'; requires refund`,
-                providerReference: String(data.id),
-                providerStatus: data.status,
+                refundAmountKobo: receivedAmountKobo,
+                refundReason: `Amount mismatch: expected ${expectedAmountKobo} kobo, received ${receivedAmountKobo} kobo`,
+                manualReason: `Amount mismatch: expected ${expectedAmountKobo} kobo, received ${receivedAmountKobo} kobo`,
+                providerReference: transactionReference,
+                providerStatus: paymentStatus,
               })
               .where(eq(payments.id, payment.id));
 
             await db.insert(paymentEvents).values({
               paymentId: payment.id,
               eventType: "REFUNDED_TO_EMPLOYER",
-              amountKobo: data.amount,
+              amountKobo: receivedAmountKobo,
               actorType: "SYSTEM",
-              metadata: { reason: "Quote superseded, cancelled or already paid", quoteId: payment.quoteId },
+              metadata: {
+                reason: "Amount mismatch against Monnify payment record",
+                expectedKobo: expectedAmountKobo,
+                receivedKobo: receivedAmountKobo,
+              },
             });
 
             await db
               .update(webhookEvents)
-              .set({ status: "processed", processedAt: new Date(), error: `Quote is ${quote?.status}` })
-              .where(eq(webhookEvents.eventId, eventId));
-
-            return Response.json({ received: true, flaggedForRefund: true }, { status: 200 });
-          }
-        }
-
-        // Check cancelled or already confirmed selections
-        if (payment.selectionId) {
-          const [sel] = await db
-            .select({ status: selections.status })
-            .from(selections)
-            .where(eq(selections.id, payment.selectionId))
-            .limit(1);
-
-          if (!sel || sel.status === "CANCELLED" || sel.status === "CONFIRMED") {
-            await db
-              .update(payments)
               .set({
-                status: "FAILED",
-                refundStatus: "PENDING",
-                refundAmountKobo: data.amount,
-                refundReason: !sel ? "Selection not found" : `Selection is ${sel.status}; flagged for refund`,
-                manualReason: `Selection is '${sel?.status ?? "missing"}'; requires refund`,
-                providerReference: String(data.id),
-                providerStatus: data.status,
+                status: "processed",
+                processedAt: new Date(),
+                error: `Amount mismatch: expected ${expectedAmountKobo}, received ${receivedAmountKobo}`,
               })
-              .where(eq(payments.id, payment.id));
-
-            await db.insert(paymentEvents).values({
-              paymentId: payment.id,
-              eventType: "REFUNDED_TO_EMPLOYER",
-              amountKobo: data.amount,
-              actorType: "SYSTEM",
-              metadata: { reason: "Selection cancelled or already confirmed", selectionId: payment.selectionId },
-            });
-
-            await db
-              .update(webhookEvents)
-              .set({ status: "processed", processedAt: new Date(), error: `Selection is ${sel?.status}` })
               .where(eq(webhookEvents.eventId, eventId));
 
-            return Response.json({ received: true, flaggedForRefund: true }, { status: 200 });
+            return Response.json({ received: true, error: "Amount mismatch; flagged for refund" }, { status: 200 });
           }
-        }
 
-        // Check if errand target has been cancelled
-        if (payment.errandId) {
-          const [errandRecord] = await db
-            .select({ id: errands.id, status: errands.status })
-            .from(errands)
-            .where(eq(errands.id, payment.errandId))
-            .limit(1);
+          // Check superseded or cancelled quotes
+          if (payment.quoteId) {
+            const [quote] = await db
+              .select({ id: quotes.id, status: quotes.status })
+              .from(quotes)
+              .where(eq(quotes.id, payment.quoteId))
+              .limit(1);
 
-          if (errandRecord && errandRecord.status !== "pending_payment" && errandRecord.status !== "open" && errandRecord.status !== "claimed") {
-            await db
-              .update(payments)
-              .set({
-                status: "FAILED",
-                refundStatus: "PENDING",
-                refundAmountKobo: data.amount,
-                refundReason: `Errand is in ${errandRecord.status} state, charge flagged for refund`,
-                providerReference: String(data.id),
-                providerStatus: data.status,
-              })
-              .where(eq(payments.id, payment.id));
+            if (!quote || quote.status === "superseded" || quote.status === "cancelled" || quote.status === "paid") {
+              await db
+                .update(payments)
+                .set({
+                  status: "FAILED",
+                  refundStatus: "PENDING",
+                  refundAmountKobo: receivedAmountKobo,
+                  refundReason: !quote ? "Quote not found" : `Quote is ${quote.status}; flagged for refund`,
+                  providerReference: transactionReference,
+                  providerStatus: paymentStatus,
+                })
+                .where(eq(payments.id, payment.id));
 
-            await db.insert(paymentEvents).values({
-              paymentId: payment.id,
-              eventType: "REFUNDED_TO_EMPLOYER",
-              amountKobo: data.amount,
-              actorType: "SYSTEM",
-              metadata: { reason: `Errand is in ${errandRecord.status} state`, errandId: payment.errandId },
-            });
-
-            await db
-              .update(webhookEvents)
-              .set({ status: "processed", processedAt: new Date(), error: `Errand is ${errandRecord.status}` })
-              .where(eq(webhookEvents.eventId, eventId));
-
-            return Response.json({ received: true, flaggedForRefund: true }, { status: 200 });
+              return Response.json({ received: true, flaggedForRefund: true }, { status: 200 });
+            }
           }
-        }
 
-        try {
           await db.transaction(async (tx) => {
             // 1. Mark payment VERIFIED
             await tx
@@ -262,8 +200,8 @@ export async function POST(req: Request) {
               .set({
                 status: "VERIFIED",
                 verifiedAt: new Date(),
-                providerReference: String(data.id),
-                providerStatus: data.status,
+                providerReference: transactionReference,
+                providerStatus: paymentStatus,
               })
               .where(eq(payments.id, payment.id));
 
@@ -364,7 +302,6 @@ export async function POST(req: Request) {
                     .set({ status: "CONFIRMED" })
                     .where(eq(selections.id, payment.selectionId));
 
-                  // Create 14-day SLA active placement
                   const [existingPlacement] = await tx
                     .select()
                     .from(placements)
@@ -385,7 +322,6 @@ export async function POST(req: Request) {
                   }
                 }
 
-                // Send in-app notifications
                 const [emp] = await tx
                   .select({ userId: employerProfiles.userId })
                   .from(employerProfiles)
@@ -404,7 +340,7 @@ export async function POST(req: Request) {
                     type: "SELECTION_CONFIRMED",
                     content: isAccepted
                       ? "Handshake agency fee confirmed! Candidate direct phone number is now accessible with our 14-day SLA guarantee."
-                      : "Payment of ₦50,850 verified! Your offer is pending candidate acceptance.",
+                      : "Payment verified via Monnify! Your offer is pending candidate acceptance.",
                   });
                 }
 
@@ -420,76 +356,138 @@ export async function POST(req: Request) {
               }
             }
 
-            // 4. Record financial event
+            // 5. Record financial event
             await tx.insert(paymentEvents).values({
               paymentId: payment.id,
               eventType: "COMMISSION_RETAINED",
-              amountKobo: payment.totalKobo || Math.round(payment.amount * 100),
+              amountKobo: expectedAmountKobo,
               actorType: "SYSTEM",
               metadata: {
-                paystackReference: reference,
-                paystackId: data.id,
-                channel: data.channel,
-                gatewayResponse: data.gateway_response,
+                reference: paymentReference,
+                transactionReference,
+                channel: eventData.paymentMethod,
+                provider: "monnify",
               },
             });
 
-            // 5. Mark webhook event as processed
+            // 6. Mark webhook event processed
             await tx
               .update(webhookEvents)
               .set({ status: "processed", processedAt: new Date() })
               .where(eq(webhookEvents.eventId, eventId));
           });
-        } catch (txError: any) {
-          const isUniqueViolation =
-            txError?.code === "23505" ||
-            String(txError?.message || "").includes("payments_verified_");
 
-          if (isUniqueViolation) {
-            await db
+          return Response.json({ received: true, verified: true }, { status: 200 });
+        }
+      }
+
+      return Response.json({ received: true }, { status: 200 });
+    }
+
+    // ==========================================
+    // 2. LEGACY PAYSTACK WEBHOOK HANDLING (Fallback)
+    // ==========================================
+    if (paystackSignature) {
+      const secret =
+        process.env.PAYSTACK_SECRET_KEY ||
+        process.env.PAYSTACK_TEST_SECRET_KEY;
+
+      if (!secret) {
+        return new Response("Paystack webhook secret misconfigured", { status: 500 });
+      }
+
+      const computedHash = crypto
+        .createHmac("sha512", secret)
+        .update(rawBody)
+        .digest("hex");
+
+      const hashBuffer = Buffer.from(computedHash);
+      const signatureBuffer = Buffer.from(paystackSignature);
+
+      if (
+        hashBuffer.length !== signatureBuffer.length ||
+        !crypto.timingSafeEqual(hashBuffer, signatureBuffer)
+      ) {
+        return new Response("Invalid signature", { status: 400 });
+      }
+
+      const event = parsedPayload;
+      const eventType = event.event;
+      const data = event.data || {};
+      const reference = data.reference;
+
+      const eventId = `paystack_${eventType}_${data.id || reference || Date.now()}`;
+      const [existingEvent] = await db
+        .select()
+        .from(webhookEvents)
+        .where(eq(webhookEvents.eventId, eventId))
+        .limit(1);
+
+      if (existingEvent && existingEvent.status === "processed") {
+        return Response.json({ received: true, duplicate: true }, { status: 200 });
+      }
+
+      if (!existingEvent) {
+        await db
+          .insert(webhookEvents)
+          .values({
+            eventId,
+            eventType,
+            provider: "paystack",
+            payload: event,
+            status: "pending",
+          })
+          .onConflictDoNothing();
+      }
+
+      if (eventType === "charge.success" && reference) {
+        const [payment] = await db
+          .select()
+          .from(payments)
+          .where(eq(payments.paystackReference, reference))
+          .limit(1);
+
+        if (payment && payment.status !== "VERIFIED") {
+          await db.transaction(async (tx) => {
+            await tx
               .update(payments)
               .set({
-                status: "FAILED",
-                refundStatus: "PENDING",
-                refundAmountKobo: data.amount,
-                refundReason: "Duplicate verified payment detected via unique index; flagged for refund",
-                manualReason: "Duplicate verified payment detected; requires refund",
+                status: "VERIFIED",
+                verifiedAt: new Date(),
                 providerReference: String(data.id),
                 providerStatus: data.status,
               })
               .where(eq(payments.id, payment.id));
 
-            await db.insert(paymentEvents).values({
+            if (payment.quoteId) {
+              await tx
+                .update(quotes)
+                .set({ status: "paid", updatedAt: new Date() })
+                .where(eq(quotes.id, payment.quoteId));
+            }
+
+            await tx.insert(paymentEvents).values({
               paymentId: payment.id,
-              eventType: "REFUNDED_TO_EMPLOYER",
-              amountKobo: data.amount,
+              eventType: "COMMISSION_RETAINED",
+              amountKobo: payment.totalKobo || Math.round(payment.amount * 100),
               actorType: "SYSTEM",
-              metadata: {
-                reason: "Duplicate verified payment (unique constraint violation)",
-                error: txError?.message,
-              },
+              metadata: { paystackReference: reference, provider: "paystack" },
             });
 
-            await db
+            await tx
               .update(webhookEvents)
-              .set({
-                status: "processed",
-                processedAt: new Date(),
-                error: "Duplicate payment unique violation; flagged for refund",
-              })
+              .set({ status: "processed", processedAt: new Date() })
               .where(eq(webhookEvents.eventId, eventId));
-
-            return Response.json({ received: true, duplicateFlaggedForRefund: true }, { status: 200 });
-          }
-
-          throw txError;
+          });
         }
       }
+
+      return Response.json({ received: true }, { status: 200 });
     }
 
-    return Response.json({ received: true }, { status: 200 });
+    return new Response("Unrecognized webhook provider signature", { status: 400 });
   } catch (error: any) {
-    console.error("[Paystack Webhook Error]:", error);
+    console.error("[Webhook Error]:", error);
     return new Response(`Webhook handler error: ${error?.message || "Internal error"}`, {
       status: 500,
     });
@@ -500,12 +498,11 @@ export async function GET() {
   return Response.json(
     {
       status: "healthy",
-      service: "StaffGuru Paystack Webhook Listener",
+      service: "StaffGuru Monnify & Payment Webhook Listener",
       timestamp: new Date().toISOString(),
       acceptedMethods: ["POST"],
-      documentation: "Configured for Paystack Test and Live Webhooks",
+      documentation: "Configured for Monnify Webhooks and legacy Paystack Webhooks",
     },
     { status: 200 }
   );
 }
-

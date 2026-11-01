@@ -13,6 +13,7 @@ import {
   Eye,
   ShieldCheck,
   Loader2,
+  Calendar,
 } from "lucide-react";
 import { respondToHandshake } from "../../actions/handshake";
 
@@ -34,6 +35,9 @@ export interface JobOfferData {
   startDate?: Date | string | null;
   createdAt: Date | string;
   termsAcceptedAt?: Date | string | null;
+  interviewDate?: Date | string | null;
+  interviewType?: string | null;
+  interviewNotes?: string | null;
 }
 
 export default function JobOfferCard({ offer }: { offer: JobOfferData }) {
@@ -111,19 +115,26 @@ export default function JobOfferCard({ offer }: { offer: JobOfferData }) {
 
           <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 pt-4 sm:pt-0 border-t sm:border-t-0 border-[var(--line)] w-full sm:w-auto">
             {/* Status Badge */}
-            {isConfirmed ? (
-              <span className="flex items-center gap-1.5 px-2.5 py-1 bg-neutral-100 text-neutral-800 border border-neutral-200/80 rounded-md text-[11px] font-semibold uppercase tracking-wider">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#008751]" /> Confirmed Handshake
-              </span>
-            ) : isDeclined ? (
-              <span className="flex items-center gap-1.5 px-2.5 py-1 bg-neutral-100 text-neutral-600 border border-neutral-200/80 rounded-md text-[11px] font-semibold uppercase tracking-wider">
-                <span className="w-1.5 h-1.5 rounded-full bg-neutral-400" /> Declined
-              </span>
-            ) : (
-              <span className="flex items-center gap-1.5 px-2.5 py-1 bg-neutral-100 text-neutral-900 border border-neutral-300 rounded-md text-[11px] font-semibold uppercase tracking-wider">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#008751] animate-pulse" /> Action Required
-              </span>
-            )}
+            <div className="flex flex-wrap items-center gap-1.5 sm:justify-end">
+              {offer.interviewDate && (
+                <span className="flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-800 border border-amber-200/80 rounded-md text-[10px] font-semibold">
+                  <Calendar size={12} className="text-amber-600" /> Interview Scheduled
+                </span>
+              )}
+              {isConfirmed ? (
+                <span className="flex items-center gap-1.5 px-2.5 py-1 bg-neutral-100 text-neutral-800 border border-neutral-200/80 rounded-md text-[11px] font-semibold uppercase tracking-wider">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#008751]" /> Confirmed Handshake
+                </span>
+              ) : isDeclined ? (
+                <span className="flex items-center gap-1.5 px-2.5 py-1 bg-neutral-100 text-neutral-600 border border-neutral-200/80 rounded-md text-[11px] font-semibold uppercase tracking-wider">
+                  <span className="w-1.5 h-1.5 rounded-full bg-neutral-400" /> Declined
+                </span>
+              ) : (
+                <span className="flex items-center gap-1.5 px-2.5 py-1 bg-neutral-100 text-neutral-900 border border-neutral-300 rounded-md text-[11px] font-semibold uppercase tracking-wider">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#008751] animate-pulse" /> Action Required
+                </span>
+              )}
+            </div>
 
             {/* Salary Display */}
             <div className="text-right">

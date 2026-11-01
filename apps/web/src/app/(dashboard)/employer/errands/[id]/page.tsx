@@ -1,5 +1,6 @@
 import { db, errands, employerProfiles, workerProfiles, ratings, eq, and } from "@repo/db";
 import { getCurrentUser } from "@/actions/auth";
+import { verifyPaymentReference } from "@/actions/payments";
 import { getErrandMessages } from "@/actions/errandMessages";
 import EmployerErrandDetailClient from "./EmployerErrandDetailClient";
 import { notFound } from "next/navigation";
@@ -14,8 +15,10 @@ export const metadata: Metadata = {
 
 export default async function EmployerErrandDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{ payment_ref?: string; paymentReference?: string }>;
 }) {
   const session = await getCurrentUser();
   if (!session || session.role !== "EMPLOYER") {
@@ -23,6 +26,15 @@ export default async function EmployerErrandDetailPage({
   }
 
   const { id } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const paymentRef = resolvedSearchParams?.payment_ref || resolvedSearchParams?.paymentReference;
+  if (paymentRef) {
+    try {
+      await verifyPaymentReference(paymentRef);
+    } catch (e) {
+      console.error("[Payment Callback Verify Error]:", e);
+    }
+  }
 
   const [employer] = await db
     .select({ id: employerProfiles.id })

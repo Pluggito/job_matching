@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { formatNaira, calculatePaystackFee } from "@repo/shared";
+import { formatNaira, calculateMonnifyFee } from "@repo/shared";
 import { initializeErrandPayment } from "@/actions/payments";
 import {
   ShieldCheck,
@@ -10,7 +10,7 @@ import {
   AlertCircle,
   MapPin,
   Clock,
-  Package,
+  Lock,
 } from "lucide-react";
 
 interface Props {
@@ -34,8 +34,8 @@ export default function ErrandCheckoutClient({ errand }: Props) {
   const taskPriceKobo = errand.taskPriceKobo || errand.budgetKobo;
   const creationFeeKobo = errand.creationFeeKobo || 0;
   const subtotalKobo = taskPriceKobo + creationFeeKobo;
-  const paystackCalc = calculatePaystackFee(subtotalKobo);
-  const totalKobo = paystackCalc.totalKobo;
+  const monnifyCalc = calculateMonnifyFee(subtotalKobo);
+  const totalKobo = monnifyCalc.totalKobo;
 
   const handlePay = async () => {
     setIsLoading(true);
@@ -102,14 +102,13 @@ export default function ErrandCheckoutClient({ errand }: Props) {
         </div>
         <div className="flex items-center justify-between text-neutral-600">
           <span className="flex items-center gap-1">
-            <span>Paystack Processing Fee:</span>
+            <span>Monnify Processing Fee:</span>
             <span className="text-[10px] text-neutral-400 font-normal">
-              ({paystackCalc.isFlatFeeWaived ? "1.5%" : "1.5% + ₦100"}
-              {paystackCalc.isCapped ? ", capped at ₦2,000" : ""})
+              (1.5%{monnifyCalc.isCapped ? ", capped at ₦2,000" : ""})
             </span>
           </span>
           <span className="font-mono font-semibold text-[var(--ink)]">
-            {formatNaira(paystackCalc.feeKobo)}
+            {formatNaira(monnifyCalc.feeKobo)}
           </span>
         </div>
         <div className="border-t border-black/10 pt-3 flex items-center justify-between font-bold text-base text-[var(--ink)]">
@@ -135,19 +134,25 @@ export default function ErrandCheckoutClient({ errand }: Props) {
         </div>
       )}
 
-      {/* Paystack Pay Button */}
-      <button
-        onClick={handlePay}
-        disabled={isLoading}
-        className="w-full py-3.5 px-6 rounded-xl bg-[var(--ng)] hover:opacity-95 text-white font-bold text-sm transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
-      >
-        {isLoading ? (
-          <Loader2 size={16} className="animate-spin" />
-        ) : (
-          <CreditCard size={16} />
-        )}
-        Pay {formatNaira(totalKobo)} with Paystack &rarr;
-      </button>
+      {/* Monnify Pay Button */}
+      <div className="space-y-2">
+        <button
+          onClick={handlePay}
+          disabled={isLoading}
+          className="w-full py-3.5 px-6 rounded-xl bg-[var(--ng)] hover:opacity-95 text-white font-bold text-sm transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+        >
+          {isLoading ? (
+            <Loader2 size={16} className="animate-spin" />
+          ) : (
+            <CreditCard size={16} />
+          )}
+          Pay {formatNaira(totalKobo)} with Monnify &rarr;
+        </button>
+        <div className="flex items-center justify-center gap-1.5 text-[11px] text-neutral-500 pt-1">
+          <Lock size={12} className="text-[var(--ng)]" />
+          <span>Secured by Monnify · 256-bit SSL encryption</span>
+        </div>
+      </div>
     </div>
   );
 }
