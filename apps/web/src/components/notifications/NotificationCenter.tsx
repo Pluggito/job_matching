@@ -1,5 +1,7 @@
 "use client";
 
+import { formatDateDDMMYYYY } from "@repo/shared";
+
 import React, { useState, useEffect, useRef, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -58,7 +60,7 @@ function formatRelativeTime(dateStr: Date | string) {
   if (diffInHours < 24) return `${diffInHours}h ago`;
   const diffInDays = Math.floor(diffInHours / 24);
   if (diffInDays < 7) return `${diffInDays}d ago`;
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return formatDateDDMMYYYY(date);
 }
 
 function getNotificationMeta(type: string) {

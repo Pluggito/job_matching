@@ -19,7 +19,7 @@ import {
   DollarSign,
   TrendingUp,
 } from "lucide-react";
-import { formatNaira } from "@repo/shared";
+import {  formatNaira , formatDateTimeDDMMYYYY } from "@repo/shared";
 import {
   claimErrand,
   startErrandExecution,
@@ -361,7 +361,7 @@ export default function WorkerErrandsClient({
                         </div>
                         <div className="flex items-center gap-1.5">
                           <Clock size={14} className="text-neutral-400 shrink-0" />
-                          <span>Deadline: {new Date(errand.deadline).toLocaleString()}</span>
+                          <span>Deadline: {formatDateTimeDDMMYYYY(errand.deadline)}</span>
                         </div>
                         <div className="flex items-center gap-1.5">
                           <Camera size={14} className="text-neutral-400 shrink-0" />
@@ -432,7 +432,7 @@ export default function WorkerErrandsClient({
                     </div>
                     <div>
                       <span className="font-bold text-neutral-900 block mb-1">Execution Deadline & Proof:</span>
-                      <p>Due by: {new Date(errand.deadline).toLocaleString()}</p>
+                      <p>Due by: {formatDateTimeDDMMYYYY(errand.deadline)}</p>
                       <p className="mt-1 italic">Required: {errand.requiredProof}</p>
                     </div>
                   </div>
@@ -538,7 +538,7 @@ export default function WorkerErrandsClient({
             </div>
 
             <p className="text-xs text-neutral-500 leading-relaxed">
-              By claiming, you commit to completing this task before <strong>{new Date(claimingErrand.deadline).toLocaleString()}</strong> and uploading verified proof. Payout is transferred directly to your bank account upon approval.
+              By claiming, you commit to completing this task before <strong>{formatDateTimeDDMMYYYY(claimingErrand.deadline)}</strong> and uploading verified proof. Payout is transferred directly to your bank account upon approval.
             </p>
 
             {claimError && (

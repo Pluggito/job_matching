@@ -4,7 +4,7 @@ import { db, selections, hiringRequests, workerProfiles, employerProfiles, place
 import { getCurrentUser } from "./auth";
 import { eq, and } from "@repo/db";
 import { revalidatePath } from "next/cache";
-import { AGENCY_FEE_PER_WORKER } from "@repo/shared";
+import { AGENCY_FEE_PER_WORKER, formatDateTimeDDMMYYYY } from "@repo/shared";
 import { sendPushToUser } from "@/server/services/pushNotifications";
 
 export async function sendHandshakeOffer(workerProfileId: string, hiringRequestId: string) {
@@ -141,7 +141,7 @@ export async function respondToHandshake(selectionId: string, accept: boolean) {
 
   if (empProfile) {
     const notifyContent = accept
-      ? "Candidate accepted your job offer! 🎉 Staff Guru is holding candidate credentials. Pay the agency fee (in full or 2 installments) to unlock direct phone and email."
+      ? "Candidate accepted your job offer! 🎉 Staff Guru is holding candidate credentials. Pay the agency fee (in full or 70%/30% installments) to unlock direct phone and email."
       : "Candidate declined the job offer. You may review other candidates in your matches.";
     const targetLink = selection.hiringRequestId
       ? `/employer/requests/${selection.hiringRequestId}/matches`
@@ -360,13 +360,7 @@ export async function scheduleInterviewAction({
         ? "Video Call"
         : "Onsite Trade Assessment";
 
-    const dateStr = parsedDate.toLocaleString("en-NG", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    const dateStr = formatDateTimeDDMMYYYY(parsedDate);
 
     const content = `${employerProfile.businessName} invited you to an interview (${typeLabel}) on ${dateStr} for "${request.title}".${
       interviewNotes ? ` Note: "${interviewNotes}"` : ""

@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { markSelectionFeeAsPaid, releaseWorkerAccess, confirmWorkerJobAcceptance } from "@/lib/actions";
-import { maskNin } from "@repo/shared";
+import { maskNin, formatDateDDMMYYYY } from "@repo/shared";
 
 export interface ShortlistedWorker {
   selectionId: string;
@@ -284,6 +284,8 @@ export default function HireRequestsView({ requests }: HireRequestsViewProps) {
                         <span>
                           Budget: ₦{req.budgetMin.toLocaleString()} - ₦{req.budgetMax.toLocaleString()}
                         </span>
+                        <span>·</span>
+                        <span>Posted: {formatDateDDMMYYYY(req.createdAt)}</span>
                       </div>
                     </div>
                   </div>

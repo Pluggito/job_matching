@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { formatDateDDMMYYYY } from "@repo/shared";
 import {
   generateAdminInviteAction,
   revokeAdminInviteAction,
@@ -235,7 +236,7 @@ export default function AdminTeamClient({ initialData }: AdminTeamClientProps) {
 
                 {member && (
                   <div className="mt-3 pt-3 border-t border-black/5 flex items-center gap-1.5 text-[10px] text-neutral-500">
-                    <Calendar size={12} /> Claimed on {new Date(member.createdAt).toLocaleDateString()}
+                    <Calendar size={12} /> Claimed on {formatDateDDMMYYYY(member.createdAt)}
                   </div>
                 )}
               </div>
@@ -394,7 +395,7 @@ export default function AdminTeamClient({ initialData }: AdminTeamClientProps) {
                       )}
                     </td>
                     <td className="py-3.5 text-neutral-500 text-[11px]">
-                      {new Date(inv.expiresAt).toLocaleDateString()}
+                      {formatDateDDMMYYYY(inv.expiresAt)}
                     </td>
                     <td className="py-3.5 text-right space-x-2">
                       {!inv.isUsed && !inv.isExpired && (
@@ -499,7 +500,7 @@ export default function AdminTeamClient({ initialData }: AdminTeamClientProps) {
                       )}
                     </td>
                     <td className="py-4 text-right text-neutral-500 text-[11px]">
-                      {new Date(member.createdAt).toLocaleDateString()}
+                      {formatDateDDMMYYYY(member.createdAt)}
                     </td>
                   </tr>
                 );

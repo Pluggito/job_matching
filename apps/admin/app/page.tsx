@@ -1,3 +1,4 @@
+import { formatDateTimeDDMMYYYY } from "@repo/shared";
 import {
   db,
   workerProfiles,
@@ -285,10 +286,7 @@ export default async function AdminPage() {
                     </p>
                   </div>
                   <span className="text-[10px] text-neutral-400 font-mono shrink-0">
-                    {new Date(log.createdAt).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    {formatDateTimeDDMMYYYY(log.createdAt)}
                   </span>
                 </div>
               ))}

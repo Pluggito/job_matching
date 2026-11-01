@@ -87,7 +87,7 @@ export default async function MatchesPage({
           </div>
           <div className="w-px h-10 bg-[var(--line)]"></div>
           <div className="text-center px-4">
-            <span className="block text-2xl font-black text-[var(--green)]">{request.budgetMax.toLocaleString()}₦</span>
+            <span className="block text-2xl font-black text-[var(--green)]">₦{request.budgetMax.toLocaleString()}</span>
             <span className="text-xs font-bold text-[var(--ink-soft)] uppercase tracking-wider">Max Budget</span>
           </div>
         </div>
@@ -113,7 +113,7 @@ export default async function MatchesPage({
                     className="absolute inset-[-4px] rounded-full border-4 border-[var(--lime)]"
                     style={{ clipPath: `polygon(0 0, 100% 0, 100% ${match.score}%, 0 ${match.score}%)` }}
                   />
-                  <span className="text-3xl font-black text-[var(--ink)] relative z-10">{match.score}</span>
+                  <span className="text-2xl font-black text-[var(--ink)] relative z-10">{match.score}%</span>
                   <span className="text-[10px] font-bold text-[var(--ink-soft)] uppercase tracking-wider relative z-10">Match</span>
                 </div>
 

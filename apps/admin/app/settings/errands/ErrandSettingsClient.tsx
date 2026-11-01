@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { formatNaira, calculateErrandPricingBreakdown } from "@repo/shared";
+import { formatNaira, calculateErrandPricingBreakdown , formatDateTimeDDMMYYYY } from "@repo/shared";
 import { updateErrandPricingSettings, ErrandPricingSettingsData } from "@/lib/actions";
 import {
   AlertCircle,
@@ -384,10 +384,7 @@ export default function ErrandSettingsClient({
                       {entry.adminEmail}
                     </span>
                     <span className="text-[11px] text-neutral-400 ml-2">
-                      {new Date(entry.createdAt).toLocaleString("en-NG", {
-                        dateStyle: "medium",
-                        timeStyle: "short",
-                      })}
+                      {formatDateTimeDDMMYYYY(entry.createdAt)}
                     </span>
                   </div>
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-neutral-100 text-neutral-700">

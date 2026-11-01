@@ -95,7 +95,8 @@ export async function initializeSelectionPayment(
     };
   }
 
-  const baseFeeNaira = installmentMode === "half" ? 25000 : 50000;
+  const fullFeeNaira = sel.feeAmount && sel.feeAmount > 0 ? sel.feeAmount : 50000;
+  const baseFeeNaira = installmentMode === "half" ? Math.round(fullFeeNaira * 0.7) : fullFeeNaira;
   const agencyFeeKobo = baseFeeNaira * 100;
   const monnifyCalc = calculateMonnifyFee(agencyFeeKobo);
 
@@ -225,7 +226,7 @@ export async function initializeSelectionPayment(
     customerName: employer.businessName || session.email || "Staff Guru Employer",
     customerEmail: session.email,
     paymentReference: reference,
-    paymentDescription: `StaffGuru Handshake Fee - ${installmentMode === "half" ? "50% Initial Installment" : "Full Placement"}`,
+    paymentDescription: `StaffGuru Handshake Fee - ${installmentMode === "half" ? "70% Initial Installment" : "Full Placement"}`,
     redirectUrl: callbackUrl,
     metaData: {
       quoteId: quote.id,

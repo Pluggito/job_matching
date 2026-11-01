@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { formatDateDDMMYYYY } from "@repo/shared";
 import {
   Search,
   Filter,
@@ -529,7 +530,7 @@ export default function WorkerVerificationQueue({
                           <div className="flex items-center justify-between">
                             <span className="font-semibold text-neutral-800">{log.action}</span>
                             <span className="text-[10px] text-neutral-400 font-mono">
-                              {new Date(log.createdAt).toLocaleDateString()}
+                              {formatDateDDMMYYYY(log.createdAt)}
                             </span>
                           </div>
                           <p className="text-neutral-500">By {log.adminEmail}</p>
