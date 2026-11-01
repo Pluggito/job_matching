@@ -7,7 +7,7 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export async function POST(req: Request) {
+async function handleCron(req: Request) {
   // Authorize with CRON_SECRET or bearer authorization header
   const authHeader = req.headers.get("authorization");
   const cronSecret = process.env.CRON_SECRET || "staffguru_cron_dev_secret";
@@ -35,4 +35,18 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
+}
+
+/**
+ * Vercel Crons invoke configured endpoints via HTTP GET.
+ */
+export async function GET(req: Request) {
+  return handleCron(req);
+}
+
+/**
+ * HTTP POST supported for manual or programmatic external triggers.
+ */
+export async function POST(req: Request) {
+  return handleCron(req);
 }

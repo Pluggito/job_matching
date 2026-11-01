@@ -17,15 +17,17 @@ export default async function MatchesPage({
   searchParams,
 }: {
   params: { id: string };
-  searchParams?: { payment_ref?: string };
+  searchParams?: { payment_ref?: string; paymentReference?: string } | Promise<{ payment_ref?: string; paymentReference?: string }>;
 }) {
   const session = await getCurrentUser();
   if (!session) return notFound();
 
-  // If returning from Paystack redirect with a payment reference, verify it in real-time in background
-  if (searchParams?.payment_ref) {
+  // If returning from Monnify redirect with a payment reference, verify it in real-time in background
+  const resolvedParams = searchParams ? await searchParams : undefined;
+  const paymentRef = resolvedParams?.payment_ref || resolvedParams?.paymentReference;
+  if (paymentRef) {
     try {
-      await verifyPaymentReference(searchParams.payment_ref);
+      await verifyPaymentReference(paymentRef);
     } catch (e) {
       console.error("[Payment Callback Verify Error]:", e);
     }
