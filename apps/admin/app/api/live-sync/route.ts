@@ -1,3 +1,4 @@
+import { formatDateDDMMYYYY } from "@repo/shared";
 import {
   db,
   paymentEvents,
@@ -184,7 +185,7 @@ export async function GET(req: Request) {
         id: `placement_${pl.id}`,
         type: "PLACEMENT",
         title: `Placement Confirmed · 14-Day SLA Active`,
-        description: `Candidate handshake confirmed. Replacement guarantee until ${pl.replacementDeadline ? new Date(pl.replacementDeadline).toLocaleDateString() : "14 days"}`,
+        description: `Candidate handshake confirmed. Replacement guarantee until ${pl.replacementDeadline ? formatDateDDMMYYYY(pl.replacementDeadline) : "14 days"}`,
         createdAt: pl.startDate.toISOString(),
         link: "/placements",
         badge: "Placement",

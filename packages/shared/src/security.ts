@@ -1,4 +1,4 @@
-import { createHmac, randomInt, timingSafeEqual, createCipheriv, createDecipheriv, randomBytes } from "crypto";
+import { createHmac, createHash, randomInt, timingSafeEqual, createCipheriv, createDecipheriv, randomBytes } from "crypto";
 
 /**
  * Generates a cryptographically random 6-digit numeric PIN for physical delivery verification.
@@ -150,4 +150,62 @@ export function verifyPaystackWebhookSignature(
   } catch {
     return false;
   }
+}
+
+/**
+ * Computes Monnify webhook transaction hash:
+ * SHA512(clientSecret + "|" + paymentReference + "|" + amountPaid + "|" + paidOn + "|" + transactionReference)
+ */
+export function computeMonnifyTransactionHash(params: {
+  clientSecret: string;
+  paymentReference: string;
+  amountPaid: string | number;
+  paidOn: string;
+  transactionReference: string;
+}): string {
+  const { clientSecret, paymentReference, amountPaid, paidOn, transactionReference } = params;
+  const rawString = `${clientSecret}|${paymentReference}|${amountPaid}|${paidOn}|${transactionReference}`;
+  return createHash("sha512").update(rawString).digest("hex");
+}
+
+/**
+ * Verifies Monnify webhook request using either:
+ * 1. The `monnify-signature` header (HMAC-SHA512 of the raw request body with secretKey)
+ * 2. Or the `transactionHash` property inside the eventData object
+ */
+export function verifyMonnifyWebhookSignature(params: {
+  rawBody?: string;
+  signatureHeader?: string | null;
+  transactionHash?: string | null;
+  computedHash?: string;
+  secretKey: string;
+}): boolean {
+  const { rawBody, signatureHeader, transactionHash, computedHash, secretKey } = params;
+
+  if (signatureHeader && rawBody && secretKey) {
+    try {
+      const expected = createHmac("sha512", secretKey).update(rawBody).digest("hex");
+      const a = Buffer.from(expected);
+      const b = Buffer.from(signatureHeader);
+      if (a.length === b.length && timingSafeEqual(a, b)) {
+        return true;
+      }
+    } catch {
+      // continue to hash check
+    }
+  }
+
+  if (transactionHash && computedHash) {
+    try {
+      const a = Buffer.from(transactionHash.toLowerCase());
+      const b = Buffer.from(computedHash.toLowerCase());
+      if (a.length === b.length && timingSafeEqual(a, b)) {
+        return true;
+      }
+    } catch {
+      return false;
+    }
+  }
+
+  return false;
 }

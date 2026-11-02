@@ -63,12 +63,6 @@ export default async function WorkerErrandDetailPage({
   }
 
   const rawMessages = await getErrandMessages(errand.id);
-  const initialMessages = rawMessages.map((m) => ({
-    id: m.id,
-    senderId: m.senderId,
-    content: m.content,
-    createdAt: m.createdAt.toISOString(),
-  }));
 
   return (
     <WorkerErrandDetailClient
@@ -95,7 +89,7 @@ export default async function WorkerErrandDetailPage({
         handoffAttempts: errand.handoffAttempts || 0,
       }}
       employerInfo={employerInfo}
-      initialMessages={initialMessages}
+      initialMessages={rawMessages}
       currentUserId={session.userId}
     />
   );

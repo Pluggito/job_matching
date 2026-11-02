@@ -11,6 +11,16 @@ export const SignupSchema = z.object({
   role: z.enum(["WORKER", "EMPLOYER"]),
 });
 
+export const CONTRACT_TYPES = ["PERMANENT", "TEMPORARY", "CONTRACT", "FREELANCE"] as const;
+export type ContractType = typeof CONTRACT_TYPES[number];
+
+export const CONTRACT_TYPE_LABELS: Record<ContractType, string> = {
+  PERMANENT: "Full-Time / Permanent",
+  TEMPORARY: "Temporary / Seasonal",
+  CONTRACT: "Fixed-Term Contract",
+  FREELANCE: "Freelance / Project-Based",
+};
+
 export const HiringRequestSchema = z.object({
   category: z.string().min(2),
   title: z.string().min(5),
@@ -21,6 +31,7 @@ export const HiringRequestSchema = z.object({
   locationState: z.string().min(2),
   locationArea: z.string().min(2),
   engagementType: z.enum(["ONSITE", "REMOTE"]),
+  contractType: z.enum(["PERMANENT", "TEMPORARY", "CONTRACT", "FREELANCE"]).default("PERMANENT"),
   startDate: z.coerce.date(),
   budgetMin: z.number().min(0),
   budgetMax: z.number().min(0),

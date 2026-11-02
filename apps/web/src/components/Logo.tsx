@@ -57,7 +57,7 @@ export function Logo({
             textClassName
           )}
         >
-          staff<span className={variant === "light" || variant === "dark" ? "text-[var(--lime)]" : "text-[var(--ng)]"}>guru</span>
+          staff<span className="text-[var(--ng)]">guru</span>
           <i className="text-[var(--orange)] not-italic">.</i>
         </span>
       )}

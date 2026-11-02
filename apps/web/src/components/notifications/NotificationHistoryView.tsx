@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useTransition } from "react";
+import { formatDateTimeDDMMYYYY } from "@repo/shared";
 import { useRouter } from "next/navigation";
 import {
   Bell,
@@ -43,14 +44,7 @@ interface NotificationHistoryViewProps {
 }
 
 function formatFullDate(dateStr: Date | string) {
-  const d = new Date(dateStr);
-  return d.toLocaleString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return formatDateTimeDDMMYYYY(dateStr);
 }
 
 function getNotificationMeta(type: string) {

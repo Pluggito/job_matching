@@ -234,3 +234,25 @@ export async function getWorkerBankDetails() {
     bankAccount: activeAccount || null,
   };
 }
+
+
+/**
+ * Resolves account name via Monnify's live NUBAN validation API.
+ */
+export async function validateWorkerBankAccountWithMonnify(params: {
+  accountNumber: string;
+  bankCode: string;
+}) {
+  const session = await getCurrentUser();
+  if (!session) {
+    return { success: false, error: "Unauthorized." };
+  }
+
+  try {
+    const { validateMonnifyBankAccount } = await import("@/server/services/monnify");
+    const result = await validateMonnifyBankAccount(params);
+    return { success: true, accountName: result.accountName };
+  } catch (error: any) {
+    return { success: false, error: error?.message || "Could not validate bank account with Monnify." };
+  }
+}

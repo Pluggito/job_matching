@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { NIGERIAN_BANKS, validateNuban, maskAccountNumber } from "@repo/shared";
+import { NIGERIAN_BANKS, validateNuban, maskAccountNumber , formatDateTimeDDMMYYYY } from "@repo/shared";
 import { saveWorkerBankDetails } from "@/actions/bank";
 import { Building, ShieldCheck, CheckCircle2, AlertCircle, ArrowLeft, Lock, RefreshCw, Loader2 } from "lucide-react";
 import Link from "next/link";
@@ -167,7 +167,7 @@ export default function BankProfileClient({ initialBank, openToErrands }: BankPr
               <Lock size={15} className="text-amber-700 shrink-0 mt-0.5" />
               <div>
                 <span className="font-bold">Security Payout Hold Active:</span> Replaced bank accounts have a 24-hour verification hold. Payouts will automatically disburse to this account after{" "}
-                {new Date(initialBank.payoutHoldUntil!).toLocaleString()}.
+                {formatDateTimeDDMMYYYY(initialBank.payoutHoldUntil!)}.
               </div>
             </div>
           )}

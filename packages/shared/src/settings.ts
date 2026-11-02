@@ -141,8 +141,8 @@ export const DEFAULT_PLATFORM_SETTINGS: DefaultPlatformSettingRecord[] = [
   {
     key: "errand_price_min_kobo",
     label: "Alabaru Minimum Permissible Errand Task Price",
-    description: "Lower bound floor constraint (e.g., ₦5,000) that employers can set for an errand task reward to ensure fair runner pay.",
-    value: { kobo: 500_000 }, // ₦5,000
+    description: "Lower bound floor constraint (e.g., ₦20,000) that employers can set for an errand task reward to ensure fair runner pay.",
+    value: { kobo: 2_000_000 }, // ₦20,000
   },
   {
     key: "errand_price_max_kobo",
@@ -220,7 +220,7 @@ export const DEFAULT_PLATFORM_SETTINGS: DefaultPlatformSettingRecord[] = [
     key: "errand_budget_limits",
     label: "Errand Minimum and Maximum Budget (Placeholder, pending client decision)",
     description: "Permissible budget range in integer kobo for posting an errand.",
-    value: { minBudgetKobo: 500_000, maxBudgetKobo: 1_000_000_000 }, // ₦5,000 to ₦10,000,000
+    value: { minBudgetKobo: 2_000_000, maxBudgetKobo: 1_000_000_000 }, // ₦20,000 to ₦10,000,000
   },
   {
     key: "errand_max_offers",

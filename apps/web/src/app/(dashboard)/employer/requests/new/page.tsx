@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
-import { JOB_CATEGORIES } from "@repo/shared";
+import { JOB_CATEGORIES, CONTRACT_TYPES, CONTRACT_TYPE_LABELS } from "@repo/shared";
 
 export default function NewHiringRequestPage() {
   const router = useRouter();
@@ -18,6 +18,7 @@ export default function NewHiringRequestPage() {
     preferredSkills: "",
     minExperienceYears: 0,
     engagementType: "ONSITE",
+    contractType: "PERMANENT",
     locationState: "",
     locationArea: "",
     startDate: "",
@@ -153,17 +154,25 @@ export default function NewHiringRequestPage() {
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
             <h2 className="text-xl font-bold mb-4">Logistics & Budget</h2>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-[var(--ink-soft)]">Contract Type</label>
+                <select required value={formData.contractType} onChange={e => updateForm("contractType", e.target.value)} className="w-full p-3 rounded-xl border border-[var(--line)] bg-[var(--canvas)] focus:outline-none focus:border-[var(--green)] font-medium text-sm">
+                  {CONTRACT_TYPES.map(type => (
+                    <option key={type} value={type}>{CONTRACT_TYPE_LABELS[type]}</option>
+                  ))}
+                </select>
+              </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-[var(--ink-soft)]">Engagement Type</label>
-                <select required value={formData.engagementType} onChange={e => updateForm("engagementType", e.target.value)} className="w-full p-3 rounded-xl border border-[var(--line)] bg-[var(--canvas)] focus:outline-none focus:border-[var(--green)]">
+                <select required value={formData.engagementType} onChange={e => updateForm("engagementType", e.target.value)} className="w-full p-3 rounded-xl border border-[var(--line)] bg-[var(--canvas)] focus:outline-none focus:border-[var(--green)] font-medium text-sm">
                   <option value="ONSITE">Onsite</option>
                   <option value="REMOTE">Remote</option>
                 </select>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-[var(--ink-soft)]">Workers Needed</label>
-                <input required value={formData.workersNeeded} onChange={e => updateForm("workersNeeded", e.target.value)} type="number" min="1" className="w-full p-3 rounded-xl border border-[var(--line)] bg-[var(--canvas)] focus:outline-none focus:border-[var(--green)]" />
+                <input required value={formData.workersNeeded} onChange={e => updateForm("workersNeeded", e.target.value)} type="number" min="1" className="w-full p-3 rounded-xl border border-[var(--line)] bg-[var(--canvas)] focus:outline-none focus:border-[var(--green)] text-sm" />
               </div>
             </div>
 

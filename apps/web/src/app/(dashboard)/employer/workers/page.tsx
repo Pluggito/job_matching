@@ -1,6 +1,7 @@
 import { Search, Filter, Download, MoreVertical, MapPin, Star, ShieldCheck, Calendar } from "lucide-react";
 import { db, selections, hiringRequests, workerProfiles, employerProfiles, users, eq, and } from "@repo/db";
 import { getCurrentUser } from "@/actions/auth";
+import { formatDateDDMMYYYY } from "@repo/shared";
 
 export default async function EmployedWorkersPage() {
   const session = await getCurrentUser();
@@ -121,7 +122,7 @@ export default async function EmployedWorkersPage() {
                   <td className="p-4">
                     <div className="text-[var(--ink)] text-sm flex items-center gap-2">
                       <Calendar size={14} className="text-[var(--ink-soft)]" />
-                      {worker.termsAcceptedAt ? new Date(worker.termsAcceptedAt).toLocaleDateString() : 'N/A'}
+                      {worker.termsAcceptedAt ? formatDateDDMMYYYY(worker.termsAcceptedAt) : 'N/A'}
                     </div>
                   </td>
                   <td className="p-4 text-right">

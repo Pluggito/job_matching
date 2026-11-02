@@ -1,15 +1,18 @@
 "use client";
 
-import { MapPin, Check, Building, Hash, User, Copy, PhoneCall, Mail, Loader2, ShieldCheck, Clock, CheckCircle2 } from "lucide-react";
+import { MapPin, Check, Building, Hash, User, Copy, PhoneCall, Mail, Loader2, ShieldCheck, Clock, CheckCircle2, Star, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import PayAgencyFeeButton from "@/components/payments/PayAgencyFeeButton";
 import { revealWorkerPhone } from "@/actions/contact";
+import SubmitRatingModal from "@/components/ratings/SubmitRatingModal";
 
 export default function PublicWorkerProfileClient({
   worker,
   isConnected = false,
   placementId,
+  initialRating,
   pendingSelectionId,
   isSelectionPaid = false,
   isCandidateAccepted = false,
@@ -17,16 +20,24 @@ export default function PublicWorkerProfileClient({
   worker: any;
   isConnected?: boolean;
   placementId?: string;
+  initialRating?: {
+    id?: string;
+    score: number;
+    feedback?: string | null;
+  } | null;
   pendingSelectionId?: string;
   isSelectionPaid?: boolean;
   isCandidateAccepted?: boolean;
 }) {
+  const router = useRouter();
   const [copiedAcc, setCopiedAcc] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [revealedPhone, setRevealedPhone] = useState<string | null>(null);
   const [revealedEmail, setRevealedEmail] = useState<string | null>(null);
   const [isRevealing, setIsRevealing] = useState(false);
   const [revealError, setRevealError] = useState<string | null>(null);
+  const [currentRating, setCurrentRating] = useState(initialRating || null);
+  const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
 
   const profileData = (worker.profileData as Record<string, any>) || {};
   
@@ -84,9 +95,14 @@ export default function PublicWorkerProfileClient({
 
   return (
     <div className="mx-auto w-full max-w-[1100px] pb-12">
-      <Link href="javascript:history.back()" className="inline-flex items-center text-sm font-bold text-[var(--ink-soft)] hover:text-[var(--ink)] mb-6 transition-colors">
-        &larr; Back to Matches
-      </Link>
+      <button
+        type="button"
+        onClick={() => router.back()}
+        className="inline-flex items-center gap-2 text-sm font-bold text-[var(--ink-soft)] hover:text-[var(--ink)] mb-6 transition-colors cursor-pointer group"
+      >
+        <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" />
+        <span>Back</span>
+      </button>
       
       <div className="overflow-hidden rounded-[24px] border border-black/10 bg-white">
         {/* Header */}
@@ -293,6 +309,49 @@ export default function PublicWorkerProfileClient({
                       </p>
                     </div>
                   )}
+
+                  {/* Placement Rating & Review Section */}
+                  {placementId && (
+                    <div className="pt-3 border-t border-[var(--line)] space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500">
+                          Candidate Rating
+                        </span>
+                        <button
+                          onClick={() => setIsRatingModalOpen(true)}
+                          className="text-[11px] font-bold text-[var(--ng)] hover:underline flex items-center gap-1 cursor-pointer"
+                        >
+                          <Star size={12} className="fill-amber-400 text-amber-400" />
+                          <span>{currentRating ? "Edit Review" : "Rate Candidate"}</span>
+                        </button>
+                      </div>
+                      {currentRating ? (
+                        <div className="bg-white p-2.5 rounded-xl border border-[var(--line)] shadow-2xs space-y-1">
+                          <div className="flex items-center gap-1.5 text-amber-400">
+                            {[1, 2, 3, 4, 5].map((s) => (
+                              <Star
+                                key={s}
+                                size={13}
+                                className={s <= currentRating.score ? "fill-amber-400 text-amber-400" : "fill-neutral-200 text-neutral-200"}
+                              />
+                            ))}
+                            <span className="text-xs font-bold text-neutral-800 ml-1">
+                              {currentRating.score}/5
+                            </span>
+                          </div>
+                          {currentRating.feedback && (
+                            <p className="text-[11px] text-neutral-600 italic">
+                              "{currentRating.feedback}"
+                            </p>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-[11px] text-gray-400">
+                          Leave feedback on work quality and reliability.
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               ) : pendingSelectionId && isCandidateAccepted && !isSelectionPaid ? (
                 <div className="space-y-3">
@@ -301,7 +360,7 @@ export default function PublicWorkerProfileClient({
                     <span>Candidate Accepted Offer! 🎉</span>
                   </div>
                   <p className="text-xs text-neutral-600 leading-relaxed">
-                    The candidate has accepted your job offer. Pay the agency fee (in full or 2 installments) to immediately unlock their direct phone number and email address.
+                    The candidate has accepted your job offer. Pay the agency fee (in full or 70%/30% installments) to immediately unlock their direct phone number and email address.
                   </p>
                   <PayAgencyFeeButton
                     selectionId={pendingSelectionId}
@@ -346,6 +405,21 @@ export default function PublicWorkerProfileClient({
           
         </div>
       </div>
+
+      {/* Placement Rating Modal */}
+      {placementId && (
+        <SubmitRatingModal
+          isOpen={isRatingModalOpen}
+          onClose={() => setIsRatingModalOpen(false)}
+          targetTitle={fullName}
+          targetSubtitle={`${worker.category || "Worker"} Placement Review`}
+          placementId={placementId}
+          existingRating={currentRating}
+          onSuccess={(newRating) => {
+            setCurrentRating(newRating);
+          }}
+        />
+      )}
     </div>
   );
 }

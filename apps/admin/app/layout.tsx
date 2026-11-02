@@ -11,6 +11,10 @@ import { getAdminUser } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: "Admin Portal | Staff Guru",
+  icons: {
+    icon: [{ url: "/logo.png", type: "image/png" }],
+    apple: [{ url: "/logo.png" }],
+  },
 };
 
 export const viewport: Viewport = {

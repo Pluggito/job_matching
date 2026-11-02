@@ -37,7 +37,7 @@ export function Logo({
         style={{ width: currentSize.dimension, height: currentSize.dimension }}
       >
         <Image
-          src="/Staff_guru_logo_no_bg.png"
+          src="/logo.png"
           alt="Staff Guru logo"
           width={currentSize.dimension * 2}
           height={currentSize.dimension * 2}
@@ -57,7 +57,7 @@ export function Logo({
             textClassName
           )}
         >
-          staff<span className={variant === "light" || variant === "dark" ? "text-[var(--lime)]" : "text-[var(--ng)]"}>guru</span>
+          staff<span className="text-[var(--ng)]">guru</span>
           <i className="text-[var(--orange)] not-italic">.</i>
         </span>
       )}

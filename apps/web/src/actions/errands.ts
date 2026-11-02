@@ -25,6 +25,7 @@ import {
   validateErrandDeadline,
   calculateErrandPricingBreakdown,
   formatNaira,
+  formatDateTimeDDMMYYYY,
 } from "@repo/shared";
 import { getCurrentUser } from "./auth";
 import crypto from "crypto";
@@ -76,7 +77,7 @@ export async function getErrandPricingStatus(): Promise<ErrandPricingStatus> {
   const commissionBps = typeof commissionObj?.basisPoints === "number" ? commissionObj.basisPoints : 3000;
 
   const minObj = map.get("errand_price_min_kobo") as { kobo?: number } | undefined;
-  const minPriceKobo = typeof minObj?.kobo === "number" ? minObj.kobo : 500_000;
+  const minPriceKobo = typeof minObj?.kobo === "number" && minObj.kobo !== 500_000 ? minObj.kobo : 2_000_000;
 
   const maxObj = map.get("errand_price_max_kobo") as { kobo?: number } | undefined;
   const maxPriceKobo = typeof maxObj?.kobo === "number" ? maxObj.kobo : 100_000_000;
@@ -830,7 +831,7 @@ export async function requestErrandChanges(params: {
           userId: wrk.userId,
           type: "ERRAND_REVISION_REQUESTED",
           title: "Revision Requested on Errand ⚠️",
-          content: `Changes requested on errand "${errand.title}": "${notes.trim()}". Please re-submit proof before ${graceExpiry.toLocaleString()}.`,
+          content: `Changes requested on errand "${errand.title}": "${notes.trim()}". Please re-submit proof before ${formatDateTimeDDMMYYYY(graceExpiry)}.`,
           link: `/dashboard/errands/${errandId}`,
         });
 

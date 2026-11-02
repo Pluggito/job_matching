@@ -28,13 +28,13 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: "STAFF GURU | Skilled work, closer to home",
-  description: "A demo marketplace connecting skilled professionals and employers across Nigeria.",
+  description: "A marketplace connecting skilled professionals and employers across Nigeria.",
   icons: {
     icon: [
       { url: "/logo.png", type: "image/png" },
-      { url: "/logo.jpg", type: "image/jpeg" },
-      { url: "/icon-192x192.jpg", sizes: "192x192", type: "image/jpeg" },
-      { url: "/icon-512x512.jpg", sizes: "512x512", type: "image/jpeg" },
+
+      { url: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512x512.png", sizes: "512x512", type: "image/png" },
     ],
     apple: [
       { url: "/logo.png" },

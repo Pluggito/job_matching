@@ -1,8 +1,14 @@
 import { describe, it, expect } from "vitest";
 import {
   verifyPaystackWebhookSignature,
+  verifyMonnifyWebhookSignature,
+  computeMonnifyTransactionHash,
 } from "../src/security";
-import { calculatePaystackFee } from "../src/pricing";
+import {
+  calculatePaystackFee,
+  calculateMonnifyFee,
+  calculateMonnifyDisbursementFee,
+} from "../src/pricing";
 import { createHmac } from "crypto";
 
 describe("Paystack Webhook Verification & Security", () => {
@@ -178,5 +184,106 @@ describe("Paystack Processing Fee Calculation", () => {
     const result = calculatePaystackFee(0);
     expect(result.feeNaira).toBe(0);
     expect(result.totalNaira).toBe(0);
+  });
+});
+
+describe("Monnify Processing Fee Calculation", () => {
+  it("calculates 1.5% processing fee without flat fee addition", () => {
+    // ₦50,000 = 5,000,000 kobo
+    // 1.5% of 50,000 = ₦750 (no flat fee addition)
+    // Total = ₦50,750
+    const result = calculateMonnifyFee(5_000_000);
+    expect(result.feeNaira).toBe(750);
+    expect(result.totalNaira).toBe(50_750);
+    expect(result.feeKobo).toBe(75_000);
+    expect(result.totalKobo).toBe(5_075_000);
+    expect(result.isCapped).toBe(false);
+  });
+
+  it("calculates fee for small transactions", () => {
+    // ₦2,000 = 200,000 kobo
+    // 1.5% of 2,000 = ₦30
+    // Total = ₦2,030
+    const result = calculateMonnifyFee(200_000);
+    expect(result.feeNaira).toBe(30);
+    expect(result.totalNaira).toBe(2_030);
+    expect(result.isCapped).toBe(false);
+  });
+
+  it("caps transaction fee at ₦2,000 maximum for large transactions", () => {
+    // ₦200,000 = 20,000,000 kobo
+    // 1.5% of 200,000 = ₦3,000
+    // Capped at ₦2,000
+    // Total = ₦202,000
+    const result = calculateMonnifyFee(20_000_000);
+    expect(result.feeNaira).toBe(2_000);
+    expect(result.totalNaira).toBe(202_000);
+    expect(result.feeKobo).toBe(200_000);
+    expect(result.totalKobo).toBe(20_200_000);
+    expect(result.isCapped).toBe(true);
+  });
+
+  it("handles zero or negative amounts gracefully", () => {
+    const result = calculateMonnifyFee(0);
+    expect(result.feeNaira).toBe(0);
+    expect(result.totalNaira).toBe(0);
+    expect(result.isCapped).toBe(false);
+  });
+});
+
+describe("Monnify Disbursement Fee Calculation", () => {
+  it("calculates ₦10 fee for payouts under ₦10,000", () => {
+    const result = calculateMonnifyDisbursementFee(800_000); // ₦8,000
+    expect(result.feeNaira).toBe(10);
+    expect(result.feeKobo).toBe(1_000);
+  });
+
+  it("calculates ₦20 fee for payouts between ₦10,000 and ₦49,999", () => {
+    const result = calculateMonnifyDisbursementFee(2_000_000); // ₦20,000
+    expect(result.feeNaira).toBe(20);
+    expect(result.feeKobo).toBe(2_000);
+  });
+
+  it("calculates ₦40 fee for payouts ₦50,000 and above", () => {
+    const result = calculateMonnifyDisbursementFee(6_000_000); // ₦60,000
+    expect(result.feeNaira).toBe(40);
+    expect(result.feeKobo).toBe(4_000);
+  });
+});
+
+describe("Monnify Webhook Verification & Hash Computation", () => {
+  const secretKey = "monnify_secret_key_123";
+  const params = {
+    clientSecret: secretKey,
+    paymentReference: "MNFY_REF_001",
+    amountPaid: "50750.00",
+    paidOn: "2026-10-31 20:00:00",
+    transactionReference: "MNFY_TXN_001",
+  };
+
+  it("computes transaction hash matching expected SHA-512", () => {
+    const hash = computeMonnifyTransactionHash(params);
+    expect(hash).toBeDefined();
+    expect(hash.length).toBe(128); // SHA-512 hex is 128 characters
+  });
+
+  it("verifies webhook with matching transaction hash", () => {
+    const hash = computeMonnifyTransactionHash(params);
+    const isValid = verifyMonnifyWebhookSignature({
+      transactionHash: hash,
+      computedHash: hash,
+      secretKey,
+    });
+    expect(isValid).toBe(true);
+  });
+
+  it("rejects mismatched transaction hash", () => {
+    const hash = computeMonnifyTransactionHash(params);
+    const isValid = verifyMonnifyWebhookSignature({
+      transactionHash: hash,
+      computedHash: "deadbeef".repeat(16),
+      secretKey,
+    });
+    expect(isValid).toBe(false);
   });
 });

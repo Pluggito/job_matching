@@ -17,6 +17,7 @@ export async function createHiringRequest(employerId: string, data: z.infer<type
     locationState: validated.locationState,
     locationArea: validated.locationArea,
     engagementType: validated.engagementType,
+    contractType: validated.contractType,
     startDate: validated.startDate,
     budgetMin: validated.budgetMin,
     budgetMax: validated.budgetMax,

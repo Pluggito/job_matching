@@ -151,6 +151,13 @@ This chronicle details every architectural milestone, data model migration, and 
 - **Worker Profile Bank Screen (`/dashboard/profile/bank`):** Allows opted-in workers to manage their bank account on file. Updating an account enforces an automated 24-hour payout security hold (`payoutHoldUntil = NOW() + 24h`).
 - **Standardized Terminology:** Enforced "bank account on file" universally across UI and server actions.
 
+### Event 13: Brand Identity, Alabaru Errand Floor, Monnify Transition & Vercel Cron Lifecycle (Active)
+- **Unified Transparent Brand Assets:** Replaced all raster logos across `apps/web` and `apps/admin` with transparent background-removed PNGs (`logo.png`, `icon-192x192.png`, `icon-512x512.png`).
+- **Alabaru ₦20,000 Floor Baseline:** Updated the minimum task reward floor from ₦5,000 to ₦20,000 (`2,000,000` kobo) across all 5 showcase scenarios, creation form validation, and `platform_settings` defaults.
+- **Alabaru Mobile Showcase Ergonomics:** Optimized mobile layout to hide the checklist while preserving the 70/30 platform take-home notice, positioned the narrative above the portrait media, and retained the sticky CTA button below.
+- **Monnify Payment Architecture Transition (Planned):** Migrating payment gateway from Paystack to Monnify. Standardizing transaction processing surcharge at 1.5%, utilizing Monnify Sandbox/Live APIs (`init-transaction`, `query`, `/disbursements/account/validate`, `/disbursements/single`), and validating webhooks via SHA-512 transaction hashes.
+- **Vercel Cron Automation:** Configuring `apps/web/vercel.json` with a daily schedule (`0 0 * * *`) for `/api/cron/errands`, supporting both `GET` and `POST` methods, authorized via `Bearer ${CRON_SECRET}` for automated 24h errand expiries, auto-release of escrow payouts, and bank payout hold releases.
+
 ---
 
 ## 3. Database Architecture & Data Dictionary
@@ -254,7 +261,40 @@ Status: PENDING       Paystack Checkout    • Contact Unmasked     • Guarante
 
 ---
 
-## 6. Paystack Real Integration Architecture
+## 6. Monnify Real Integration Architecture (Active Transition)
+
+Staff Guru is transitioning its primary gateway and disbursement engine from Paystack to **Monnify** (powered by TeamApt/Moniepoint) operating in Sandbox/Test Mode with instant live switchability.
+
+### Monnify Transaction Initialization & Webhook Ingestion Pipeline
+
+1. **Monnify Official Pricing Rules (from Monnify Merchant Schedule):**
+   - **Collections (Local Cards, USSD, Bank Transfer):** Flat **1.5%**, capped at **₦2,000** maximum per transaction (no ₦100 flat fee addition).
+   - **Payouts (Runner Disbursements):**
+     - Amount < ₦10,000: **₦10** transfer fee.
+     - Amount ≥ ₦10,000 and < ₦50,000: **₦20** transfer fee.
+     - Amount ≥ ₦50,000: **₦40** transfer fee.
+
+2. **Authentication & Token Lifecycle:**
+   - Client authenticates with Basic Auth (`apiKey:secretKey`) via `POST /api/v1/auth/login`.
+   - Bearer token is cached in memory and refreshed automatically prior to expiry.
+
+2. **Server-Side Initialization (`init-transaction`):**
+   - Transactions are initialized via `POST /api/v1/merchant/transactions/init-transaction`.
+   - Passing employer details, unique `paymentReference`, `amount` in Naira (including 1.5% processing fee), `contractCode`, and `redirectUrl`.
+   - Employer is seamlessly redirected to the Monnify hosted checkout modal supporting Cards and Bank Account Transfers.
+
+3. **Secure Webhook Ingestion (`POST /api/payments/webhook`):**
+   - Monnify webhook payloads are verified by computing the SHA-512 hash: `SHA512(clientSecret + "|" + paymentReference + "|" + amountPaid + "|" + paidOn + "|" + transactionReference)`.
+   - Idempotency is preserved through `webhook_events`.
+   - Upon `paymentStatus === "PAID"`, the database transaction marks the escrow funded or placement fee paid.
+
+4. **Worker Disbursements via Monnify Single Transfer:**
+   - Direct disbursements (`POST /api/v2/disbursements/single`) to runner bank accounts upon completed errands or 24-hour auto-release.
+   - Account name inquiry validation using `GET /api/v1/disbursements/account/validate`.
+
+---
+
+## 6.1 Legacy Paystack Architecture (Deprecated Reference)
 
 All simulated payment pathways (`isDemo`, `DEMO_PAYMENT_SIMULATION_ENABLED`) have been expunged from the platform. The system operates on a single Paystack pipeline in **Test Mode** with server-side validation.
 

@@ -193,6 +193,64 @@ export function calculateErrandPricingBreakdown(
   };
 }
 
+export interface MonnifyFeeCalculation {
+  baseAmountKobo: number;
+  baseAmountNaira: number;
+  feeKobo: number;
+  feeNaira: number;
+  totalKobo: number;
+  totalNaira: number;
+  isCapped: boolean;
+}
+
+export function calculateMonnifyFee(baseAmountKobo: number): MonnifyFeeCalculation {
+  if (baseAmountKobo <= 0) {
+    return {
+      baseAmountKobo: 0,
+      baseAmountNaira: 0,
+      feeKobo: 0,
+      feeNaira: 0,
+      totalKobo: 0,
+      totalNaira: 0,
+      isCapped: false,
+    };
+  }
+
+  const baseAmountNaira = baseAmountKobo / 100;
+  const rawFeeKobo = Math.round(baseAmountKobo * 0.015);
+  const capKobo = 2000 * 100;
+  const isCapped = rawFeeKobo > capKobo;
+  const feeKobo = Math.min(rawFeeKobo, capKobo);
+  const totalKobo = baseAmountKobo + feeKobo;
+
+  return {
+    baseAmountKobo,
+    baseAmountNaira,
+    feeKobo,
+    feeNaira: feeKobo / 100,
+    totalKobo,
+    totalNaira: totalKobo / 100,
+    isCapped,
+  };
+}
+
+export function calculateMonnifyDisbursementFee(amountKobo: number): {
+  feeKobo: number;
+  feeNaira: number;
+} {
+  const amountNaira = amountKobo / 100;
+  let feeNaira = 10;
+  if (amountNaira >= 50000) {
+    feeNaira = 40;
+  } else if (amountNaira >= 10000) {
+    feeNaira = 20;
+  }
+  return {
+    feeKobo: feeNaira * 100,
+    feeNaira,
+  };
+}
+
 export interface PaystackFeeCalculation {
   baseAmountKobo: number;
   baseAmountNaira: number;

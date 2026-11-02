@@ -1,5 +1,5 @@
 import webPush from "web-push";
-import { db, pushSubscriptions, eq, and } from "@repo/db";
+import { db, pushSubscriptions, users, eq, and } from "@repo/db";
 
 // Configure Web Push with VAPID credentials
 const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
@@ -115,8 +115,8 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
     title: payload.title,
     body: payload.body,
     url: payload.url || "/dashboard",
-    icon: payload.icon || "/icons/icon-192x192.png",
-    badge: payload.badge || "/icons/icon-192x192.png",
+    icon: payload.icon || "/icon-192x192.png",
+    badge: payload.badge || "/icon-192x192.png",
     tag: payload.tag || "staff-guru-notice",
   });
 
@@ -159,4 +159,22 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
 export async function sendPushToMultipleUsers(userIds: string[], payload: PushPayload) {
   const uniqueUserIds = Array.from(new Set(userIds));
   return Promise.all(uniqueUserIds.map((id) => sendPushToUser(id, payload)));
+}
+
+/**
+ * Broadcast Web Push to all active admin devices across the team
+ */
+export async function sendPushToAllAdmins(payload: PushPayload) {
+  if (!vapidPublicKey || !vapidPrivateKey) {
+    return { dispatched: 0, failed: 0 };
+  }
+
+  const adminUsers = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.role, "ADMIN"));
+
+  if (adminUsers.length === 0) return { dispatched: 0, failed: 0 };
+
+  return sendPushToMultipleUsers(adminUsers.map((u) => u.id), payload);
 }

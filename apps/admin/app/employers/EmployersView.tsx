@@ -18,6 +18,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { formatDateDDMMYYYY } from "@repo/shared";
 
 export interface EmployerDirectoryItem {
   id: string;
@@ -146,7 +147,7 @@ export default function EmployersView({ employers }: EmployersViewProps) {
                     </td>
 
                     <td className="px-6 py-4 text-xs text-neutral-500 font-mono">
-                      {new Date(emp.createdAt).toLocaleDateString()}
+                      {formatDateDDMMYYYY(emp.createdAt)}
                     </td>
 
                     <td className="px-6 py-4 text-right">

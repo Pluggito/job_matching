@@ -7,6 +7,7 @@ import Link from "next/link";
 import { db, selections, payments, eq, sql } from "@repo/db";
 import ShortlistButton from "./ShortlistButton";
 import HireButton from "./HireButton";
+import ScheduleInterviewButton from "./ScheduleInterviewButton";
 import PayAgencyFeeButton from "@/components/payments/PayAgencyFeeButton";
 import { notFound } from "next/navigation";
 
@@ -16,15 +17,17 @@ export default async function MatchesPage({
   searchParams,
 }: {
   params: { id: string };
-  searchParams?: { payment_ref?: string };
+  searchParams?: { payment_ref?: string; paymentReference?: string } | Promise<{ payment_ref?: string; paymentReference?: string }>;
 }) {
   const session = await getCurrentUser();
   if (!session) return notFound();
 
-  // If returning from Paystack redirect with a payment reference, verify it in real-time in background
-  if (searchParams?.payment_ref) {
+  // If returning from Monnify redirect with a payment reference, verify it in real-time in background
+  const resolvedParams = searchParams ? await searchParams : undefined;
+  const paymentRef = resolvedParams?.payment_ref || resolvedParams?.paymentReference;
+  if (paymentRef) {
     try {
-      await verifyPaymentReference(searchParams.payment_ref);
+      await verifyPaymentReference(paymentRef);
     } catch (e) {
       console.error("[Payment Callback Verify Error]:", e);
     }
@@ -41,7 +44,7 @@ export default async function MatchesPage({
 
   if (!request) return notFound();
 
-  // Fetch existing selections with their status and verified payment
+  // Fetch existing selections with their status, interview details, and verified payment
   const requestSelections = await db
     .select({
       id: selections.id,
@@ -50,6 +53,9 @@ export default async function MatchesPage({
       feeAmount: selections.feeAmount,
       termsAcceptedAt: selections.termsAcceptedAt,
       hiredAt: selections.hiredAt,
+      interviewDate: selections.interviewDate,
+      interviewType: selections.interviewType,
+      interviewNotes: selections.interviewNotes,
       isPaid: sql<boolean>`EXISTS (
         SELECT 1 FROM ${payments} 
         WHERE ${payments.selectionId} = ${selections.id} 
@@ -81,7 +87,7 @@ export default async function MatchesPage({
           </div>
           <div className="w-px h-10 bg-[var(--line)]"></div>
           <div className="text-center px-4">
-            <span className="block text-2xl font-black text-[var(--green)]">{request.budgetMax.toLocaleString()}₦</span>
+            <span className="block text-2xl font-black text-[var(--green)]">₦{request.budgetMax.toLocaleString()}</span>
             <span className="text-xs font-bold text-[var(--ink-soft)] uppercase tracking-wider">Max Budget</span>
           </div>
         </div>
@@ -107,7 +113,7 @@ export default async function MatchesPage({
                     className="absolute inset-[-4px] rounded-full border-4 border-[var(--lime)]"
                     style={{ clipPath: `polygon(0 0, 100% 0, 100% ${match.score}%, 0 ${match.score}%)` }}
                   />
-                  <span className="text-3xl font-black text-[var(--ink)] relative z-10">{match.score}</span>
+                  <span className="text-2xl font-black text-[var(--ink)] relative z-10">{match.score}%</span>
                   <span className="text-[10px] font-bold text-[var(--ink-soft)] uppercase tracking-wider relative z-10">Match</span>
                 </div>
 
@@ -156,7 +162,26 @@ export default async function MatchesPage({
                 </div>
 
                 {/* Action Section */}
-                <div className="shrink-0 flex flex-col items-stretch gap-3 w-full md:w-56">
+                <div className="shrink-0 flex flex-col items-stretch gap-2.5 w-full md:w-56">
+                  {/* Interview Coordination Trigger */}
+                  {(!sel || sel.status === "PENDING") && (
+                    <ScheduleInterviewButton
+                      workerProfileId={match.workerId}
+                      candidateName={match.preview.category}
+                      hiringRequestId={request.id}
+                      jobTitle={request.title}
+                      existingInterview={
+                        sel?.interviewDate
+                          ? {
+                              interviewDate: sel.interviewDate,
+                              interviewType: sel.interviewType,
+                              interviewNotes: sel.interviewNotes,
+                            }
+                          : null
+                      }
+                    />
+                  )}
+
                   {!sel ? (
                     <ShortlistButton 
                       workerProfileId={match.workerId} 

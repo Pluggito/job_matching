@@ -1,6 +1,36 @@
 export const AGENCY_FEE_PER_WORKER = 50000;
+export const AGENCY_FEE_INSTALLMENT_PERCENT_UPFRONT = 70;
+export const AGENCY_FEE_INSTALLMENT_PERCENT_BALANCE = 30;
 export const REPLACEMENT_WINDOW_DAYS = 14;
 export const REMOVAL_NOTICE_DAYS = 3;
+
+/**
+ * Format date to standard format: DD-MM-YYYY
+ */
+export function formatDateDDMMYYYY(date: Date | string | number | null | undefined): string {
+  if (!date) return "";
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return "";
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  return `${day}-${month}-${year}`;
+}
+
+/**
+ * Format date and time to standard format: DD-MM-YYYY HH:mm
+ */
+export function formatDateTimeDDMMYYYY(date: Date | string | number | null | undefined): string {
+  if (!date) return "";
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return "";
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  const hours = String(d.getHours()).padStart(2, "0");
+  const minutes = String(d.getMinutes()).padStart(2, "0");
+  return `${day}-${month}-${year} ${hours}:${minutes}`;
+}
 
 export const JOB_CATEGORIES = [
   "Fashion, Tailoring & Textile",

@@ -182,15 +182,6 @@ export default function SignupPage() {
               </div>
             )}
 
-            {role === "worker" && (
-              <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                <label className="flex items-center gap-3 p-4 rounded-xl border border-black/5 bg-[#fafcfa] cursor-pointer hover:border-black/10 transition-colors">
-                  <input type="checkbox" name="openToErrands" value="true" className="w-5 h-5 accent-[var(--ng)] rounded border-gray-300 text-[var(--ng)] cursor-pointer" />
-                  <span className="text-sm font-medium text-[var(--ink)]">I am open to running errands</span>
-                </label>
-              </div>
-            )}
-
             <SubmitButton />
             
             <p className="text-xs text-center text-black/60 px-4">

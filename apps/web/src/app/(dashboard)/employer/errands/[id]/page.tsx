@@ -1,5 +1,6 @@
-import { db, errands, employerProfiles, workerProfiles, eq, and } from "@repo/db";
+import { db, errands, employerProfiles, workerProfiles, ratings, eq, and } from "@repo/db";
 import { getCurrentUser } from "@/actions/auth";
+import { verifyPaymentReference } from "@/actions/payments";
 import { getErrandMessages } from "@/actions/errandMessages";
 import EmployerErrandDetailClient from "./EmployerErrandDetailClient";
 import { notFound } from "next/navigation";
@@ -14,8 +15,10 @@ export const metadata: Metadata = {
 
 export default async function EmployerErrandDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{ payment_ref?: string; paymentReference?: string }>;
 }) {
   const session = await getCurrentUser();
   if (!session || session.role !== "EMPLOYER") {
@@ -23,6 +26,15 @@ export default async function EmployerErrandDetailPage({
   }
 
   const { id } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const paymentRef = resolvedSearchParams?.payment_ref || resolvedSearchParams?.paymentReference;
+  if (paymentRef) {
+    try {
+      await verifyPaymentReference(paymentRef);
+    } catch (e) {
+      console.error("[Payment Callback Verify Error]:", e);
+    }
+  }
 
   const [employer] = await db
     .select({ id: employerProfiles.id })
@@ -61,16 +73,22 @@ export default async function EmployerErrandDetailPage({
     }
   }
 
+  const [existingRating] = await db
+    .select({
+      id: ratings.id,
+      score: ratings.score,
+      feedback: ratings.feedback,
+      moderated: ratings.moderated,
+    })
+    .from(ratings)
+    .where(eq(ratings.errandId, errand.id))
+    .limit(1);
+
   const rawMessages = await getErrandMessages(errand.id);
-  const initialMessages = rawMessages.map((m) => ({
-    id: m.id,
-    senderId: m.senderId,
-    content: m.content,
-    createdAt: m.createdAt.toISOString(),
-  }));
 
   return (
     <EmployerErrandDetailClient
+      initialRating={existingRating || null}
       errand={{
         id: errand.id,
         title: errand.title,
@@ -97,7 +115,7 @@ export default async function EmployerErrandDetailPage({
       }}
       runner={runner}
       deliveryPin={errand.type === "pickup_delivery" ? "123456" : null}
-      initialMessages={initialMessages}
+      initialMessages={rawMessages}
       currentUserId={session.userId}
     />
   );
