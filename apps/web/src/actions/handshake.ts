@@ -188,6 +188,17 @@ export async function respondToHandshake(selectionId: string, accept: boolean) {
   revalidatePath(`/employer/workers/${selection.workerProfileId}`);
   revalidatePath("/employer/workers");
 
+  // Notify candidate of their decision
+  await db.insert(notifications).values({
+    userId: session.userId,
+    type: accept ? "HANDSHAKE_ACCEPTED" : "HANDSHAKE_DECLINED",
+    title: accept ? "Offer Accepted! 🎉" : "Offer Declined",
+    content: accept
+      ? "You accepted the job placement offer. Staff Guru will verify credentials with the employer."
+      : "You declined the job offer.",
+    link: "/dashboard",
+  });
+
   return { success: true, status: newStatus };
 }
 
@@ -247,6 +258,15 @@ export async function confirmEmployerHire(selectionId: string) {
       tag: "job-offer",
     }).catch(console.error);
   }
+
+  // Notify employer of offer transmission
+  await db.insert(notifications).values({
+    userId: session.userId,
+    type: "JOB_OFFER",
+    title: "Job Offer Sent 💼",
+    content: `Your job placement offer was sent successfully. Candidate will be notified to review.`,
+    link: `/employer/requests/${selection.hiringRequestId}/matches`,
+  });
 
   revalidatePath(`/employer/requests/${selection.hiringRequestId}/matches`);
   revalidatePath("/dashboard");
@@ -380,6 +400,15 @@ export async function scheduleInterviewAction({
       url: "/dashboard",
       tag: "interview-invitation",
     }).catch(console.error);
+
+    // Notify employer of scheduled interview
+    await db.insert(notifications).values({
+      userId: session.userId,
+      type: "INTERVIEW_INVITATION",
+      title: "Interview Invitation Sent 📅",
+      content: `Interview scheduled on ${dateStr} for "${request.title}".`,
+      link: `/employer/requests/${hiringRequestId}/matches`,
+    });
   }
 
   revalidatePath(`/employer/requests/${hiringRequestId}/matches`);

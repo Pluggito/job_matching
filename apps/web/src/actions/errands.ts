@@ -198,6 +198,15 @@ export async function createErrand(input: CreateErrandInput) {
     handoffAttempts: 0,
   });
 
+  // Notify employer of live errand posting
+  await db.insert(notifications).values({
+    userId: employer.userId,
+    type: "ERRAND_POSTED",
+    title: "Errand Posted Successfully! 📋",
+    content: `Your errand "${input.title.trim()}" is live and open for verified runners.`,
+    link: `/employer/errands/${errandId}`,
+  });
+
   revalidatePath("/employer/errands");
   revalidatePath("/dashboard/errands");
   return {
@@ -360,6 +369,15 @@ export async function claimErrand(errandId: string) {
         }).catch(console.error);
       }
 
+      // Notify the claiming runner
+      await tx.insert(notifications).values({
+        userId: session.userId,
+        type: "ERRAND_CLAIMED",
+        title: "Errand Claimed! 🏃‍♂️",
+        content: `You accepted "${lockedErrand.title}". Please await the client's escrow funding before starting execution.`,
+        link: `/dashboard/errands/${errandId}`,
+      });
+
       return { success: true };
     });
 
@@ -423,6 +441,30 @@ export async function startErrandExecution(errandId: string) {
       updatedAt: new Date(),
     })
     .where(eq(errands.id, errandId));
+
+  // Notify employer that execution has started
+  const [emp] = await db
+    .select({ userId: employerProfiles.userId })
+    .from(employerProfiles)
+    .where(eq(employerProfiles.id, errand.employerId))
+    .limit(1);
+
+  if (emp) {
+    await db.insert(notifications).values({
+      userId: emp.userId,
+      type: "ERRAND_CLAIMED",
+      title: "Runner Started Execution! 🏃‍♂️",
+      content: `Your runner has started executing errand "${errand.title}".`,
+      link: `/employer/errands/${errandId}`,
+    });
+
+    sendPushToUser(emp.userId, {
+      title: "Runner Started Execution! 🏃‍♂️",
+      body: `Your runner has started executing "${errand.title}".`,
+      url: `/employer/errands/${errandId}`,
+      tag: `errand-${errandId}`,
+    }).catch(console.error);
+  }
 
   revalidatePath("/dashboard/errands");
   return { success: true };
@@ -548,6 +590,15 @@ export async function submitErrandProof(params: {
         tag: `errand-${params.errandId}`,
       }).catch(console.error);
     }
+
+    // Notify the submitting runner
+    await tx.insert(notifications).values({
+      userId: session.userId,
+      type: "PROOF_SUBMITTED",
+      title: "Proof Submitted 📸",
+      content: `Your completion proof for "${errand.title}" has been submitted. The client has 24 hours to review.`,
+      link: `/dashboard/errands/${params.errandId}`,
+    });
   });
 
   revalidatePath("/dashboard/errands");
@@ -653,6 +704,17 @@ export async function approveErrandCompletion(errandId: string) {
         }).catch(console.error);
       }
     }
+
+    // Notify approving employer
+    await tx.insert(notifications).values({
+      userId: session.userId,
+      type: "ERRAND_COMPLETED",
+      title: "Errand Completed & Approved ✅",
+      content: `You approved errand "${errand.title}". Payout of ₦${(
+        (errand.workerPayoutKobo || 0) / 100
+      ).toLocaleString()} has been released to the runner.`,
+      link: `/employer/errands/${errandId}`,
+    });
   });
 
   revalidatePath("/employer/errands");
@@ -843,6 +905,15 @@ export async function requestErrandChanges(params: {
         }).catch(console.error);
       }
     }
+
+    // Notify requesting employer
+    await tx.insert(notifications).values({
+      userId: session.userId,
+      type: "ERRAND_REVISION_REQUESTED",
+      title: "Revision Requested ⚠️",
+      content: `You requested revisions on errand "${errand.title}": "${notes.trim()}".`,
+      link: `/employer/errands/${errandId}`,
+    });
   });
 
   revalidatePath(`/employer/errands/${errandId}`);
@@ -942,6 +1013,51 @@ export async function reportErrandProblem(params: {
         senderId: session.userId,
         content: `[Dispute Filed]: Reason - ${reason}. An admin has been assigned to mediate.`,
       });
+    }
+
+    // 4. Notify reporter and other party in-app
+    const targetUrl = session.role === "EMPLOYER" ? `/employer/errands/${errandId}` : `/dashboard/errands/${errandId}`;
+    await tx.insert(notifications).values({
+      userId: session.userId,
+      type: "DISPUTE_FILED",
+      title: "Dispute Opened ⚠️",
+      content: `Dispute opened for "${errand.title}". Staff Guru administrative team has been notified to mediate.`,
+      link: targetUrl,
+    });
+
+    let otherUserId: string | null = null;
+    if (session.role === "EMPLOYER" && errand.claimedByWorkerId) {
+      const [wrk] = await tx
+        .select({ userId: workerProfiles.userId })
+        .from(workerProfiles)
+        .where(eq(workerProfiles.id, errand.claimedByWorkerId))
+        .limit(1);
+      otherUserId = wrk?.userId || null;
+    } else if (session.role === "WORKER") {
+      const [emp] = await tx
+        .select({ userId: employerProfiles.userId })
+        .from(employerProfiles)
+        .where(eq(employerProfiles.id, errand.employerId))
+        .limit(1);
+      otherUserId = emp?.userId || null;
+    }
+
+    if (otherUserId) {
+      const otherUrl = session.role === "EMPLOYER" ? `/dashboard/errands/${errandId}` : `/employer/errands/${errandId}`;
+      await tx.insert(notifications).values({
+        userId: otherUserId,
+        type: "DISPUTE_FILED",
+        title: "Dispute Reported on Errand ⚠️",
+        content: `A dispute has been reported on "${errand.title}": ${reason}. Admin has been assigned to mediate.`,
+        link: otherUrl,
+      });
+
+      sendPushToUser(otherUserId, {
+        title: "Dispute Reported on Errand ⚠️",
+        body: `A dispute was reported on "${errand.title}".`,
+        url: otherUrl,
+        tag: `dispute-${errandId}`,
+      }).catch(console.error);
     }
   });
 

@@ -215,3 +215,39 @@ export async function deleteNotification(id: string) {
     return { success: false, error: err?.message };
   }
 }
+
+
+/**
+ * Trigger an immediate test notification for the current user.
+ * Inserts into the in-app notifications database AND attempts Web Push delivery to the device.
+ */
+export async function triggerTestNotificationAction() {
+  const session = await getCurrentUser();
+  if (!session) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  const roleLabel = session.role === "EMPLOYER" ? "Employer" : "Worker";
+  const targetUrl = session.role === "EMPLOYER" ? "/employer/notifications" : "/dashboard/notifications";
+
+  // Create In-App Notification and trigger device push
+  const result = await createNotification({
+    userId: session.userId,
+    type: "TEST_NOTIFICATION",
+    title: "Test Alert: Notifications Active! 🚀",
+    content: `Hi ${roleLabel}! Your notifications are working perfectly on Staff Guru. In-app feeds, unread badges, and real-time alerts are active.`,
+    link: targetUrl,
+    tag: `test-notif-${Date.now()}`,
+  });
+
+  revalidatePath("/dashboard");
+  revalidatePath("/employer");
+  revalidatePath("/dashboard/notifications");
+  revalidatePath("/employer/notifications");
+
+  return {
+    success: result.success,
+    notification: result.notification,
+    error: result.error,
+  };
+}

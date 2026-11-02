@@ -25,6 +25,7 @@ import {
   markNotificationAsRead,
   markAllNotificationsAsRead,
   deleteNotification,
+  triggerTestNotificationAction,
 } from "@/actions/notifications";
 
 interface NotificationItem {
@@ -49,6 +50,48 @@ function formatFullDate(dateStr: Date | string) {
 
 function getNotificationMeta(type: string) {
   switch (type) {
+    case "TEST_NOTIFICATION":
+      return {
+        icon: Sparkles,
+        badgeBg: "bg-emerald-50 text-[#008751] border-emerald-200",
+        label: "System Test",
+        category: "other",
+      };
+    case "ERRAND_POSTED":
+      return {
+        icon: Sparkles,
+        badgeBg: "bg-indigo-50 text-indigo-700 border-indigo-200",
+        label: "Errand Posted",
+        category: "errands",
+      };
+    case "DISPUTE_FILED":
+      return {
+        icon: AlertTriangle,
+        badgeBg: "bg-rose-50 text-rose-700 border-rose-200",
+        label: "Dispute Opened",
+        category: "other",
+      };
+    case "INTERVIEW_INVITATION":
+      return {
+        icon: Clock,
+        badgeBg: "bg-purple-50 text-purple-700 border-purple-200",
+        label: "Interview Invite",
+        category: "placement",
+      };
+    case "HANDSHAKE_ACCEPTED":
+      return {
+        icon: ShieldCheck,
+        badgeBg: "bg-emerald-50 text-[#008751] border-emerald-200",
+        label: "Offer Accepted",
+        category: "placement",
+      };
+    case "HANDSHAKE_DECLINED":
+      return {
+        icon: AlertTriangle,
+        badgeBg: "bg-amber-50 text-amber-700 border-amber-200",
+        label: "Offer Declined",
+        category: "placement",
+      };
     case "JOB_OFFER":
       return {
         icon: Briefcase,
@@ -117,6 +160,10 @@ export function NotificationHistoryView({ role }: NotificationHistoryViewProps) 
   const [filterStatus, setFilterStatus] = useState<"all" | "unread">("all");
   const [isPending, startTransition] = useTransition();
 
+  // Test notification state
+  const [isSendingTest, setIsSendingTest] = useState(false);
+  const [testFeedback, setTestFeedback] = useState<string | null>(null);
+
   const returnUrl = role === "EMPLOYER" ? "/employer" : "/dashboard";
 
   const fetchItems = async () => {
@@ -135,7 +182,79 @@ export function NotificationHistoryView({ role }: NotificationHistoryViewProps) 
 
   useEffect(() => {
     fetchItems();
+
+    // Listen to custom notification events & storage sync across tabs
+    const handleSync = () => fetchItems();
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "staffguru_notify_sync") fetchItems();
+    };
+
+    window.addEventListener("focus", handleSync);
+    window.addEventListener("staffguru:notification", handleSync);
+    window.addEventListener("storage", handleStorage);
+
+    return () => {
+      window.removeEventListener("focus", handleSync);
+      window.removeEventListener("staffguru:notification", handleSync);
+      window.removeEventListener("storage", handleStorage);
+    };
   }, []);
+
+  const handleSendTestNotification = async () => {
+    setIsSendingTest(true);
+    setTestFeedback(null);
+    try {
+      // 1. Show immediate browser desktop/tray notification if permitted
+      if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+        if ("serviceWorker" in navigator) {
+          navigator.serviceWorker.ready.then((reg) => {
+            reg.showNotification("Staff Guru Test Alert 🚀", {
+              body: "Your notifications are active! Real-time alerts and feeds are working.",
+              icon: "/icon-192x192.png",
+              badge: "/icon-192x192.png",
+              tag: `test-history-${Date.now()}`,
+            });
+          }).catch(() => {
+            new Notification("Staff Guru Test Alert 🚀", {
+              body: "Your notifications are active!",
+              icon: "/icon-192x192.png",
+            });
+          });
+        }
+      }
+
+      // 2. Insert into DB notifications table & dispatch push
+      const res = await triggerTestNotificationAction();
+      if (res.success && res.notification) {
+        const newItem: NotificationItem = {
+          id: res.notification.id,
+          userId: res.notification.userId,
+          type: res.notification.type || "TEST_NOTIFICATION",
+          title: res.notification.title,
+          content: res.notification.content,
+          link: res.notification.link,
+          readAt: null,
+          createdAt: new Date(),
+          isRead: false,
+        };
+
+        setNotifications((prev) => [newItem, ...prev.filter((n) => n.id !== newItem.id)]);
+        setTestFeedback("Test notification created & sent! 🚀 Check your unread count and list.");
+
+        // Broadcast across tabs
+        window.dispatchEvent(new CustomEvent("staffguru:notification"));
+        localStorage.setItem("staffguru_notify_sync", Date.now().toString());
+      } else {
+        setTestFeedback(res.error || "Failed to send test notification.");
+      }
+    } catch (err: any) {
+      console.error("[NotificationHistory] Test error:", err);
+      setTestFeedback("Error triggering test notification.");
+    } finally {
+      setIsSendingTest(false);
+      setTimeout(() => setTestFeedback(null), 5000);
+    }
+  };
 
   const handleMarkAllRead = () => {
     startTransition(async () => {
@@ -214,17 +333,49 @@ export function NotificationHistoryView({ role }: NotificationHistoryViewProps) 
           </p>
         </div>
 
-        {unreadCount > 0 && (
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          {/* Test notification button */}
           <button
-            onClick={handleMarkAllRead}
-            disabled={isPending}
-            className="self-start sm:self-auto flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-xl bg-white border border-neutral-200/90 text-neutral-800 hover:bg-neutral-50 transition-all shadow-sm"
+            onClick={handleSendTestNotification}
+            disabled={isSendingTest}
+            className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl bg-emerald-50 border border-emerald-200 text-[#008751] hover:bg-emerald-100 transition-all shadow-sm"
           >
-            <CheckCheck className="w-4 h-4 text-[#008751]" />
-            <span>Mark All as Read</span>
+            {isSendingTest ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-[#008751]" />
+            ) : (
+              <Sparkles className="w-3.5 h-3.5 text-[#008751]" />
+            )}
+            <span>Send Test Alert</span>
           </button>
-        )}
+
+          {unreadCount > 0 && (
+            <button
+              onClick={handleMarkAllRead}
+              disabled={isPending}
+              className="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-xl bg-white border border-neutral-200/90 text-neutral-800 hover:bg-neutral-50 transition-all shadow-sm"
+            >
+              <CheckCheck className="w-4 h-4 text-[#008751]" />
+              <span>Mark All as Read</span>
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* Test feedback banner */}
+      {testFeedback && (
+        <div className="p-3.5 rounded-xl bg-emerald-600 text-white text-xs font-medium flex items-center justify-between shadow-sm animate-in fade-in duration-150">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 shrink-0" />
+            <span>{testFeedback}</span>
+          </div>
+          <button
+            onClick={() => setTestFeedback(null)}
+            className="opacity-80 hover:opacity-100 text-xs underline ml-2"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
 
       {/* Controls & Filter Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-neutral-200/80 shadow-sm">
@@ -298,8 +449,22 @@ export function NotificationHistoryView({ role }: NotificationHistoryViewProps) 
                 ? `No notifications found matching "${searchQuery}".`
                 : filterStatus === "unread"
                 ? "You have zero unread notifications."
-                : "No notifications have been recorded yet."}
+                : "No notifications have been recorded yet. Click below to trigger a test alert and verify delivery."}
             </p>
+            <div className="pt-2">
+              <button
+                onClick={handleSendTestNotification}
+                disabled={isSendingTest}
+                className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-sm"
+              >
+                {isSendingTest ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Sparkles className="w-4 h-4" />
+                )}
+                <span>Send Test Notification</span>
+              </button>
+            </div>
           </div>
         ) : (
           filteredItems.map((item) => {

@@ -29,6 +29,7 @@ import {
   markNotificationAsRead,
   markAllNotificationsAsRead,
   deleteNotification,
+  triggerTestNotificationAction,
 } from "@/actions/notifications";
 import { subscribeToPush, unsubscribeFromPush, sendTestPushNotification } from "@/actions/push";
 
@@ -65,6 +66,42 @@ function formatRelativeTime(dateStr: Date | string) {
 
 function getNotificationMeta(type: string) {
   switch (type) {
+    case "TEST_NOTIFICATION":
+      return {
+        icon: Sparkles,
+        bg: "bg-emerald-50 text-[#008751] border-emerald-200",
+        label: "System Test",
+      };
+    case "ERRAND_POSTED":
+      return {
+        icon: Sparkles,
+        bg: "bg-indigo-50 text-indigo-700 border-indigo-200",
+        label: "Errand Posted",
+      };
+    case "DISPUTE_FILED":
+      return {
+        icon: AlertTriangle,
+        bg: "bg-rose-50 text-rose-700 border-rose-200",
+        label: "Dispute Opened",
+      };
+    case "INTERVIEW_INVITATION":
+      return {
+        icon: Clock,
+        bg: "bg-purple-50 text-purple-700 border-purple-200",
+        label: "Interview Invite",
+      };
+    case "HANDSHAKE_ACCEPTED":
+      return {
+        icon: ShieldCheck,
+        bg: "bg-emerald-50 text-[#008751] border-emerald-200",
+        label: "Offer Accepted",
+      };
+    case "HANDSHAKE_DECLINED":
+      return {
+        icon: AlertTriangle,
+        bg: "bg-amber-50 text-amber-700 border-amber-200",
+        label: "Offer Declined",
+      };
     case "JOB_OFFER":
       return {
         icon: Briefcase,
@@ -142,6 +179,10 @@ export function NotificationCenter({ role }: NotificationCenterProps) {
   const [pushLoading, setPushLoading] = useState(false);
   const [testPushStatus, setTestPushStatus] = useState<string | null>(null);
 
+  // Real-time test alert state
+  const [isSendingTest, setIsSendingTest] = useState(false);
+  const [testAlertBanner, setTestAlertBanner] = useState<string | null>(null);
+
   const panelRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown on outside click
@@ -178,14 +219,23 @@ export function NotificationCenter({ role }: NotificationCenterProps) {
   useEffect(() => {
     fetchFeed();
 
-    // Polling every 25 seconds & on tab focus
-    const interval = setInterval(fetchFeed, 25000);
+    // Active polling every 8 seconds & on window focus or cross-tab sync
+    const interval = setInterval(fetchFeed, 8000);
     const handleFocus = () => fetchFeed();
+    const handleSync = () => fetchFeed();
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "staffguru_notify_sync") fetchFeed();
+    };
+
     window.addEventListener("focus", handleFocus);
+    window.addEventListener("staffguru:notification", handleSync);
+    window.addEventListener("storage", handleStorage);
 
     return () => {
       clearInterval(interval);
       window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("staffguru:notification", handleSync);
+      window.removeEventListener("storage", handleStorage);
     };
   }, []);
 
@@ -239,22 +289,72 @@ export function NotificationCenter({ role }: NotificationCenterProps) {
     }
   };
 
-  const handleSendTestPush = async () => {
-    setPushLoading(true);
+  const handleTriggerTestNotification = async () => {
+    setIsSendingTest(true);
+    setTestAlertBanner(null);
     setTestPushStatus(null);
     try {
-      const res = await sendTestPushNotification();
-      if (res.success) {
-        setTestPushStatus("Test alert sent to device tray!");
-      } else {
-        setTestPushStatus(res.error || "Failed to send test push.");
+      // 1. Show immediate desktop/tray push if browser permission is already granted
+      if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+        if ("serviceWorker" in navigator) {
+          navigator.serviceWorker.ready.then((reg) => {
+            reg.showNotification("Staff Guru Test Alert 🚀", {
+              body: "Your notifications are active! Real-time feeds and push alerts are working.",
+              icon: "/icon-192x192.png",
+              badge: "/icon-192x192.png",
+              tag: `test-notif-${Date.now()}`,
+            });
+          }).catch(() => {
+            new Notification("Staff Guru Test Alert 🚀", {
+              body: "Your notifications are active!",
+              icon: "/icon-192x192.png",
+            });
+          });
+        }
       }
-    } catch (err) {
+
+      // 2. Insert into DB notifications table & dispatch Web Push in background
+      const res = await triggerTestNotificationAction();
+      if (res.success && res.notification) {
+        const newItem: NotificationItem = {
+          id: res.notification.id,
+          userId: res.notification.userId,
+          type: res.notification.type || "TEST_NOTIFICATION",
+          title: res.notification.title,
+          content: res.notification.content,
+          link: res.notification.link,
+          readAt: null,
+          createdAt: new Date(),
+          isRead: false,
+        };
+
+        // Optimistically update local feed and unread counter
+        setNotifications((prev) => [newItem, ...prev.filter((n) => n.id !== newItem.id)]);
+        setUnreadCount((c) => c + 1);
+        setTestAlertBanner("Test alert dispatched! Added to feed & sent to device.");
+        setTestPushStatus("Test alert sent to in-app feed & device tray!");
+
+        // Broadcast to other open tabs
+        window.dispatchEvent(new CustomEvent("staffguru:notification"));
+        localStorage.setItem("staffguru_notify_sync", Date.now().toString());
+      } else {
+        const errMsg = res.error || "Failed to trigger test notification.";
+        setTestAlertBanner(errMsg);
+        setTestPushStatus(errMsg);
+      }
+    } catch (err: any) {
+      console.error("[NotificationCenter] Test trigger error:", err);
+      setTestAlertBanner("Error triggering test notification.");
       setTestPushStatus("Error sending test alert.");
     } finally {
-      setPushLoading(false);
+      setIsSendingTest(false);
+      setTimeout(() => {
+        setTestAlertBanner(null);
+      }, 5000);
     }
   };
+
+  const handleSendTestPush = handleTriggerTestNotification;
 
   const handleItemClick = async (item: NotificationItem) => {
     // Optimistic read
@@ -337,6 +437,21 @@ export function NotificationCenter({ role }: NotificationCenterProps) {
             </div>
 
             <div className="flex items-center gap-1.5">
+              {/* One-click Test Notification Button */}
+              <button
+                onClick={handleTriggerTestNotification}
+                disabled={isSendingTest}
+                title="Send a real-time test alert to your feed and device"
+                className="flex items-center gap-1 text-[11px] font-bold text-[#008751] bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/90 px-2 py-1 rounded-lg transition-all shadow-xs"
+              >
+                {isSendingTest ? (
+                  <Loader2 className="w-3 h-3 animate-spin text-[#008751]" />
+                ) : (
+                  <Sparkles className="w-3 h-3 text-[#008751]" />
+                )}
+                <span>Test Alert</span>
+              </button>
+
               {unreadCount > 0 && (
                 <button
                   onClick={handleMarkAllRead}
@@ -368,6 +483,19 @@ export function NotificationCenter({ role }: NotificationCenterProps) {
             </div>
           </div>
 
+          {/* Feedback banner */}
+          {testAlertBanner && (
+            <div className="px-4 py-2 bg-emerald-600 text-white text-[11px] font-medium flex items-center justify-between animate-in fade-in duration-150">
+              <div className="flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                <span>{testAlertBanner}</span>
+              </div>
+              <button onClick={() => setTestAlertBanner(null)} className="opacity-80 hover:opacity-100">
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          )}
+
           {/* Collapsible Web Push Settings Panel */}
           {showPushSettings && (
             <div className="p-4 bg-neutral-900 text-white border-b border-neutral-800 space-y-3 animate-in fade-in duration-150">
@@ -395,19 +523,23 @@ export function NotificationCenter({ role }: NotificationCenterProps) {
                 </button>
               </div>
 
-              {pushSubscribed && (
-                <div className="pt-2 border-t border-neutral-800 flex items-center justify-between">
-                  <span className="text-[11px] text-neutral-400">Test phone/desktop delivery:</span>
-                  <button
-                    onClick={handleSendTestPush}
-                    disabled={pushLoading}
-                    className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded-md transition-colors"
-                  >
+              <div className="pt-2 border-t border-neutral-800 flex items-center justify-between">
+                <span className="text-[11px] text-neutral-400">
+                  {pushSubscribed ? "Test device tray & feed:" : "Test in-app notification feed:"}
+                </span>
+                <button
+                  onClick={handleTriggerTestNotification}
+                  disabled={isSendingTest}
+                  className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded-md transition-colors"
+                >
+                  {isSendingTest ? (
+                    <Loader2 className="w-3 h-3 animate-spin text-[#008751]" />
+                  ) : (
                     <Send className="w-3 h-3 text-[#008751]" />
-                    <span>Send Test Alert</span>
-                  </button>
-                </div>
-              )}
+                  )}
+                  <span>Send Test Alert</span>
+                </button>
+              </div>
 
               {testPushStatus && (
                 <p className="text-[11px] text-emerald-400 pt-1">{testPushStatus}</p>
@@ -447,16 +579,30 @@ export function NotificationCenter({ role }: NotificationCenterProps) {
                 <span>Loading your notifications...</span>
               </div>
             ) : filteredNotifications.length === 0 ? (
-              <div className="p-8 text-center space-y-2">
+              <div className="p-8 text-center space-y-3">
                 <div className="w-10 h-10 rounded-full bg-emerald-50 text-[#008751] flex items-center justify-center mx-auto">
                   <CheckCircle2 className="w-5 h-5" />
                 </div>
                 <p className="text-sm font-semibold text-neutral-800">All caught up!</p>
-                <p className="text-xs text-neutral-500">
+                <p className="text-xs text-neutral-500 max-w-xs mx-auto">
                   {activeTab === "unread"
                     ? "You have zero unread notifications."
-                    : "No notifications recorded yet."}
+                    : "No notifications recorded yet. Click below to verify real-time alerts."}
                 </p>
+                <div className="pt-1">
+                  <button
+                    onClick={handleTriggerTestNotification}
+                    disabled={isSendingTest}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-emerald-50 text-[#008751] border border-emerald-200 hover:bg-emerald-100 transition-colors shadow-xs"
+                  >
+                    {isSendingTest ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-[#008751]" />
+                    ) : (
+                      <Sparkles className="w-3.5 h-3.5 text-[#008751]" />
+                    )}
+                    <span>Send Test Notification</span>
+                  </button>
+                </div>
               </div>
             ) : (
               filteredNotifications.map((item) => {
@@ -520,7 +666,7 @@ export function NotificationCenter({ role }: NotificationCenterProps) {
           </div>
 
           {/* Footer */}
-          <div className="px-4 py-3 bg-neutral-50 border-t border-neutral-100 flex items-center justify-between text-xs">
+          <div className="px-4 py-2.5 bg-neutral-50 border-t border-neutral-100 flex items-center justify-between text-xs">
             <button
               onClick={() => {
                 setIsOpen(false);
@@ -528,11 +674,22 @@ export function NotificationCenter({ role }: NotificationCenterProps) {
               }}
               className="text-neutral-600 hover:text-neutral-950 font-semibold flex items-center gap-1 transition-colors"
             >
-              <span>View full notification history</span>
+              <span>View full history</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
 
-            <span className="text-[11px] text-neutral-400">Staff Guru Alerts</span>
+            <button
+              onClick={handleTriggerTestNotification}
+              disabled={isSendingTest}
+              className="text-xs font-semibold text-[#008751] hover:text-[#007043] flex items-center gap-1 transition-colors"
+            >
+              {isSendingTest ? (
+                <Loader2 className="w-3 h-3 animate-spin text-[#008751]" />
+              ) : (
+                <Sparkles className="w-3 h-3 text-[#008751]" />
+              )}
+              <span>Send Test Alert</span>
+            </button>
           </div>
         </div>
       )}
