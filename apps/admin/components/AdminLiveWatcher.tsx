@@ -16,9 +16,31 @@ import {
   VolumeX,
   X,
   ArrowUpRight,
+  Smartphone,
+  Send,
+  Loader2,
+  BellRing,
+  BellOff,
 } from "lucide-react";
 import Link from "next/link";
+import { formatDateTimeDDMMYYYY } from "@repo/shared";
 import type { LiveActivityItem } from "@/app/api/live-sync/route";
+import {
+  subscribeAdminAction,
+  unsubscribeAdminAction,
+  sendAdminTestPushAction,
+} from "@/lib/pushActions";
+
+function urlBase64ToUint8Array(base64String: string) {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
 
 function playNotificationChime() {
   try {
@@ -87,6 +109,11 @@ export function AdminLiveWatcher() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [toast, setToast] = useState<{ title: string; desc: string } | null>(null);
 
+  // Push Notification state
+  const [pushState, setPushState] = useState<"loading" | "subscribed" | "unsubscribed" | "denied" | "unsupported">("loading");
+  const [pushSubmitting, setPushSubmitting] = useState(false);
+  const [testPushStatus, setTestPushStatus] = useState<string | null>(null);
+
   const lastSeenTimestampRef = useRef<string>(new Date().toISOString());
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -120,6 +147,118 @@ export function AdminLiveWatcher() {
     }
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
+
+  // Service Worker and Web Push check / auto-subscribe on mount
+  useEffect(() => {
+    async function initPush() {
+      if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+        setPushState("unsupported");
+        return;
+      }
+
+      if (Notification.permission === "denied") {
+        setPushState("denied");
+        return;
+      }
+
+      try {
+        const reg = await navigator.serviceWorker.register("/sw.js");
+        const sub = await reg.pushManager.getSubscription();
+
+        if (sub) {
+          setPushState("subscribed");
+          // Re-sync subscription token to server in background
+          subscribeAdminAction(JSON.parse(JSON.stringify(sub))).catch(console.error);
+        } else if (Notification.permission === "granted") {
+          const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+          if (vapidKey) {
+            const appServerKey = urlBase64ToUint8Array(vapidKey);
+            const newSub = await reg.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: appServerKey,
+            });
+            await subscribeAdminAction(JSON.parse(JSON.stringify(newSub)));
+            setPushState("subscribed");
+          } else {
+            setPushState("unsubscribed");
+          }
+        } else {
+          setPushState("unsubscribed");
+        }
+      } catch (err) {
+        console.error("[Admin Push] Init error:", err);
+        setPushState("unsubscribed");
+      }
+    }
+
+    initPush();
+  }, []);
+
+  const handleTogglePush = async () => {
+    setPushSubmitting(true);
+    setTestPushStatus(null);
+    try {
+      if (pushState === "subscribed") {
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        if (sub) {
+          await unsubscribeAdminAction(sub.endpoint);
+          await sub.unsubscribe();
+        }
+        setPushState("unsubscribed");
+      } else {
+        const permission = await Notification.requestPermission();
+        if (permission === "denied") {
+          setPushState("denied");
+          return;
+        }
+        if (permission !== "granted") {
+          setPushState("unsubscribed");
+          return;
+        }
+
+        const reg = await navigator.serviceWorker.ready;
+        const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+        if (!vapidKey) {
+          throw new Error("Missing NEXT_PUBLIC_VAPID_PUBLIC_KEY in environment");
+        }
+
+        const applicationServerKey = urlBase64ToUint8Array(vapidKey);
+        const sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey,
+        });
+
+        const res = await subscribeAdminAction(JSON.parse(JSON.stringify(sub)));
+        if (!res.success) {
+          throw new Error(res.error || "Failed to register subscription.");
+        }
+        setPushState("subscribed");
+      }
+    } catch (err: any) {
+      console.error("[Admin Push] Toggle error:", err);
+      setTestPushStatus(err?.message || "Failed to toggle notifications");
+    } finally {
+      setPushSubmitting(false);
+    }
+  };
+
+  const handleSendTestPush = async () => {
+    setPushSubmitting(true);
+    setTestPushStatus(null);
+    try {
+      const res = await sendAdminTestPushAction();
+      if (res.success) {
+        setTestPushStatus("Test alert dispatched! Check your notification tray.");
+      } else {
+        setTestPushStatus(res.error || "Failed to send test push.");
+      }
+    } catch (err: any) {
+      setTestPushStatus(err?.message || "Error sending test alert.");
+    } finally {
+      setPushSubmitting(false);
+    }
+  };
 
   // Main synchronization routine
   const checkLiveActivity = useCallback(async (isManual = false) => {
@@ -239,15 +378,17 @@ export function AdminLiveWatcher() {
       <button
         onClick={handleOpenDropdown}
         className="relative p-2 text-muted-foreground hover:text-black transition-colors rounded-lg hover:bg-gray-100"
-        title="Live website activity"
+        title="Live website activity & alerts"
       >
-        <Bell size={19} />
+        {pushState === "subscribed" ? <BellRing size={19} className="text-emerald-700" /> : <Bell size={19} />}
         {unreadCount > 0 ? (
           <span className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 bg-emerald-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-bounce shadow-sm">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
+        ) : pushState === "subscribed" ? (
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
         ) : (
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-emerald-500 rounded-full" />
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-amber-500 rounded-full" />
         )}
       </button>
 
@@ -282,11 +423,11 @@ export function AdminLiveWatcher() {
           <div className="px-4 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
             <div>
               <h4 className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
-                <span>Live Activity</span>
+                <span>Admin Operations Desk</span>
                 <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
               </h4>
               <p className="text-[10px] text-gray-500">
-                Auto-syncs live actions without refreshing
+                Real-time activity & push alerts
               </p>
             </div>
             <div className="flex items-center gap-1">
@@ -305,6 +446,82 @@ export function AdminLiveWatcher() {
               </button>
             </div>
           </div>
+
+          {/* Device Push Notifications Bar */}
+          <div className="p-3 bg-neutral-50/90 border-b border-gray-100 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+                <Smartphone size={14} />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-semibold text-gray-900">Device Push Alerts</span>
+                  {pushState === "subscribed" && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  )}
+                </div>
+                <p className="text-[10px] text-gray-500 truncate">
+                  {pushState === "subscribed"
+                    ? "Active & Connected"
+                    : pushState === "denied"
+                    ? "Blocked in Browser"
+                    : pushState === "unsupported"
+                    ? "Not Supported"
+                    : "Instant phone & browser alerts"}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5 shrink-0">
+              {pushState !== "unsupported" && pushState !== "denied" && (
+                <button
+                  onClick={handleTogglePush}
+                  disabled={pushSubmitting || pushState === "loading"}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                    pushState === "subscribed"
+                      ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      : "bg-[#008751] text-white hover:bg-[#007043] shadow-xs"
+                  }`}
+                >
+                  {pushSubmitting ? (
+                    <Loader2 size={12} className="animate-spin" />
+                  ) : pushState === "subscribed" ? (
+                    "Turn Off"
+                  ) : (
+                    "Turn On"
+                  )}
+                </button>
+              )}
+
+              {pushState === "subscribed" && (
+                <button
+                  onClick={handleSendTestPush}
+                  disabled={pushSubmitting}
+                  title="Send Test Push Alert"
+                  className="p-1.5 text-emerald-700 hover:text-emerald-900 hover:bg-emerald-100/60 rounded-md transition-colors"
+                >
+                  {pushSubmitting ? (
+                    <Loader2 size={13} className="animate-spin" />
+                  ) : (
+                    <Send size={13} />
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Test Push Status Toast Message */}
+          {testPushStatus && (
+            <div className="px-3 py-1.5 bg-emerald-50 text-[10px] font-medium text-emerald-800 border-b border-emerald-100 flex items-center justify-between animate-in fade-in duration-150">
+              <span className="truncate">{testPushStatus}</span>
+              <button
+                onClick={() => setTestPushStatus(null)}
+                className="text-emerald-500 hover:text-emerald-800 ml-1 p-0.5"
+              >
+                <X size={11} />
+              </button>
+            </div>
+          )}
 
           {/* List of Activities */}
           <div className="max-h-80 overflow-y-auto divide-y divide-gray-100">
@@ -347,7 +564,7 @@ export function AdminLiveWatcher() {
 
           {/* Footer */}
           <div className="px-4 py-2 bg-gray-50 border-t border-gray-100 text-[10px] text-gray-400 flex items-center justify-between">
-            <span>Last sync: {lastSyncedAt.toLocaleTimeString()}</span>
+            <span>Last sync: {formatDateTimeDDMMYYYY(lastSyncedAt)}</span>
             <button
               onClick={() => checkLiveActivity(true)}
               className="text-emerald-700 hover:underline font-semibold"
