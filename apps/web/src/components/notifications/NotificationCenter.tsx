@@ -422,11 +422,23 @@ export function NotificationCenter({ role }: NotificationCenterProps) {
         )}
       </button>
 
+      {/* Mobile Backdrop */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/25 z-40 sm:hidden"
+          onClick={() => {
+            setIsOpen(false);
+            setShowPushSettings(false);
+          }}
+          aria-hidden="true"
+        />
+      )}
+
       {/* Dropdown Popover */}
       {isOpen && (
-        <div className="absolute right-0 mt-2.5 w-[340px] sm:w-[420px] bg-white rounded-2xl shadow-2xl border border-neutral-200/90 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-x-3.5 top-16 sm:inset-x-auto sm:left-auto sm:absolute sm:right-0 sm:top-full sm:mt-2 sm:w-[420px] max-h-[calc(100vh-80px)] sm:max-h-[580px] flex flex-col bg-white rounded-2xl shadow-2xl border border-neutral-200/90 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
           {/* Header */}
-          <div className="px-4 py-3.5 border-b border-neutral-100 flex items-center justify-between bg-neutral-50/80">
+          <div className="px-4 py-3 border-b border-neutral-100 flex items-center justify-between bg-neutral-50/80 shrink-0">
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-semibold text-neutral-900">Notifications</h3>
               {unreadCount > 0 && (
@@ -437,27 +449,12 @@ export function NotificationCenter({ role }: NotificationCenterProps) {
             </div>
 
             <div className="flex items-center gap-1.5">
-              {/* One-click Test Notification Button */}
-              <button
-                onClick={handleTriggerTestNotification}
-                disabled={isSendingTest}
-                title="Send a real-time test alert to your feed and device"
-                className="flex items-center gap-1 text-[11px] font-bold text-[#008751] bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/90 px-2 py-1 rounded-lg transition-all shadow-xs"
-              >
-                {isSendingTest ? (
-                  <Loader2 className="w-3 h-3 animate-spin text-[#008751]" />
-                ) : (
-                  <Sparkles className="w-3 h-3 text-[#008751]" />
-                )}
-                <span>Test Alert</span>
-              </button>
-
               {unreadCount > 0 && (
                 <button
                   onClick={handleMarkAllRead}
                   disabled={isPending}
                   title="Mark all as read"
-                  className="flex items-center gap-1 text-xs font-medium text-neutral-500 hover:text-neutral-900 px-2 py-1 rounded-md hover:bg-neutral-200/60 transition-colors"
+                  className="flex items-center gap-1 text-xs font-medium text-neutral-600 hover:text-neutral-900 px-2 py-1 rounded-md hover:bg-neutral-200/60 transition-colors"
                 >
                   <CheckCheck className="w-3.5 h-3.5 text-[#008751]" />
                   <span>Mark read</span>
@@ -476,7 +473,8 @@ export function NotificationCenter({ role }: NotificationCenterProps) {
               </button>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-neutral-400 hover:text-neutral-700 p-1 rounded-md"
+                className="text-neutral-400 hover:text-neutral-700 p-1.5 rounded-md hover:bg-neutral-100"
+                aria-label="Close notifications"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -485,12 +483,12 @@ export function NotificationCenter({ role }: NotificationCenterProps) {
 
           {/* Feedback banner */}
           {testAlertBanner && (
-            <div className="px-4 py-2 bg-emerald-600 text-white text-[11px] font-medium flex items-center justify-between animate-in fade-in duration-150">
-              <div className="flex items-center gap-1.5">
+            <div className="px-4 py-2 bg-emerald-600 text-white text-[11px] font-medium flex items-center justify-between shrink-0 animate-in fade-in duration-150">
+              <div className="flex items-center gap-1.5 min-w-0">
                 <Sparkles className="w-3.5 h-3.5 shrink-0" />
-                <span>{testAlertBanner}</span>
+                <span className="truncate">{testAlertBanner}</span>
               </div>
-              <button onClick={() => setTestAlertBanner(null)} className="opacity-80 hover:opacity-100">
+              <button onClick={() => setTestAlertBanner(null)} className="opacity-80 hover:opacity-100 p-0.5">
                 <X className="w-3 h-3" />
               </button>
             </div>
@@ -498,16 +496,16 @@ export function NotificationCenter({ role }: NotificationCenterProps) {
 
           {/* Collapsible Web Push Settings Panel */}
           {showPushSettings && (
-            <div className="p-4 bg-neutral-900 text-white border-b border-neutral-800 space-y-3 animate-in fade-in duration-150">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Smartphone className="w-4 h-4 text-[#008751]" />
-                  <span className="text-xs font-semibold">Instant Web Push Alerts</span>
+            <div className="p-4 bg-neutral-900 text-white border-b border-neutral-800 space-y-3 shrink-0 animate-in fade-in duration-150">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Smartphone className="w-4 h-4 text-[#008751] shrink-0" />
+                  <span className="text-xs font-semibold truncate">Instant Web Push Alerts</span>
                 </div>
                 <button
                   onClick={handleTogglePush}
                   disabled={pushLoading}
-                  className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${
+                  className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors shrink-0 ${
                     pushSubscribed
                       ? "bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
                       : "bg-[#008751] text-white hover:bg-[#007043]"
@@ -523,14 +521,14 @@ export function NotificationCenter({ role }: NotificationCenterProps) {
                 </button>
               </div>
 
-              <div className="pt-2 border-t border-neutral-800 flex items-center justify-between">
+              <div className="pt-2 border-t border-neutral-800 flex items-center justify-between gap-2">
                 <span className="text-[11px] text-neutral-400">
                   {pushSubscribed ? "Test device tray & feed:" : "Test in-app notification feed:"}
                 </span>
                 <button
                   onClick={handleTriggerTestNotification}
                   disabled={isSendingTest}
-                  className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded-md transition-colors"
+                  className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded-md transition-colors shrink-0"
                 >
                   {isSendingTest ? (
                     <Loader2 className="w-3 h-3 animate-spin text-[#008751]" />
@@ -547,32 +545,49 @@ export function NotificationCenter({ role }: NotificationCenterProps) {
             </div>
           )}
 
-          {/* Filter Tabs */}
-          <div className="flex border-b border-neutral-100 px-4 pt-2 gap-4 text-xs font-semibold">
+          {/* Filter Tabs & Test Alert Bar */}
+          <div className="flex items-center justify-between border-b border-neutral-100 px-4 pt-2.5 pb-2 bg-neutral-50/50 shrink-0">
+            <div className="flex items-center gap-4 text-xs font-semibold">
+              <button
+                onClick={() => setActiveTab("all")}
+                className={`pb-1.5 transition-colors border-b-2 ${
+                  activeTab === "all"
+                    ? "border-[#008751] text-neutral-950 font-bold"
+                    : "border-transparent text-neutral-400 hover:text-neutral-700"
+                }`}
+              >
+                All ({notifications.length})
+              </button>
+              <button
+                onClick={() => setActiveTab("unread")}
+                className={`pb-1.5 transition-colors border-b-2 ${
+                  activeTab === "unread"
+                    ? "border-[#008751] text-neutral-950 font-bold"
+                    : "border-transparent text-neutral-400 hover:text-neutral-700"
+                }`}
+              >
+                Unread ({unreadCount})
+              </button>
+            </div>
+
+            {/* Test Alert Button */}
             <button
-              onClick={() => setActiveTab("all")}
-              className={`pb-2 transition-colors border-b-2 ${
-                activeTab === "all"
-                  ? "border-[#008751] text-neutral-950 font-bold"
-                  : "border-transparent text-neutral-400 hover:text-neutral-700"
-              }`}
+              onClick={handleTriggerTestNotification}
+              disabled={isSendingTest}
+              title="Send a real-time test alert to your feed and device"
+              className="flex items-center gap-1.5 text-[11px] font-bold text-[#008751] bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/90 px-2.5 py-1 rounded-lg transition-all shadow-xs shrink-0"
             >
-              All ({notifications.length})
-            </button>
-            <button
-              onClick={() => setActiveTab("unread")}
-              className={`pb-2 transition-colors border-b-2 ${
-                activeTab === "unread"
-                  ? "border-[#008751] text-neutral-950 font-bold"
-                  : "border-transparent text-neutral-400 hover:text-neutral-700"
-              }`}
-            >
-              Unread ({unreadCount})
+              {isSendingTest ? (
+                <Loader2 className="w-3 h-3 animate-spin text-[#008751]" />
+              ) : (
+                <Sparkles className="w-3 h-3 text-[#008751]" />
+              )}
+              <span>Test Alert</span>
             </button>
           </div>
 
           {/* Notification List Container */}
-          <div className="max-h-[380px] overflow-y-auto divide-y divide-neutral-100">
+          <div className="flex-1 overflow-y-auto divide-y divide-neutral-100 min-h-0">
             {isLoading ? (
               <div className="p-8 text-center text-neutral-400 text-xs flex flex-col items-center justify-center gap-2">
                 <Loader2 className="w-5 h-5 animate-spin text-[#008751]" />
@@ -666,7 +681,7 @@ export function NotificationCenter({ role }: NotificationCenterProps) {
           </div>
 
           {/* Footer */}
-          <div className="px-4 py-2.5 bg-neutral-50 border-t border-neutral-100 flex items-center justify-between text-xs">
+          <div className="px-4 py-2.5 bg-neutral-50 border-t border-neutral-100 flex items-center justify-between text-xs shrink-0">
             <button
               onClick={() => {
                 setIsOpen(false);
