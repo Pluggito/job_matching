@@ -378,6 +378,13 @@ export async function claimErrand(errandId: string) {
         link: `/dashboard/errands/${errandId}`,
       });
 
+      sendPushToUser(session.userId, {
+        title: "Errand Claimed! 🏃‍♂️",
+        body: `You accepted "${lockedErrand.title}". Awaiting client escrow funding.`,
+        url: `/dashboard/errands/${errandId}`,
+        tag: `errand-${errandId}`,
+      }).catch(console.error);
+
       return { success: true };
     });
 

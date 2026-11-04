@@ -11,7 +11,7 @@ export interface CreateNotificationParams {
   title: string;
   content: string;
   link?: string;
-  tag?: string;
+  tag?: string
   skipPush?: boolean;
 }
 

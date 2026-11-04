@@ -1,3 +1,4 @@
+import { sendPushToUser } from "@/server/services/pushNotifications";
 import {
   db,
   payments,
@@ -256,6 +257,15 @@ export async function POST(req: Request) {
                       : `Your errand "${targetErrand.title}" is funded and live! Matching verified runners can now claim it.`,
                     link: `/employer/errands/${payment.errandId}`,
                   });
+
+                  sendPushToUser(emp.userId, {
+                    title: isDispatched ? "Payment Confirmed · Runner Dispatched! 🚀" : "Errand Funded & Live! 🚀",
+                    body: isDispatched
+                      ? `Escrow payment confirmed for "${targetErrand.title}". Runner dispatched!`
+                      : `Your errand "${targetErrand.title}" is funded and live!`,
+                    url: `/employer/errands/${payment.errandId}`,
+                    tag: `errand-${payment.errandId}`,
+                  }).catch(console.error);
                 }
 
                 if (targetErrand.claimedByWorkerId) {
@@ -273,6 +283,13 @@ export async function POST(req: Request) {
                       content: `The creator has funded "${targetErrand.title}". You may now begin execution.`,
                       link: "/dashboard/errands",
                     });
+
+                    sendPushToUser(worker.userId, {
+                      title: "Escrow Funded! 🚀",
+                      body: `The creator has funded "${targetErrand.title}". You may now begin execution.`,
+                      url: "/dashboard/errands",
+                      tag: `errand-${payment.errandId}`,
+                    }).catch(console.error);
                   }
                 }
               }

@@ -27,6 +27,7 @@
     "next": "15.0.0-rc.0",
     "react": "19.0.0-rc-f994737d14-20240522",
     "react-dom": "19.0.0-rc-f994737d14-20240522",
+    "resend": "^6.37.0",
     "shadcn": "^4.21.1",
     "socket.io-client": "^4.8.1",
     "tailwind-merge": "^2.5.2",

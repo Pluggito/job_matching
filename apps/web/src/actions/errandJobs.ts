@@ -15,6 +15,7 @@ import {
   sql,
 } from "@repo/db";
 import { formatNaira } from "@repo/shared";
+import { sendPushToUser } from "@/server/services/pushNotifications";
 
 /**
  * 1. Process unclaimed errands past their 24h window (or past deadline).
@@ -100,6 +101,13 @@ export async function processUnclaimedExpiredErrands() {
           content: `Your errand "${errand.title}" was not claimed within the 24-hour guarantee window. A 100% full refund has been initiated to your account.`,
           link: `/employer/errands/${errand.id}`,
         });
+
+        sendPushToUser(emp.userId, {
+          title: "Errand Auto-Completed ✅",
+          body: `Errand "${errand.title}" auto-completed after 24 hours.`,
+          url: `/employer/errands/${errand.id}`,
+          tag: `errand-${errand.id}`,
+        }).catch(console.error);
       }
     });
 
@@ -169,6 +177,13 @@ export async function processAutoReleaseProofPayouts() {
           content: `Proof auto-approved after 24 hours! Your payout of ${formatNaira(payoutKobo)} has been transferred to your registered bank account.`,
           link: `/dashboard/errands/${errand.id}`,
         });
+
+        sendPushToUser(worker.userId, {
+          title: "Errand Payout Auto-Released 💰",
+          body: `Proof auto-approved! Your payout of ${formatNaira(payoutKobo)} has been released.`,
+          url: `/dashboard/errands/${errand.id}`,
+          tag: `errand-${errand.id}`,
+        }).catch(console.error);
       }
 
       // Notify employer

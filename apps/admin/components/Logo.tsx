@@ -6,6 +6,7 @@ interface LogoProps {
   className?: string;
   iconClassName?: string;
   textClassName?: string;
+  guruClassName?: string;
   showText?: boolean;
   size?: "sm" | "md" | "lg";
   variant?: "default" | "dark" | "light";
@@ -15,6 +16,7 @@ export function Logo({
   className,
   iconClassName,
   textClassName,
+  guruClassName,
   showText = true,
   size = "md",
   variant = "default",
@@ -26,6 +28,7 @@ export function Logo({
   };
 
   const currentSize = sizeMap[size];
+  const isLightOrDark = variant === "light" || variant === "dark";
 
   return (
     <div className={cn("inline-flex items-center gap-2.5 select-none", className)}>
@@ -51,13 +54,13 @@ export function Logo({
           className={cn(
             "font-bold tracking-tight [font-family:var(--font-plus-jakarta)]",
             currentSize.text,
-            variant === "light" || variant === "dark"
+            isLightOrDark
               ? "text-white"
               : "text-[var(--ink)]",
             textClassName
           )}
         >
-          staff<span className="text-[var(--ng)]">guru</span>
+          staff<span className={cn(isLightOrDark ? "text-white" : "text-[var(--ng)]", guruClassName)}>guru</span>
           <i className="text-[var(--orange)] not-italic">.</i>
         </span>
       )}
