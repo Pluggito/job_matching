@@ -33,27 +33,6 @@ interface Scenario {
 
 const SCENARIOS: Scenario[] = [
   {
-    id: "inspection",
-    tabLabel: "Site Inspection",
-    category: "Diaspora & Real Estate",
-    title: "Building Site & Property Check",
-    punchline: "You dey abroad, but your eyes dey on the ground.",
-    description:
-      "Sending money home for your building project? Before you release the next payment, a verified runner goes to site and sends you GPS-stamped photos and video of the foundation, blocks and work done so far. No more \"the work is moving, oga\" stories.",
-    howItWorks:
-      "Sending money home for a building project? Don't rely on phone calls or second-hand updates. A verified runner visits your site in person, takes 360° walk-through videos with live GPS timestamps, counts physical materials, and confirms who is actively working on-site before you release funds.",
-    keyHighlights: [
-      "GPS-Stamped Media",
-      "Material Count Verification",
-      "Live WhatsApp Updates",
-    ],
-    location: "The Eko Pearl · Victoria Island, Lagos",
-    budget: 20000,
-    turnaround: "3.5 hrs avg.",
-    image: "/site_inspection compressed.png",
-    badge: "GPS-Stamped Proof",
-  },
-  {
     id: "ship",
     tabLabel: "Buy & Ship Abroad",
     category: "Diaspora & Cargo",
