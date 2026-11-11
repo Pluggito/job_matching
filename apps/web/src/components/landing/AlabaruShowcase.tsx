@@ -37,7 +37,7 @@ const SCENARIOS: Scenario[] = [
     tabLabel: "Buy & Ship Abroad",
     category: "Diaspora & Cargo",
     title: "Buy in Nigeria, Ship Abroad",
-    punchline: "Missing home? We buy am here, we ship am to you.",
+    punchline: "Too busy? Abroad? Make our runners handle am.",
     description:
       "Want Ankara, lace, foodstuff, skincare, gadgets or gifts for family abroad? Your runner buys the item for you, checks it in person, packs it well and ships it by cargo to the UK, USA or anywhere in the world.",
     howItWorks:
@@ -261,7 +261,7 @@ export default function AlabaruShowcase({
               </h3>
               <div className="space-y-2.5 text-sm sm:text-[15px] text-[var(--ink)]/70 leading-normal sm:leading-[1.42] font-normal">
                 <p>
-                  Staff Guru is more than a job platform. With Alabaru, you can get trusted people to run errands, inspect properties, make deliveries and represent you on the ground, whether you&apos;re in Lagos or abroad.
+                  Staff Guru is more than a job platform. With Alabaru, you can get a verified local runner to handle personal errands, administrative errands, photography and deliveries for you, whether you're in Nigeria or abroad.
                 </p>
                 <p>
                   Too busy? Living abroad? Can&apos;t be in two places at once? Let a verified local runner handle it for you.
@@ -313,7 +313,7 @@ export default function AlabaruShowcase({
 
               {/* Fee Split / Escrow Explanation */}
               <div className="pt-3 border-t border-black/[0.06] text-xs sm:text-[12px] text-[var(--ink)]/65 leading-relaxed">
-                Runners take home <strong className="text-[var(--ink)] font-bold">70% of every errand</strong> once the work is confirmed. Staff Guru keeps <strong className="text-[var(--ink)] font-bold">30%</strong> to run the platform, secure payments, verify runners and handle disputes.
+                Every Alabaru errand is completed within 24 hours. You pay when you post the errand. Your runner is paid in two steps: when they accept it, and after you confirm completion with your handover PIN. Staff Guru keeps <strong className="text-[var(--ink)] font-bold">30%</strong> to run the platform, secure payments, verify runners and handle disputes.
               </div>
             </div>
           </div>
@@ -454,8 +454,7 @@ export default function AlabaruShowcase({
               {/* Narrative Paragraphs */}
               <div className="space-y-2.5 text-sm sm:text-[15px] text-[var(--ink)]/70 leading-normal sm:leading-[1.42] font-normal">
                 <p>
-                  Staff Guru is more than a job platform. With Alabaru, you can get trusted people to run errands, inspect properties, make deliveries and represent you on the ground, whether you&apos;re in Lagos or abroad.
-                </p>
+                  Staff Guru is more than a job platform. With Alabaru, you can get a verified local runner to handle personal errands, administrative errands, photography and deliveries for you, whether you're in Lagos or abroad.
                 <p>
                   Too busy? Living abroad? Can&apos;t be in two places at once? Let a verified local runner handle it for you.
                 </p>
