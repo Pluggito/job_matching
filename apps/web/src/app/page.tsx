@@ -132,8 +132,8 @@ export default async function LandingPage() {
                   </div>
                   <p className="text-[var(--ink)] opacity-50">Trusted by 1,800+ Nigerian businesses</p>
                 </div>
-              </div>
-            </div> */}
+              </div> */}
+            </div>
 
             {/* Dynamic UI Illustration: Nigeria Spatial Map */}
             {/* On mobile: Ambient watermark positioned directly behind the hero text with subtle opacity */}
