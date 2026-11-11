@@ -108,7 +108,7 @@ export default async function LandingPage() {
                 </Link>
               </div>
 
-              {/* Social proof */}
+              {/* Social proof 
               <div className="lp-fade-up lp-d4 mt-10 flex items-center gap-4">
                 <div className="flex -space-x-3">
                   {["/landing/tailor.jpg", "/landing/electrician.jpg", "/landing/employer.jpg"].map((src) => (
@@ -133,7 +133,7 @@ export default async function LandingPage() {
                   <p className="text-[var(--ink)] opacity-50">Trusted by 1,800+ Nigerian businesses</p>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Dynamic UI Illustration: Nigeria Spatial Map */}
             {/* On mobile: Ambient watermark positioned directly behind the hero text with subtle opacity */}
@@ -370,11 +370,10 @@ export default async function LandingPage() {
                     Hire in days, not weeks.
                   </h2>
                   <p className="mt-6 text-base sm:text-lg text-[var(--ink-soft)] leading-normal sm:leading-[1.45] max-w-md">
-                    Search verified workers, message them in the app, agree terms, and pay as each milestone is completed.
+                    Search verified workers, message them in the app, agree terms, and hire the right person for the job.
                   </p>
                 </div>
               </div>
-
               {/* Scrolling Steps */}
               <div className="lg:w-7/12 relative">
                 {/* Vertical Line */}
@@ -413,7 +412,7 @@ export default async function LandingPage() {
                       num: "04",
                       icon: Handshake,
                       title: "Hire & manage",
-                      desc: "Make an offer, onboard your new hire, and manage your team all in one place.",
+                      desc: "Hire: Choose your worker and agree the details in one place.",
                       cardStyle: "bg-[#f4f7f5] sm:bg-transparent text-black border-2 border-dashed border-black/15 hover:border-[var(--ng)]/50 hover:bg-white",
                       iconStyle: "bg-[#f4f7f5] sm:bg-transparent text-black border-2 border-dashed border-black/15 group-hover:border-[var(--ng)]/50 group-hover:bg-white",
                       numColor: "text-black/10 group-hover:text-black/20"
@@ -510,7 +509,7 @@ export default async function LandingPage() {
                   <span className="w-10 shrink-0 text-sm font-bold text-gray-500">04</span>
                   <div>
                     <h3 className="font-bold text-[var(--ink)]">Secure Platform</h3>
-                    <p className="mt-1 text-sm text-gray-600 leading-normal sm:leading-[1.38]">In-app messaging and milestone-based payments protect both parties throughout the entire engagement.</p>
+                    <p className="mt-1 text-sm text-gray-600 leading-normal sm:leading-[1.38]">In-app messaging and secure payments help protect both parties.</p>
                   </div>
                 </div>
               </div>
