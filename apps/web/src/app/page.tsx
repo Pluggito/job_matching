@@ -411,8 +411,8 @@ export default async function LandingPage() {
                     {
                       num: "04",
                       icon: Handshake,
-                      title: "Hire & manage",
-                      desc: "Hire: Choose your worker and agree the details in one place.",
+                      title: "Hire",
+                      desc: "Choose your worker and agree the details in one place.",
                       cardStyle: "bg-[#f4f7f5] sm:bg-transparent text-black border-2 border-dashed border-black/15 hover:border-[var(--ng)]/50 hover:bg-white",
                       iconStyle: "bg-[#f4f7f5] sm:bg-transparent text-black border-2 border-dashed border-black/15 group-hover:border-[var(--ng)]/50 group-hover:bg-white",
                       numColor: "text-black/10 group-hover:text-black/20"
