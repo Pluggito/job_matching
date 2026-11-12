@@ -147,18 +147,14 @@ export default async function LandingPage() {
           <div className="relative border-t border-black/[0.05]">
             <dl className="mx-auto grid max-w-7xl grid-cols-2 divide-black/[0.05] px-5 lg:grid-cols-4 lg:divide-x lg:px-8">
               {[
-                { k: "Verified professionals", v: "10,000+" },
+                { k: "NIN-verified professionals"},
                 { k: "Skill categories", v: "30+" },
-                { k: "Cities covered", v: "36 + FCT" },
-                { k: "Faster hiring", v: "70%" },
+                { k: "Nationwide marketplace"},
               ].map((s, i) => (
                 <div key={s.k} className={`py-8 ${i % 2 === 1 ? "pl-6" : ""} lg:px-8 lg:first:pl-0`}>
                   <dd className="text-3xl font-bold tracking-tight text-[var(--ink)] [font-family:var(--font-bricolage)] sm:text-4xl">
-                    {s.v}
-                  </dd>
-                  <dt className="mt-1 text-xs font-medium uppercase tracking-[0.14em] text-[var(--ink)] opacity-50 [font-family:var(--font-dm-sans)]">
                     {s.k}
-                  </dt>
+                  </dd>
                 </div>
               ))}
             </dl>
