@@ -34,24 +34,12 @@ interface Scenario {
 const SCENARIOS: Scenario[] = [
   {
     id: "ship",
-    tabLabel: "Buy & Ship Abroad",
+    tabLabel: "Personal Errands",
     category: "Diaspora & Cargo",
-    title: "Buy in Nigeria, Ship Abroad",
-    punchline: "Too busy? Abroad? Make our runners handle am.",
-    description:
-      "Want Ankara, lace, foodstuff, skincare, gadgets or gifts for family abroad? Your runner buys the item for you, checks it in person, packs it well and ships it by cargo to the UK, USA or anywhere in the world.",
-    howItWorks:
+    punchline: "Too busy? Abroad? Make our runners handle howItWorks:
       "Craving authentic foodstuffs, bespoke lace, Ankara fabrics, or local gifts for family overseas? Your runner goes into the market, video-calls you to inspect items before purchase, bargains local prices without diaspora markups, packs everything securely with receipts, and handles international cargo handover.",
-    keyHighlights: [
-      "Live Video Inspection",
-      "Local Market Bargaining",
-      "Worldwide Cargo Tracking",
-    ],
-    location: "Balogun Market · Lagos → UK, USA & worldwide",
     budget: 20000,
-    turnaround: "Shipped in days",
     image: "/landing/alabaru/cargo.jpg",
-    badge: "Checked, Packed & Shipped",
   },
   {
     id: "market",
@@ -263,9 +251,6 @@ export default function AlabaruShowcase({
                 <p>
                   Staff Guru is more than a job platform. With Alabaru, you can get a verified local runner to handle personal errands, administrative errands, photography and deliveries for you, whether you're in Nigeria or abroad.
                 </p>
-                <p>
-                  Too busy? Living abroad? Can&apos;t be in two places at once? Let a verified local runner handle it for you.
-                </p>
               </div>
             </div>
 
@@ -455,9 +440,6 @@ export default function AlabaruShowcase({
               <div className="space-y-2.5 text-sm sm:text-[15px] text-[var(--ink)]/70 leading-normal sm:leading-[1.42] font-normal">
                 <p>
                   Staff Guru is more than a job platform. With Alabaru, you can get a verified local runner to handle personal errands, administrative errands, photography and deliveries for you, whether you're in Nigeria or abroad.
-                </p>
-                <p>
-                  Too busy? Living abroad? Can&apos;t be in two places at once? Let a verified local runner handle it for you.
                 </p>
               </div>
             </div>
