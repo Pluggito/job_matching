@@ -32,6 +32,10 @@ This Turborepo includes the following packages/apps:
 
    # JWT Secret for authentication
    JWT_SECRET="your-super-secret-key-for-development"
+
+   # Resend email delivery
+   RESEND_API_KEY="re_your_resend_api_key"
+   RESEND_FROM_EMAIL="Staff Guru <noreply@your-verified-domain.com>"
    ```
 
 3. **Database Setup**
