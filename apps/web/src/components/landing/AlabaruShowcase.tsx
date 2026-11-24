@@ -36,10 +36,21 @@ const SCENARIOS: Scenario[] = [
     id: "ship",
     tabLabel: "Personal Errands",
     category: "Diaspora & Cargo",
-    punchline: "Too busy? Abroad? Make our runners handle am" 
+    title: "Diaspora Market & Cargo Runs",
+    punchline: "Too busy? Abroad? Let our runners handle the market run.",
+    description:
+      "Shop local markets remotely with in-person inspection, careful packing, and international cargo handover.",
     howItWorks: "Craving authentic foodstuffs, bespoke lace, Ankara fabrics, or local gifts for family overseas? Your runner goes into the market, video-calls you to inspect items before purchase, bargains local prices without diaspora markups, packs everything securely with receipts, and handles international cargo handover.",
+    keyHighlights: [
+      "Live Video Item Inspection",
+      "Local Price Negotiation",
+      "Secure Packing & Cargo Handover",
+    ],
+    location: "Local markets · International cargo handover",
     budget: 20000,
+    turnaround: "Same-day market run",
     image: "/landing/alabaru/cargo.jpg",
+    badge: "Inspected & Packed with Care",
   },
   {
     id: "market",
