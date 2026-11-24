@@ -108,7 +108,7 @@ export default async function LandingPage() {
                 </Link>
               </div>
 
-              {/* Social proof */}
+              {/* Social proof 
               <div className="lp-fade-up lp-d4 mt-10 flex items-center gap-4">
                 <div className="flex -space-x-3">
                   {["/landing/tailor.jpg", "/landing/electrician.jpg", "/landing/employer.jpg"].map((src) => (
@@ -132,7 +132,7 @@ export default async function LandingPage() {
                   </div>
                   <p className="text-[var(--ink)] opacity-50">Trusted by 1,800+ Nigerian businesses</p>
                 </div>
-              </div>
+              </div> */}
             </div>
 
             {/* Dynamic UI Illustration: Nigeria Spatial Map */}
@@ -147,18 +147,14 @@ export default async function LandingPage() {
           <div className="relative border-t border-black/[0.05]">
             <dl className="mx-auto grid max-w-7xl grid-cols-2 divide-black/[0.05] px-5 lg:grid-cols-4 lg:divide-x lg:px-8">
               {[
-                { k: "Verified professionals", v: "10,000+" },
+                { k: "NIN-verified professionals"},
                 { k: "Skill categories", v: "30+" },
-                { k: "Cities covered", v: "36 + FCT" },
-                { k: "Faster hiring", v: "70%" },
+                { k: "Nationwide marketplace"},
               ].map((s, i) => (
                 <div key={s.k} className={`py-8 ${i % 2 === 1 ? "pl-6" : ""} lg:px-8 lg:first:pl-0`}>
                   <dd className="text-3xl font-bold tracking-tight text-[var(--ink)] [font-family:var(--font-bricolage)] sm:text-4xl">
-                    {s.v}
-                  </dd>
-                  <dt className="mt-1 text-xs font-medium uppercase tracking-[0.14em] text-[var(--ink)] opacity-50 [font-family:var(--font-dm-sans)]">
                     {s.k}
-                  </dt>
+                  </dd>
                 </div>
               ))}
             </dl>
@@ -370,11 +366,10 @@ export default async function LandingPage() {
                     Hire in days, not weeks.
                   </h2>
                   <p className="mt-6 text-base sm:text-lg text-[var(--ink-soft)] leading-normal sm:leading-[1.45] max-w-md">
-                    Search verified workers, message them in the app, agree terms, and pay as each milestone is completed.
+                    Search verified workers, message them in the app, agree terms, and hire the right person for the job.
                   </p>
                 </div>
               </div>
-
               {/* Scrolling Steps */}
               <div className="lg:w-7/12 relative">
                 {/* Vertical Line */}
@@ -412,8 +407,8 @@ export default async function LandingPage() {
                     {
                       num: "04",
                       icon: Handshake,
-                      title: "Hire & manage",
-                      desc: "Make an offer, onboard your new hire, and manage your team all in one place.",
+                      title: "Hire",
+                      desc: "Choose your worker and agree the details in one place.",
                       cardStyle: "bg-[#f4f7f5] sm:bg-transparent text-black border-2 border-dashed border-black/15 hover:border-[var(--ng)]/50 hover:bg-white",
                       iconStyle: "bg-[#f4f7f5] sm:bg-transparent text-black border-2 border-dashed border-black/15 group-hover:border-[var(--ng)]/50 group-hover:bg-white",
                       numColor: "text-black/10 group-hover:text-black/20"
@@ -510,7 +505,7 @@ export default async function LandingPage() {
                   <span className="w-10 shrink-0 text-sm font-bold text-gray-500">04</span>
                   <div>
                     <h3 className="font-bold text-[var(--ink)]">Secure Platform</h3>
-                    <p className="mt-1 text-sm text-gray-600 leading-normal sm:leading-[1.38]">In-app messaging and milestone-based payments protect both parties throughout the entire engagement.</p>
+                    <p className="mt-1 text-sm text-gray-600 leading-normal sm:leading-[1.38]">In-app messaging and secure payments help protect both parties.</p>
                   </div>
                 </div>
               </div>

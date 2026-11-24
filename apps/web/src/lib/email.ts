@@ -132,8 +132,12 @@ Need support? Email us at: ${COMPANY_EMAIL}
   console.log(`======================================================\n`);
 
   if (!resend) {
-    console.warn("[Email] RESEND_API_KEY is not set. OTP logged above for development.");
-    return { success: true, simulated: true, otp };
+    console.error("[Email] RESEND_API_KEY is not set. OTP was not emailed.");
+    return {
+      success: false,
+      error: "Email delivery is not configured. Please contact support.",
+      otp,
+    };
   }
 
   try {
@@ -152,7 +156,7 @@ Need support? Email us at: ${COMPANY_EMAIL}
     }
 
     console.log(`[Email] Resend API Success:`, response.data);
-    return { success: true, id: response.data?.id };
+    return { success: true, id: response.data?.id, error: null };
   } catch (error: any) {
     console.error(`[Email] Failed to send email via Resend:`, error?.message || error);
     // Return simulated flag so testing flow does not crash if Resend sandbox restricts domain

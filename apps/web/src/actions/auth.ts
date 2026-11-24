@@ -44,7 +44,14 @@ export async function login(prevState: any, formData: FormData) {
       attempts: 0,
     });
 
-    await sendVerificationOtpEmail({ to: user.email, otp, role: user.role });
+    const emailResult = await sendVerificationOtpEmail({ to: user.email, otp, role: user.role });
+    if (!emailResult.success) {
+      return {
+        error: emailResult.error
+          ? `Could not send the verification email: ${emailResult.error}`
+          : "Could not send the verification email. Please try again.",
+      };
+    }
     redirect(`/verify-email?email=${encodeURIComponent(user.email)}&notice=unverified`);
   }
 
@@ -93,7 +100,14 @@ export async function signup(prevState: any, formData: FormData) {
         attempts: 0,
       });
 
-      await sendVerificationOtpEmail({ to: existingUser.email, otp, role: existingUser.role });
+      const emailResult = await sendVerificationOtpEmail({ to: existingUser.email, otp, role: existingUser.role });
+      if (!emailResult.success) {
+        return {
+          error: emailResult.error
+            ? `Could not send the verification email: ${emailResult.error}`
+            : "Could not send the verification email. Please try again.",
+        };
+      }
       redirect(`/verify-email?email=${encodeURIComponent(existingUser.email)}`);
     }
 
@@ -153,11 +167,18 @@ export async function signup(prevState: any, formData: FormData) {
   });
 
   // Dispatch OTP email via Resend
-  await sendVerificationOtpEmail({
+  const emailResult = await sendVerificationOtpEmail({
     to: newUser.email,
     otp,
     role: newUser.role,
   });
+  if (!emailResult.success) {
+    return {
+      error: emailResult.error
+        ? `Could not send the verification email: ${emailResult.error}`
+        : "Could not send the verification email. Please try again.",
+    };
+  }
 
   // Redirect user to the verification page
   redirect(`/verify-email?email=${encodeURIComponent(newUser.email)}`);
@@ -292,11 +313,18 @@ export async function resendVerificationOtp(email: string) {
   });
 
   // Send via Resend
-  await sendVerificationOtpEmail({
+  const emailResult = await sendVerificationOtpEmail({
     to: user.email,
     otp,
     role: user.role,
   });
+  if (!emailResult.success) {
+    return {
+      error: emailResult.error
+        ? `Could not send the verification email: ${emailResult.error}`
+        : "Could not send the verification email. Please try again.",
+    };
+  }
 
   return { success: true, message: "A new 6-digit code has been sent to your email." };
 }
